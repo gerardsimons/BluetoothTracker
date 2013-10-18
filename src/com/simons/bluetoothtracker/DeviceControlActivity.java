@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.AvoidXfermode;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -63,10 +64,7 @@ public class DeviceControlActivity extends Activity {
 
     private BluetoothLeService mBluetoothLeService;
 
-    private ArrayList<Integer> rssiValues;
-    private long lastNanoTime;
-    private ArrayList<Float> timeDeltas;
-    private ArrayList<Integer> rssiDeltas;
+    private DeviceMeasurmentsManager measurementsManager;
 
     private int averageFilterSize = 10;
 
@@ -105,6 +103,7 @@ public class DeviceControlActivity extends Activity {
 	    if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
 		mConnected = true;
 		updateConnectionState(R.string.connected);
+		measurementsManager = new DeviceMeasurmentsManager();
 		invalidateOptionsMenu();
 		Toast.makeText(DeviceControlActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
 	    } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
@@ -118,6 +117,13 @@ public class DeviceControlActivity extends Activity {
 	    }
 	}
     };
+
+    private void updateMeasurements(int rssi) {
+	if (measurementsManager != null) {
+	    measurementsManager.addMeasurement(rssi);
+	    updateUI();
+	}
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -133,12 +139,6 @@ public class DeviceControlActivity extends Activity {
 
 	mConnectionState = (TextView) findViewById(R.id.connection_state);
 
-	rssiDeltas = new ArrayList<Integer>();
-	rssiValues = new ArrayList<Integer>();
-	timeDeltas = new ArrayList<Float>();
-
-	lastNanoTime = System.nanoTime();
-
 	rssiValuesTextView = (TextView) findViewById(R.id.rssi_values);
 	timeDeltasTextView = (TextView) findViewById(R.id.timeDeltaValues);
 	rssiDeltasTextView = (TextView) findViewById(R.id.deltaRssiValues);
@@ -149,47 +149,35 @@ public class DeviceControlActivity extends Activity {
 	bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
-    public void updateMeasurements(int rssi) {
-	long time = System.nanoTime();
-	Log.d(TAG, "New RSSI broadcast received :" + rssi);
-	float timeDelta = (time - lastNanoTime) / 1000000F;
-	timeDeltas.add(timeDelta);
-	if (!rssiValues.isEmpty()) {
-	    rssiDeltas.add(rssiValues.get(rssiValues.size() - 1) - rssi);
-	}
-	rssiValues.add(rssi);
-	lastNanoTime = time;
-	updateUI();
-    }
-
     private void updateUI() {
 
-	int nrOfValuesToShow = 20;
+	if (measurementsManager != null) {
 
-	int lowerBound = Math.max(rssiValues.size() - nrOfValuesToShow, 0);
-	int upperBound = Math.min(rssiValues.size(), nrOfValuesToShow);
+	    String rssiValuesText = new String();
+	    String timeDeltasText = new String();
+	    String rssiDeltasText = new String();
+	    String separator = " ";
 
-	if (lowerBound > 0) {
-	    upperBound += lowerBound;
+	    int amount = 20;
+
+	    List<Integer> rssiValues = measurementsManager.getLastRssiValues(amount);
+	    List<Float> rssiDeltas = measurementsManager.getLastRssiDeltas(amount);
+	    List<Float> timeDeltas = measurementsManager.getLastTimeDeltas(amount);
+
+	    //Log.d(TAG, measurementsManager.getAverageOfRSSIValues(5).toString());
+
+	    for (int i = 0; i < rssiValues.size(); i++) {
+		rssiValuesText += rssiValues.get(i) + separator;
+		timeDeltasText += timeDeltas.get(i) + separator;
+	    }
+	    for (int i = 0; i < rssiDeltas.size(); i++) {
+		rssiDeltasText += Math.round(rssiDeltas.get(i)) + separator;
+	    }
+
+	    rssiValuesTextView.setText(rssiValuesText);
+	    timeDeltasTextView.setText(timeDeltasText);
+	    rssiDeltasTextView.setText(rssiDeltasText);
 	}
-
-	String rssiValuesText = new String();
-	String timeDeltasText = new String();
-	String rssiDeltasText = new String();
-	String separator = " ";
-
-	for (int i = lowerBound; i < upperBound; i++) {
-	    rssiValuesText += rssiValues.get(i) + separator;
-	    timeDeltasText += (Integer) Math.round(timeDeltas.get(i)) + separator;
-	    if (i == 0)
-		rssiDeltasText += "X";
-	    else
-		rssiDeltasText += rssiDeltas.get(i - 1);
-	    rssiDeltasText += separator;
-	}
-	timeDeltasTextView.setText(timeDeltasText);
-	rssiValuesTextView.setText(rssiValuesText);
-	rssiDeltasTextView.setText(rssiDeltasText);
     }
 
     @Override
@@ -263,4 +251,5 @@ public class DeviceControlActivity extends Activity {
 	intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
 	return intentFilter;
     }
+
 }

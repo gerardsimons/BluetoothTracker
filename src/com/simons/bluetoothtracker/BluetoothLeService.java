@@ -67,7 +67,7 @@ public class BluetoothLeService extends Service {
 		Log.i(TAG, "Connected to GATT server.");
 
 		// Loop to keep reading
-		rssiReader = new RSSIReader(mBluetoothGatt);
+		rssiReader = new RSSIReader(mBluetoothGatt, 50);
 		if (!rssiReader.isReading()) {
 		    rssiReader.startReading();
 		}
@@ -231,11 +231,12 @@ public class BluetoothLeService extends Service {
     }
 
     private static class RSSIReader extends Thread {
-	final static int REFRESH_RATE = 100;
+	private int refreshRate = 50;
 	private volatile boolean isReading = false;
 	private BluetoothGatt mBluetoothGatt;
 
-	public RSSIReader(BluetoothGatt bluetoothGatt) {
+	public RSSIReader(BluetoothGatt bluetoothGatt, int refreshRate) {
+	    this.refreshRate = refreshRate;
 	    mBluetoothGatt = bluetoothGatt;
 	}
 
@@ -244,7 +245,7 @@ public class BluetoothLeService extends Service {
 	    while (true) {
 		synchronized (this) {
 		    try {
-			sleep(REFRESH_RATE);
+			sleep(refreshRate);
 			if (!isReading) {
 			    Log.i(TAG, "Stopping RSSI Reading.");
 			    break;
