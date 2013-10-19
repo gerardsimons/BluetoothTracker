@@ -46,9 +46,9 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED = "com.simons.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED = "com.simons.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_RSSI_VALUE_READ = "com.simons.bluetooth.le.ACTION_RSSI_VALUE_READ";
+    public final static String ACTION_GATT_CONNECTED = "com.simons.bluetoothtracker.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED = "com.simons.bluetoothtracker.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_RSSI_VALUE_READ = "com.simons.bluetoothtracker.ACTION_RSSI_VALUE_READ";
 
     public static final String RSSI_VALUE_KEY = "RSSI_VALUE_KEY";
 

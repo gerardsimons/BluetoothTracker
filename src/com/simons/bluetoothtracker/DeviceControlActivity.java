@@ -16,30 +16,28 @@
 
 package com.simons.bluetoothtracker;
 
+import java.util.List;
+
 import android.app.Activity;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.AvoidXfermode;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ExpandableListView;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect,
@@ -47,7 +45,7 @@ import java.util.List;
  * device. The Activity communicates with {@code BluetoothLeService}, which in
  * turn interacts with the Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity {
+public class DeviceControlActivity extends Activity implements SensorEventListener {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
@@ -64,9 +62,10 @@ public class DeviceControlActivity extends Activity {
 
     private BluetoothLeService mBluetoothLeService;
 
-    private DeviceMeasurmentsManager measurementsManager;
+    private SensorManager mSensorManager;
+    private Sensor motionSensor;
 
-    private int averageFilterSize = 10;
+    private DeviceMeasurmentsManager measurementsManager;
 
     private boolean mConnected = false;
 
@@ -81,7 +80,8 @@ public class DeviceControlActivity extends Activity {
 		finish();
 	    }
 	    // Automatically connects to the device upon successful start-up initialization.
-	    mBluetoothLeService.connect(mDeviceAddress);
+	    //mBluetoothLeService.connect(mDeviceAddress);
+
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class DeviceControlActivity extends Activity {
 
     private void updateMeasurements(int rssi) {
 	if (measurementsManager != null) {
-	    measurementsManager.addMeasurement(rssi);
+	    measurementsManager.addRssiMeasurement(rssi);
 	    updateUI();
 	}
     }
@@ -147,6 +147,18 @@ public class DeviceControlActivity extends Activity {
 	getActionBar().setDisplayHomeAsUpEnabled(true);
 	Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
 	bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+	measurementsManager = new DeviceMeasurmentsManager();
+
+	mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+	if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+	    // Success! There's a magnetometer.
+	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	} else {
+	    // Failure! No magnetometer.
+	    Log.e(TAG, "No signification motion sensor.");
+	    finish();
+	}
     }
 
     private void updateUI() {
@@ -184,6 +196,7 @@ public class DeviceControlActivity extends Activity {
     protected void onResume() {
 	super.onResume();
 	registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+	mSensorManager.registerListener(this, motionSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -191,13 +204,13 @@ public class DeviceControlActivity extends Activity {
 	super.onPause();
 	mBluetoothLeService.stopReading();
 	unregisterReceiver(mGattUpdateReceiver);
+	mSensorManager.unregisterListener(this, motionSensor);
     }
 
     @Override
     protected void onDestroy() {
 	super.onDestroy();
 	unbindService(mServiceConnection);
-	mBluetoothLeService = null;
     }
 
     @Override
@@ -250,6 +263,26 @@ public class DeviceControlActivity extends Activity {
 	intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
 	intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
 	return intentFilter;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+	for (int i = 0; i < event.values.length; i++) {
+	    //Log.i(TAG, "values[" + i + "]=" + event.values[i]);
+	}
+	//If already initialized
+	if (measurementsManager != null) {
+	    measurementsManager.addMotionMeasurements(event.values);
+	    if (measurementsManager.significantMotionDetected()) {
+		Log.i(TAG, "User is moving.");
+		Toast.makeText(this, "Significant motion detected.", Toast.LENGTH_SHORT).show();
+	    }
+	}
     }
 
 }
