@@ -8,7 +8,7 @@ import android.util.Log;
 public class DeviceMeasurmentsManager {
 
     private static final String TAG = DeviceMeasurmentsManager.class.getSimpleName();
-    private static final float MOTION_THRESHOLD = 5F;
+    public static final float MOTION_THRESHOLD = 5F;
 
     //Last time of a measurement
     private long lastNanoTime;
@@ -18,12 +18,11 @@ public class DeviceMeasurmentsManager {
     private ArrayList<Float> timeDeltas;
     private ArrayList<Float> rssiDeltas;
     private ArrayList<Float> motionDistances;
-    private float distanceThreshold = 1.0f;
 
     private int measurementRound = 0;
 
-    private static final int averageFilterSizeRssi = 10;
-    private static final int averageFilterSizeMotion = 10;
+    private static final int rssiAvgFilterSize = 10;
+    private static final int motionAvgFilterSize = 10;
 
     float[] previousMotionValues;
 
@@ -32,6 +31,7 @@ public class DeviceMeasurmentsManager {
 	rssiValues = new ArrayList<Integer>();
 	timeDeltas = new ArrayList<Float>();
 	motionDistances = new ArrayList<Float>();
+	rssiAverages = new ArrayList<Float>();
 
 	lastNanoTime = System.nanoTime();
 	rssiDeltas.add(0F);
@@ -46,8 +46,8 @@ public class DeviceMeasurmentsManager {
 	timeDeltas.add(timeDelta);
 	rssiValues.add(rssi);
 	//Only update the averages when we have enough averages to compare and if a new average segment has been reached
-	if (rssiAverages.size() >= 2 && measurementRound % averageFilterSizeRssi == 0) {
-	    rssiAverages = (ArrayList<Float>) averageListOf(rssiValues, averageFilterSizeRssi);
+	if (rssiAverages.size() >= 2 && measurementRound % rssiAvgFilterSize == 0) {
+	    rssiAverages = (ArrayList<Float>) AverageListOf(ConvertToListOfFloats(rssiValues), rssiAvgFilterSize);
 	    rssiDeltas.add(rssiAverages.get(rssiAverages.size() - 1) - rssiAverages.get(0));
 	}
 	measurementRound++;
@@ -70,12 +70,11 @@ public class DeviceMeasurmentsManager {
 	    motionDistances.add(distance);
 	}
 	previousMotionValues = motionValues.clone();
-
     }
 
     public boolean significantMotionDetected() {
-	List<Float> lastDistances = (List<Float>) getLastValues(motionDistances, averageFilterSizeMotion);
-	float averageMotion = average(lastDistances, 0, lastDistances.size() - 1);
+	List<Float> lastDistances = (List<Float>) getLastValues(motionDistances, motionAvgFilterSize);
+	float averageMotion = Average(lastDistances, 0, lastDistances.size() - 1);
 	Log.d(TAG, "averageMotion=" + averageMotion);
 	return averageMotion >= MOTION_THRESHOLD;
     }
@@ -95,6 +94,16 @@ public class DeviceMeasurmentsManager {
 	return (List<Float>) getLastValues(rssiDeltas, amount);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Float> getLastMotionDistances(int amount) {
+	return (List<Float>) getLastValues(motionDistances, amount);
+    }
+
+    public List<Float> getLastAverageDistances(int amount) {
+	List<Float> lastDistances = getLastMotionDistances(amount * motionAvgFilterSize);
+	return AverageListOf(lastDistances, motionAvgFilterSize);
+    }
+
     private List<?> getLastValues(List<?> values, int amount) {
 	amount = Math.min(values.size(), amount);
 
@@ -108,34 +117,44 @@ public class DeviceMeasurmentsManager {
     }
 
     public List<Float> getAverageOfRSSIValues() {
-	return averageListOf(rssiValues, averageFilterSizeRssi);
+	return AverageListOf(ConvertToListOfFloats(rssiValues), rssiAvgFilterSize);
     }
 
     public List<Float> getLatestOfAverageRSSIValues(int amount) {
 	return (List<Float>) getLastValues(getAverageOfRSSIValues(), amount);
     }
 
-    public static List<Float> averageListOf(List<Integer> values, int filterSize) {
+    public static List<Float> ConvertToListOfFloats(List<Integer> values) {
+	List<Float> convertedList = new ArrayList<Float>(values.size());
+	for (int i : values) {
+	    convertedList.add(Float.valueOf(i));
+	}
+	return convertedList;
+    }
+
+    public static List<Float> AverageListOf(List<Float> values, int filterSize) {
 	int fitsTimes = (int) Math.floor(values.size() / (float) filterSize);
 	//	Log.d(TAG, "fitsTimes = " + fitsTimes);
 	List<Float> averages = new ArrayList<Float>(fitsTimes);
 	for (int i = 0; i < fitsTimes; i++) {
-	    int sum = 0;
+	    float sum = 0;
 	    //Log.d(TAG, "i=" + i);
+
 	    for (int j = filterSize * i; j < filterSize * (i + 1); j++) {
 		//		Log.d(TAG, "j=" + j);
 		sum += values.get(j);
 	    }
-	    averages.add(sum / (float) filterSize);
+	    //Log.d(TAG, "sum=" + sum);
+	    averages.add(sum / filterSize);
 	}
 	return averages;
     }
 
-    public static float average(List<Float> values) {
-	return DeviceMeasurmentsManager.average(values, 0, values.size() - 1);
+    public static float Average(List<Float> values) {
+	return DeviceMeasurmentsManager.Average(values, 0, values.size() - 1);
     }
 
-    public static float average(List<Float> values, int start, int end) {
+    public static float Average(List<Float> values, int start, int end) {
 	float sum = 0f;
 	if (values.size() - 1 >= end && start < end) {
 	    for (float value : values) {

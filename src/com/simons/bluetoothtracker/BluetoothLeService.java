@@ -66,12 +66,6 @@ public class BluetoothLeService extends Service {
 		broadcastUpdate(intentAction);
 		Log.i(TAG, "Connected to GATT server.");
 
-		// Loop to keep reading
-		rssiReader = new RSSIReader(mBluetoothGatt, 50);
-		if (!rssiReader.isReading()) {
-		    rssiReader.startReading();
-		}
-
 		//Log.i(TAG, "Attempting to read RSSI:" + mBluetoothGatt.readRemoteRssi());
 	    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 		intentAction = ACTION_GATT_DISCONNECTED;
@@ -193,6 +187,13 @@ public class BluetoothLeService extends Service {
 	mBluetoothDeviceAddress = address;
 	mConnectionState = STATE_CONNECTING;
 	return true;
+    }
+
+    public void startReading(int refreshRate) {
+	rssiReader = new RSSIReader(mBluetoothGatt, refreshRate);
+	if (!rssiReader.isReading()) {
+	    rssiReader.startReading();
+	}
     }
 
     public void stopReading() {

@@ -29,15 +29,20 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEvent;
-import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+import com.simons.bluetoothtracker.views.CompassView;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect,
@@ -60,14 +65,33 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     private TextView timeDeltasTextView;
     private TextView rssiDeltasTextView;
 
+    private CompassView compassView;
+
+    //    private GraphViewSeries motionSeries;
+    //    private GraphViewSeries thresholdSeries;
+    //    private LineGraphView graphView;
+
     private BluetoothLeService mBluetoothLeService;
 
     private SensorManager mSensorManager;
+
     private Sensor motionSensor;
+    private Sensor magneticSensor;
+
+    private float[] magnetic = new float[3];
+    private float[] motion = new float[3];
+
+    private float azimuth = 0f;
+
+    //Low pass filter coefficient
+    private final float alpha = 0.97f;
 
     private DeviceMeasurmentsManager measurementsManager;
 
     private boolean mConnected = false;
+
+    //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
+    private static final int MEASUREMENTS_RATE = 1000;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -80,7 +104,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 		finish();
 	    }
 	    // Automatically connects to the device upon successful start-up initialization.
-	    //mBluetoothLeService.connect(mDeviceAddress);
+	    mBluetoothLeService.connect(mDeviceAddress);
 
 	}
 
@@ -106,6 +130,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 		measurementsManager = new DeviceMeasurmentsManager();
 		invalidateOptionsMenu();
 		Toast.makeText(DeviceControlActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
+		//mBluetoothLeService.startReading(MEASUREMENTS_RATE);
 	    } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
 		mConnected = false;
 		updateConnectionState(R.string.disconnected);
@@ -128,7 +153,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	setContentView(R.layout.gatt_services_characteristics);
+	setContentView(R.layout.device_control);
 
 	final Intent intent = getIntent();
 	mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -142,6 +167,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	rssiValuesTextView = (TextView) findViewById(R.id.rssi_values);
 	timeDeltasTextView = (TextView) findViewById(R.id.timeDeltaValues);
 	rssiDeltasTextView = (TextView) findViewById(R.id.deltaRssiValues);
+	compassView = (CompassView) findViewById(R.id.compassView);
 
 	getActionBar().setTitle(mDeviceName);
 	getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -154,11 +180,31 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
 	    // Success! There's a magnetometer.
 	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 	} else {
 	    // Failure! No magnetometer.
-	    Log.e(TAG, "No signification motion sensor.");
+	    Log.e(TAG, "The device has no accelerometer.");
 	    finish();
 	}
+
+	//Create graph
+	//	LinearLayout graphContainer = (LinearLayout) findViewById(R.id.motionGraphContainer);
+	//
+	//	motionSeries = new GraphViewSeries(new GraphViewData[] {});
+	//	thresholdSeries = new GraphViewSeries(new GraphViewData[] {});
+	//
+	//	graphView = new LineGraphView(this, "Motion Values");
+	//	graphView.setDrawBackground(true);
+	//	graphView.setManualYAxisBounds(10, 0);
+	//	//graphView.setScalable(true);
+	//	graphView.setScrollable(true);
+	//	graphView.setViewPort(0, 100);
+	//	graphView.setVerticalLabels(null);
+	//
+	//	graphView.addSeries(motionSeries);
+	//	graphView.addSeries(thresholdSeries);
+	//
+	//	graphContainer.addView(graphView);
     }
 
     private void updateUI() {
@@ -170,11 +216,14 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	    String rssiDeltasText = new String();
 	    String separator = " ";
 
+	    //How many values do we want to show
 	    int amount = 20;
+	    int graphAmount = 100;
 
 	    List<Integer> rssiValues = measurementsManager.getLastRssiValues(amount);
 	    List<Float> rssiDeltas = measurementsManager.getLastRssiDeltas(amount);
 	    List<Float> timeDeltas = measurementsManager.getLastTimeDeltas(amount);
+	    //List<Float> motionDistances = measurementsManager.getLastAverageDistances(graphAmount);
 
 	    //Log.d(TAG, measurementsManager.getAverageOfRSSIValues(5).toString());
 
@@ -189,6 +238,15 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	    rssiValuesTextView.setText(rssiValuesText);
 	    timeDeltasTextView.setText(timeDeltasText);
 	    rssiDeltasTextView.setText(rssiDeltasText);
+
+	    //motionGraphSeries.resetData(new GraphViewData[] {});
+	    //Append motion values to graph, x is the time delta, y
+	    //	    for (int i = 0; i < motionDistances.size(); i++) {
+	    //		float motionValue = motionDistances.get(i);
+	    //		double d = motionValue;
+	    //		motionSeries.appendData(new GraphViewData(i, d), true, graphAmount);
+	    //		thresholdSeries.appendData(new GraphViewData(1, DeviceMeasurmentsManager.MOTION_THRESHOLD), true, graphAmount);
+	    //	    }
 	}
     }
 
@@ -196,7 +254,8 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     protected void onResume() {
 	super.onResume();
 	registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-	mSensorManager.registerListener(this, motionSensor, SensorManager.SENSOR_DELAY_NORMAL);
+	mSensorManager.registerListener(this, motionSensor, MEASUREMENTS_RATE);
+	mSensorManager.registerListener(this, magneticSensor, MEASUREMENTS_RATE);
     }
 
     @Override
@@ -205,6 +264,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	mBluetoothLeService.stopReading();
 	unregisterReceiver(mGattUpdateReceiver);
 	mSensorManager.unregisterListener(this, motionSensor);
+	mSensorManager.unregisterListener(this, magneticSensor);
     }
 
     @Override
@@ -270,19 +330,51 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     }
 
+    private void adjustCompass() {
+	compassView.setRotation(azimuth);
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-	for (int i = 0; i < event.values.length; i++) {
-	    //Log.i(TAG, "values[" + i + "]=" + event.values[i]);
-	}
+	//for (int i = 0; i < event.values.length; i++) {
+	//	Log.i(TAG, "values[" + i + "]=" + event.values[i]);
+	//}
 	//If already initialized
 	if (measurementsManager != null) {
-	    measurementsManager.addMotionMeasurements(event.values);
-	    if (measurementsManager.significantMotionDetected()) {
-		Log.i(TAG, "User is moving.");
-		Toast.makeText(this, "Significant motion detected.", Toast.LENGTH_SHORT).show();
+	    if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+		//		Log.d(TAG, "Magnetic Field Sensor Values : ");
+		//		for (float f : event.values) {
+		//		    Log.d(TAG, f + "");
+		//		}
+		magnetic[0] = alpha * magnetic[0] + (1 - alpha) * event.values[0];
+		magnetic[1] = alpha * magnetic[1] + (1 - alpha) * event.values[1];
+		magnetic[2] = alpha * magnetic[2] + (1 - alpha) * event.values[2];
+	    } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+		//		Log.d(TAG, "Accelerometer Values : ");
+		//		for (float f : event.values) {
+		//		    Log.d(TAG, f + "");
+		//		}
+		motion[0] = alpha * motion[0] + (1 - alpha) * event.values[0];
+		motion[1] = alpha * motion[1] + (1 - alpha) * event.values[1];
+		motion[2] = alpha * motion[2] + (1 - alpha) * event.values[2];
+	    }
+	    float R[] = new float[9];
+	    float I[] = new float[9];
+	    boolean success = SensorManager.getRotationMatrix(R, I, motion, magnetic);
+	    Log.d(TAG, "getRotationMatrix returns " + success);
+	    if (success) {
+
+		float orientation[] = new float[3];
+		SensorManager.getOrientation(R, orientation);
+		// Log.d(TAG, "azimuth (rad): " + azimuth);
+		azimuth = (float) Math.toDegrees(orientation[0]); // orientation
+		azimuth = (azimuth + 360) % 360;
+		Log.d(TAG, "azimuth (deg): " + azimuth);
+
+		//Adjust the compassview
+		adjustCompass();
 	    }
 	}
     }
-
 }
