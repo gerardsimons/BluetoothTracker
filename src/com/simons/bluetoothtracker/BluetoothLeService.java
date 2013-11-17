@@ -66,20 +66,21 @@ public class BluetoothLeService extends Service {
 		broadcastUpdate(intentAction);
 		Log.i(TAG, "Connected to GATT server.");
 
+		startReading(DeviceControlActivity.MEASUREMENTS_RATE);
+
 		//Log.i(TAG, "Attempting to read RSSI:" + mBluetoothGatt.readRemoteRssi());
 	    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 		intentAction = ACTION_GATT_DISCONNECTED;
 		mConnectionState = STATE_DISCONNECTED;
 		Log.i(TAG, "Disconnected from GATT server.");
 		rssiReader.stopReading();
-
+		mBluetoothGatt.connect();
 		broadcastUpdate(intentAction);
 	    }
 	}
 
 	@Override
 	public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-	    Log.i(TAG, "OnReadRmoteRSSI RSSI:" + rssi);
 	    broadcastUpdate(ACTION_RSSI_VALUE_READ, rssi);
 	}
 
@@ -87,13 +88,14 @@ public class BluetoothLeService extends Service {
 
     private void broadcastUpdate(final String action) {
 	final Intent intent = new Intent(action);
-	Log.i(TAG, "Broadcast Update : " + action);
+	//Log.i(TAG, "Broadcast Update : " + action);
 	sendBroadcast(intent);
     }
 
     private void broadcastUpdate(final String action, int rssiExtra) {
 	final Intent intent = new Intent(action);
 	intent.putExtra(RSSI_VALUE_KEY, rssiExtra);
+	//Log.i(TAG, "Broadcast Update RSSI: " + rssiExtra);
 	sendBroadcast(intent);
     }
 
@@ -232,13 +234,13 @@ public class BluetoothLeService extends Service {
     }
 
     private static class RSSIReader extends Thread {
-	private int refreshRate = 50;
+	private int refreshRate;
 	private volatile boolean isReading = false;
 	private BluetoothGatt mBluetoothGatt;
 
-	public RSSIReader(BluetoothGatt bluetoothGatt, int refreshRate) {
+	public RSSIReader(BluetoothGatt mBluetoothGatt, int refreshRate) {
 	    this.refreshRate = refreshRate;
-	    mBluetoothGatt = bluetoothGatt;
+	    this.mBluetoothGatt = mBluetoothGatt;
 	}
 
 	@Override
@@ -251,8 +253,11 @@ public class BluetoothLeService extends Service {
 			    Log.i(TAG, "Stopping RSSI Reading.");
 			    break;
 			} else {
-			    Log.i(TAG, "Initiating RSSI Read.");
-			    mBluetoothGatt.readRemoteRssi();
+			    //Log.i(TAG, "Initiating RSSI Read.");
+			    if (mBluetoothGatt != null)
+				mBluetoothGatt.readRemoteRssi();
+			    else
+				break;
 			}
 		    } catch (InterruptedException e) {
 			e.printStackTrace();

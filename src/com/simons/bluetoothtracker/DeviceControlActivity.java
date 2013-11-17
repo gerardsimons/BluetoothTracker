@@ -16,7 +16,9 @@
 
 package com.simons.bluetoothtracker;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -25,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -65,7 +68,10 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     private TextView timeDeltasTextView;
     private TextView rssiDeltasTextView;
 
-    private CompassView compassView;
+    private BluetoothTrackerApplication application;
+
+    //private CompassView compassView;
+    private Compass compass;
 
     //    private GraphViewSeries motionSeries;
     //    private GraphViewSeries thresholdSeries;
@@ -75,11 +81,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     private SensorManager mSensorManager;
 
-    private Sensor motionSensor;
-    private Sensor magneticSensor;
-
-    private float[] magnetic = new float[3];
-    private float[] motion = new float[3];
+    private OrientationSensor orientationSensor;
 
     private float azimuth = 0f;
 
@@ -91,7 +93,10 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     private boolean mConnected = false;
 
     //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
-    private static final int MEASUREMENTS_RATE = 1000;
+    public static final int MEASUREMENTS_RATE = 100;
+
+    public static final int MIN_RSSI = -130;
+    public static final int MAX_RSSI = 0;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -105,7 +110,6 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	    }
 	    // Automatically connects to the device upon successful start-up initialization.
 	    mBluetoothLeService.connect(mDeviceAddress);
-
 	}
 
 	@Override
@@ -129,23 +133,35 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 		updateConnectionState(R.string.connected);
 		measurementsManager = new DeviceMeasurmentsManager();
 		invalidateOptionsMenu();
+		Log.i(TAG, "Connected to GATT server.");
 		Toast.makeText(DeviceControlActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
-		//mBluetoothLeService.startReading(MEASUREMENTS_RATE);
+		if (compass != null) {
+		    compass.clearData();
+		}
 	    } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
 		mConnected = false;
 		updateConnectionState(R.string.disconnected);
 		invalidateOptionsMenu();
+		Log.i(TAG, "Disconnected from GATT server.");
+		Toast.makeText(DeviceControlActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
 	    } else if (BluetoothLeService.ACTION_RSSI_VALUE_READ.equals(action)) {
 		int newRSSI = intent.getExtras().getInt(BluetoothLeService.RSSI_VALUE_KEY);
-		updateMeasurements(newRSSI);
-		Toast.makeText(DeviceControlActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
+		if (isValidRSSI(newRSSI)) {
+		    updateMeasurements(newRSSI);
+		}
 	    }
 	}
     };
 
+    private boolean isValidRSSI(int rssi) {
+	return (rssi > MIN_RSSI && rssi < MAX_RSSI);
+    }
+
     private void updateMeasurements(int rssi) {
 	if (measurementsManager != null) {
+	    //Log.d(TAG, "New RSSI value = " + rssi);
 	    measurementsManager.addRssiMeasurement(rssi);
+	    compass.addData(rssi, azimuth);
 	    updateUI();
 	}
     }
@@ -154,6 +170,8 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.device_control);
+
+	application = (BluetoothTrackerApplication) getApplication();
 
 	final Intent intent = getIntent();
 	mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -167,10 +185,13 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	rssiValuesTextView = (TextView) findViewById(R.id.rssi_values);
 	timeDeltasTextView = (TextView) findViewById(R.id.timeDeltaValues);
 	rssiDeltasTextView = (TextView) findViewById(R.id.deltaRssiValues);
-	compassView = (CompassView) findViewById(R.id.compassView);
 
-	getActionBar().setTitle(mDeviceName);
-	getActionBar().setDisplayHomeAsUpEnabled(true);
+	//testCompass(compassView, 8);
+
+	loadCompass();
+
+	//	getActionBar().setTitle(mDeviceName);
+	//	getActionBar().setDisplayHomeAsUpEnabled(true);
 	Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
 	bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
@@ -179,8 +200,9 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 	if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
 	    // Success! There's a magnetometer.
-	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+	    //	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	    //	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+	    orientationSensor = new OrientationSensor(mSensorManager, this);
 	} else {
 	    // Failure! No magnetometer.
 	    Log.e(TAG, "The device has no accelerometer.");
@@ -207,6 +229,20 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	//	graphContainer.addView(graphView);
     }
 
+    private void loadCompass() {
+	if (application != null) {
+
+	    Log.d(TAG, "LOADING COMPASS");
+
+	    CompassView compassView = (CompassView) findViewById(R.id.compassView);
+
+	    int nrOfFragments = application.loadFragmentsNumber();
+	    int calibrationLimit = application.loadCalibrationLimit();
+
+	    compass = new Compass(compassView, nrOfFragments, calibrationLimit);
+	}
+    }
+
     private void updateUI() {
 
 	if (measurementsManager != null) {
@@ -218,7 +254,6 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
 	    //How many values do we want to show
 	    int amount = 20;
-	    int graphAmount = 100;
 
 	    List<Integer> rssiValues = measurementsManager.getLastRssiValues(amount);
 	    List<Float> rssiDeltas = measurementsManager.getLastRssiDeltas(amount);
@@ -254,8 +289,8 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     protected void onResume() {
 	super.onResume();
 	registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-	mSensorManager.registerListener(this, motionSensor, MEASUREMENTS_RATE);
-	mSensorManager.registerListener(this, magneticSensor, MEASUREMENTS_RATE);
+	if (orientationSensor != null)
+	    orientationSensor.register(this, MEASUREMENTS_RATE);
     }
 
     @Override
@@ -263,8 +298,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 	super.onPause();
 	mBluetoothLeService.stopReading();
 	unregisterReceiver(mGattUpdateReceiver);
-	mSensorManager.unregisterListener(this, motionSensor);
-	mSensorManager.unregisterListener(this, magneticSensor);
+	orientationSensor.unregister();
     }
 
     @Override
@@ -330,51 +364,22 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     }
 
-    private void adjustCompass() {
-	compassView.setRotation(azimuth);
+    private float toDegrees(float rads) {
+	float degrees = (float) (rads * (180F / Math.PI));
+	if (degrees < 0) {
+	    degrees = 360 + degrees;
+	}
+	return degrees;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-	//for (int i = 0; i < event.values.length; i++) {
-	//	Log.i(TAG, "values[" + i + "]=" + event.values[i]);
-	//}
-	//If already initialized
-	if (measurementsManager != null) {
-	    if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-		//		Log.d(TAG, "Magnetic Field Sensor Values : ");
-		//		for (float f : event.values) {
-		//		    Log.d(TAG, f + "");
-		//		}
-		magnetic[0] = alpha * magnetic[0] + (1 - alpha) * event.values[0];
-		magnetic[1] = alpha * magnetic[1] + (1 - alpha) * event.values[1];
-		magnetic[2] = alpha * magnetic[2] + (1 - alpha) * event.values[2];
-	    } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+	if (measurementsManager != null && orientationSensor != null && compass != null) {
 
-		//		Log.d(TAG, "Accelerometer Values : ");
-		//		for (float f : event.values) {
-		//		    Log.d(TAG, f + "");
-		//		}
-		motion[0] = alpha * motion[0] + (1 - alpha) * event.values[0];
-		motion[1] = alpha * motion[1] + (1 - alpha) * event.values[1];
-		motion[2] = alpha * motion[2] + (1 - alpha) * event.values[2];
-	    }
-	    float R[] = new float[9];
-	    float I[] = new float[9];
-	    boolean success = SensorManager.getRotationMatrix(R, I, motion, magnetic);
-	    Log.d(TAG, "getRotationMatrix returns " + success);
-	    if (success) {
+	    azimuth = toDegrees(orientationSensor.m_azimuth_radians);
+	    //Log.d(TAG, "azimuth = " + azimuth);
+	    compass.setRotation(azimuth);
 
-		float orientation[] = new float[3];
-		SensorManager.getOrientation(R, orientation);
-		// Log.d(TAG, "azimuth (rad): " + azimuth);
-		azimuth = (float) Math.toDegrees(orientation[0]); // orientation
-		azimuth = (azimuth + 360) % 360;
-		Log.d(TAG, "azimuth (deg): " + azimuth);
-
-		//Adjust the compassview
-		adjustCompass();
-	    }
 	}
     }
 }

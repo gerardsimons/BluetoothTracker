@@ -16,28 +16,34 @@
 
 package com.simons.bluetoothtracker;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -49,15 +55,25 @@ public class DeviceScanActivity extends ListActivity {
     private boolean mScanning;
     private Handler mHandler;
 
+    private BluetoothTrackerApplication application;
+
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
+    private SharedPreferences preferences;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	getActionBar().setTitle(R.string.title_devices);
+
 	mHandler = new Handler();
+
+	application = (BluetoothTrackerApplication) getApplication();
+
+	preferences = getSharedPreferences(this.getClass().getPackage().getName(), 0);
+
+	setContentView(R.layout.device_scan);
 
 	// Use this check to determine whether BLE is supported on the device.  Then you can
 	// selectively disable BLE-related features.
@@ -77,6 +93,53 @@ public class DeviceScanActivity extends ListActivity {
 	    finish();
 	    return;
 	}
+
+	Button calibrationBttn = (Button) findViewById(R.id.calibrationLimitSettings);
+	calibrationBttn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		dialogToStoreValue(BluetoothTrackerApplication.CALIBRATION_LIMIT_KEY);
+	    }
+	});
+
+	Button fragmentsBttn = (Button) findViewById(R.id.fragmentsNumberSettings);
+	fragmentsBttn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		dialogToStoreValue(BluetoothTrackerApplication.FRAGMENTS_NUMBER_KEY);
+	    }
+	});
+    }
+
+    private void dialogToStoreValue(final String key) {
+	AlertDialog.Builder alert = new AlertDialog.Builder(DeviceScanActivity.this);
+
+	alert.setTitle(key);
+	alert.setMessage("New Value");
+
+	int value = application.loadIntValue(key);
+
+	// Set an EditText view to get user input 
+	final EditText input = new EditText(DeviceScanActivity.this);
+	input.setInputType(InputType.TYPE_CLASS_PHONE);
+	input.setText(value + "");
+	alert.setView(input);
+
+	alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int whichButton) {
+		String value = input.getText().toString();
+		application.storeIntValue(key, Integer.parseInt(value));
+	    }
+	});
+
+	alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int whichButton) {
+		// Canceled.
+	    }
+	});
+
+	alert.show();
+	// see http://androidsnippets.com/prompt-user-input-with-an-alertdialog
     }
 
     @Override
