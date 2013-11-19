@@ -70,9 +70,9 @@ public class MyBluetoothDevice {
 
     public String toString() {
 	String toString = "MyBlueToothDevice\nName: " + blueToothDevice.getName() + "\nAddress:" + blueToothDevice.getAddress() + "\nRSSI Values:";
-	toString += Utilities.arrayListToString(rssiValues);
+	toString += Utilities.listToString(rssiValues);
 	toString += "\nTime Deltas:";
-	toString += Utilities.arrayListToString(getTimeDeltas());
+	toString += Utilities.listToString(getTimeDeltas());
 	toString += toString += "]";
 	return toString;
     }
