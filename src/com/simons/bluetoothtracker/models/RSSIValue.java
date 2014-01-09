@@ -1,4 +1,4 @@
-package com.simons.bluetoothtracker;
+package com.simons.bluetoothtracker.models;
 
 public class RSSIValue {
 
@@ -8,19 +8,19 @@ public class RSSIValue {
     private long time;
 
     public RSSIValue(int value) {
-	this.value = value;
-	this.time = System.nanoTime();
+        this.value = value;
+        this.time = System.nanoTime();
     }
 
     public int getValue() {
-	return value;
+        return value;
     }
 
     public long getTime() {
-	return time;
+        return time;
     }
 
     public String toString() {
-	return value + "";
+        return value + "";
     }
 }
