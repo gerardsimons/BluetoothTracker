@@ -27,7 +27,7 @@ public class CompassController {
     private Compass compass;
     private CompassView compassView;
 
-    private final float alpha = 0.96F;
+    private float alpha = 0.96F;
     private final float threshold = 270F;
     private double lastAngle = Double.NaN;
 
@@ -67,17 +67,16 @@ public class CompassController {
                 compassView.setCalibrated();
             }
         } else {
-
             Fragment fragment = compass.fragmentForAngle(angle);
+            Log.d(TAG,"Receiving fragment #" + fragment.getId());
             fragment.setActive(true);
 
-            double oldValue = fragment.getValue();
-
+            double oldValue = fragment.getLastRssiValue();
 
             fragment.addValues(rssi, angle);
 
             double newValue = fragment.getValue();
-            double delta = newValue - oldValue;
+            double delta = rssi - oldValue;
 
             Log.d(Fragment.TAG,fragment.toString());
 
@@ -85,7 +84,7 @@ public class CompassController {
             Log.d(TAG,"New RSSI Value = " + newValue);
             Log.d(TAG,"Delta RSSI Value = " + delta);
 
-            /* PROPOGATE VALUES TO OTHER FRAGMENTS */
+            /* PROPAGATE VALUES TO OTHER FRAGMENTS */
 
             //Also update other fragments
             List<Fragment> allFragments = compass.getFragments();
@@ -93,19 +92,18 @@ public class CompassController {
                 if(!f.equals(fragment)) {
                     double distance = f.distanceTo(angle);
                     double weight = 1 - distance / 90D;
-                    double value = f.getCalibrationValue();
-
+                    double value = f.getLastRssiValue();
+                    Log.d(TAG,"Fragment ID = " + f.getId());
                     Log.d(TAG,"Calibrated RSSI = " + value);
                     Log.d(TAG,"Distance = " + distance);
                     Log.d(TAG,"Weight = " + weight);
 
+
                     f.addValues(value + weight * delta,f.getAverageAngle());
-                }
-                else {
-                    Log.d(TAG,f.getId() + " == " + fragment.getId());
                 }
             }
         }
+        compassView.invalidate();
     }
 
     private void sortFragments() {
@@ -172,5 +170,14 @@ public class CompassController {
 
     public void clearData() {
         compass.clearData();
+    }
+
+    public void setFilterAlpha(float newAlpha) {
+        if(newAlpha <= 1F && newAlpha >= 0F) {
+            alpha = newAlpha;
+        }
+        else {
+            Log.e(TAG,"Invalid alpha coefficient.");
+        }
     }
 }

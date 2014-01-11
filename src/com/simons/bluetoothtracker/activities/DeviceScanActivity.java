@@ -43,9 +43,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.simons.bluetoothtracker.BleDevicesAdapter;
+import com.simons.bluetoothtracker.controllers.BleDevicesAdapter;
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.MyBluetoothDevice;
+import com.simons.bluetoothtracker.models.MyBluetoothDevice;
 import com.simons.bluetoothtracker.R;
 
 import java.util.ArrayList;

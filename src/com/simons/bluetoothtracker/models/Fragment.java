@@ -170,11 +170,23 @@ public class Fragment implements CompassDataSource {
     }
 
     public double distanceTo(double angle) {
-        double avgAngle = getAverageAngle();
-        avgAngle = avgAngle % 180D;
-        double distance = Math.abs(avgAngle - angle);
-        Log.d(TAG,"Distance this fragment (" + avgAngle + ") to angle " + angle + " = " + distance);
+//        double avgAngle = getAverageAngle();
+//        angle += 90.0;
+        double rawDistance = rawDistanceTo(angle);
+        double distance = Math.min(rawDistance, 360D - rawDistance);
+        Log.d(TAG,"Raw distance = " + distance);
+//        if(distance != 180D)
+//            distance = distance % 180D;
+
+//        Log.d(TAG,"Normalized distance = " + distance);
+        Log.d(TAG,"Center angle = " + centerAngle);
+        Log.d(TAG,"Other angle = " + angle);
+        Log.d(TAG,"Distance = " + distance);
         return distance;
+    }
+
+    public double rawDistanceTo(double angle) {
+        return Math.abs(centerAngle - angle);
     }
 
     public void clearData() {
@@ -204,5 +216,11 @@ public class Fragment implements CompassDataSource {
             return averageAngle;
         }
         return avgAngle / angles.size();
+    }
+
+    public double getLastRssiValue() {
+        if(rssiValues != null && !rssiValues.isEmpty())
+            return rssiValues.get(rssiValues.size() - 1);
+        else return Double.NaN;
     }
 }

@@ -6,6 +6,7 @@
     android:orientation="vertical" >
     <LinearLayout
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:orientation="horizontal" >
@@ -22,7 +23,7 @@
         <TextView
             android:id="@+id/device_address"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:textSize="18sp" />
     </LinearLayout>
     <LinearLayout
@@ -43,7 +44,7 @@
         <TextView
             android:id="@+id/connection_state"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:text="@string/disconnected"
             android:textSize="18sp" />
     </LinearLayout>
@@ -63,7 +64,7 @@
         <TextView
             android:id="@+id/rssi_values"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:textSize="18sp" />
     </LinearLayout>
     <LinearLayout
@@ -82,7 +83,7 @@
         <TextView
             android:id="@+id/timeDeltaValues"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:textSize="18sp" />
     </LinearLayout>
     <LinearLayout
@@ -101,7 +102,7 @@
         <TextView
             android:id="@+id/deltaRssiValues"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:textSize="18sp" />
     </LinearLayout>
     <com.simons.bluetoothtracker.views.CompassView

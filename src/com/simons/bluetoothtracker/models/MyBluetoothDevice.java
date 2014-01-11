@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.bluetooth.BluetoothDevice;
 
-import com.simons.bluetoothtracker.RSSIValue;
 import com.simons.bluetoothtracker.Utilities;
 
 public class MyBluetoothDevice {

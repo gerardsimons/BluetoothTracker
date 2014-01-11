@@ -13,6 +13,12 @@ public interface CompassDataSource {
     public double getValue();
 
     /**
+     * ID of the data source (should be unique)
+     * @return
+     */
+    public int getId();
+
+    /**
      *
      * @return the value that was determined after calibration (fixed)
      */

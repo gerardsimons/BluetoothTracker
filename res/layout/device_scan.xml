@@ -7,13 +7,27 @@
     <Button 
         android:layout_width="wrap_content" 
         android:layout_height="50dp" 
-        android:id="@+id/calibrationLimitSettings" 
-        android:text="Calibration Limit"/>
+        android:id="@+id/calibrationLimitSettings"
+        android:textSize="12sp"
+        android:text="Calibration"/>
     <Button
         android:id="@+id/fragmentsNumberSettings"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:text="# Fragments" />
+        android:textSize="12sp"
+        android:text="Fragments" />
+    <Button
+        android:id="@+id/maxValuesSizeSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:textSize="12sp"
+        android:text="Values" />
+    <Button
+        android:id="@+id/btRefreshRateSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:textSize="12sp"
+        android:text="Refresh Rate" />
     </LinearLayout>
     <ListView 
         android:id="@android:id/list" 

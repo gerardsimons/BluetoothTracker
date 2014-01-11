@@ -30,7 +30,7 @@ public class OrientationSensor implements SensorEventListener {
     float[] m_NormEastVector; // normalised cross product of raw gravity vector with magnetic field values, points east
     float[] m_NormNorthVector; // Normalised vector pointing to magnetic north
     boolean m_OrientationOK; // set true if m_azimuth_radians and m_pitch_radians have successfully been calculated following a call to onSensorChanged(...)
-    float m_azimuth_radians; // angle of the device from magnetic north
+    private float m_azimuth_radians; // angle of the device from magnetic north
     float m_pitch_radians; // tilt angle of the device from the horizontal.  m_pitch_radians = 0 if the device if flat, m_pitch_radians = Math.PI/2 means the device is upright.
     float m_pitch_axis_radians; // angle which defines the axis for the rotation m_pitch_radians
 
@@ -158,6 +158,10 @@ public class OrientationSensor implements SensorEventListener {
         }
         if (m_parent != null)
             m_parent.onSensorChanged(event);
+    }
+
+    public float getM_azimuth_radians() {
+        return m_azimuth_radians;
     }
 
     @Override

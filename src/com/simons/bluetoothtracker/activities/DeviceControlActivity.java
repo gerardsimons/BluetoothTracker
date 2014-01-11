@@ -35,11 +35,11 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.simons.bluetoothtracker.BluetoothLeService;
+import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.CompassController;
-import com.simons.bluetoothtracker.DeviceMeasurmentsManager;
-import com.simons.bluetoothtracker.OrientationSensor;
+import com.simons.bluetoothtracker.controllers.CompassController;
+import com.simons.bluetoothtracker.controllers.DeviceMeasurmentsManager;
+import com.simons.bluetoothtracker.controllers.OrientationSensor;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.views.CompassView;
 
@@ -379,7 +379,8 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         if (measurementsManager != null && orientationSensor != null && compassController != null) {
 
-            azimuth = toDegrees(orientationSensor.m_azimuth_radians);
+            azimuth = toDegrees(orientationSensor.getM_azimuth_radians());
+            //Flip the orientation
             azimuth = 360F - azimuth;
             //Log.d(TAG, "azimuth = " + azimuth);
             compassController.setRotation(azimuth);

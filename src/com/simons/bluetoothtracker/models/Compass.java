@@ -2,9 +2,6 @@ package com.simons.bluetoothtracker.models;
 
 import android.util.Log;
 
-import com.simons.bluetoothtracker.CompassDataSource;
-import com.simons.bluetoothtracker.Fragment;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,14 +58,31 @@ public class Compass {
     private int fragmentIndexForAngle(float angle) {
         angle += 90F;
         angle = angle % 360F;
-        angle = 360F - angle;
         return Math.round(angle / 360F * (fragments.size() - 1));
     }
 
-    public Fragment fragmentForAngle(float angle) {
+//    public Fragment fragmentForAngle(float angle) {
+//        if (fragments != null && !fragments.isEmpty()) {
+//            return fragments.get(fragmentIndexForAngle(angle));
+//        } else
+//            return null;
+//    }
+
+    public Fragment fragmentForAngle(float azimuth) {
         if (fragments != null && !fragments.isEmpty()) {
-            int index = fragmentIndexForAngle(angle);
-            return fragments.get(index);
+
+            double bestDistance = Double.MAX_VALUE;
+            Fragment closestFragment = null;
+            for(Fragment fragment : fragments) {
+                double distance = fragment.distanceTo(270D - azimuth);
+                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
+                if(distance < bestDistance) {
+                    closestFragment = fragment;
+                    bestDistance = distance;
+                }
+            }
+            Log.d(TAG,"Fragment #" + closestFragment.getId() + " has the best distance = " + bestDistance);
+            return closestFragment;
         } else
             return null;
     }
