@@ -182,7 +182,7 @@ public class Fragment implements CompassDataSource {
         Log.d(TAG,"Center angle = " + centerAngle);
         Log.d(TAG,"Other angle = " + angle);
         Log.d(TAG,"Distance = " + distance);
-        return distance;
+        return Math.abs(distance);
     }
 
     public double rawDistanceTo(double angle) {
@@ -200,6 +200,10 @@ public class Fragment implements CompassDataSource {
             return f.getId() == id;
         }
         else return false;
+    }
+
+    public double getCenterAngle() {
+        return centerAngle;
     }
 
     public int getId() {

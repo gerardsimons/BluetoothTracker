@@ -58,7 +58,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context ctx, Intent intent) {
-
             Bundle bundle = intent.getExtras();
             if(bundle.containsKey(RSSI_KEY)) {
                 int rssi = intent.getIntExtra(RSSI_KEY,999);
@@ -75,7 +74,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 Random r = new Random();
 
                 azimuth = newAzimuth;
-                compassController.addData(r.nextInt(100),azimuth);
+                compassController.addData(-1 * r.nextInt(100),azimuth);
                 compassController.setRotation(azimuth);
             }
             if(bundle.containsKey(AZIMUTH_DELTA_KEY)) {
@@ -86,7 +85,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 Random r = new Random();
 
                 azimuth += azimuthDelta;
-                compassController.addData(r.nextInt(100),azimuth);
+                compassController.addData(-1 * r.nextInt(100),azimuth);
                 compassController.setRotation(azimuth);
             }
         }
@@ -127,9 +126,9 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //            int calibrationLimit = application.loadIntValue(BluetoothTrackerApplication.CALIBRATION_LIMIT_KEY);
 
             //Compass settings
-            int maxValuesSize = 10;
-            int nrOfFragments = 5;
-            int calibrationLimit = 100;
+            int maxValuesSize = 5;
+            int nrOfFragments = 8;
+            int calibrationLimit = 10;
 
             compassController = new CompassController(nrOfFragments, calibrationLimit, maxValuesSize, compassView);
             compassController.setFilterAlpha(0F);
@@ -139,13 +138,13 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //
 //            //Fill the compass with equal values
 //
-//            float rotationDelta = 360F / nrOfFragments;
-//            float rotation = 90F + rotationDelta;
-//
-//            for(int i = 0 ; i < nrOfFragments ; i++) {
-//                compassController.addData(0,rotation);
-//                rotation += rotationDelta;
-//            }
+            float rotationDelta = 360F / nrOfFragments;
+            float rotation = 90F + rotationDelta;
+
+            for(int i = 0 ; i < nrOfFragments ; i++) {
+                compassController.addData(0,rotation);
+                rotation += rotationDelta;
+            }
 
 //            compassController.addData(0,180);
 //            compassController.addData(0,0);

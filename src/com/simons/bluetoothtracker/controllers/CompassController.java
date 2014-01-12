@@ -52,6 +52,7 @@ public class CompassController {
     }
 
     public void addData(int rssi, float angle) {
+        angle = normalizedAngle(angle);
         deactivateAllFragments();
         if (!calibrationFinished) {
             Fragment fragment = compass.fragmentForAngle(angle);
@@ -68,7 +69,7 @@ public class CompassController {
             }
         } else {
             Fragment fragment = compass.fragmentForAngle(angle);
-            Log.d(TAG,"Receiving fragment #" + fragment.getId());
+
             fragment.setActive(true);
 
             double oldValue = fragment.getLastRssiValue();
@@ -78,8 +79,9 @@ public class CompassController {
             double newValue = fragment.getValue();
             double delta = rssi - oldValue;
 
-            Log.d(Fragment.TAG,fragment.toString());
 
+            Log.d(TAG,"Receiving fragment #" + fragment.getId());
+            Log.d(Fragment.TAG,fragment.toString());
             Log.d(TAG,"Old RSSI Value = " + oldValue);
             Log.d(TAG,"New RSSI Value = " + newValue);
             Log.d(TAG,"Delta RSSI Value = " + delta);
@@ -90,11 +92,11 @@ public class CompassController {
             List<Fragment> allFragments = compass.getFragments();
             for(Fragment f : allFragments) {
                 if(!f.equals(fragment)) {
-                    double distance = f.distanceTo(angle);
+                    double distance = f.distanceTo(fragment.getCenterAngle());
                     double weight = 1 - distance / 90D;
                     double value = f.getLastRssiValue();
                     Log.d(TAG,"Fragment ID = " + f.getId());
-                    Log.d(TAG,"Calibrated RSSI = " + value);
+                    Log.d(TAG,"Last RSSI Value = " + value);
                     Log.d(TAG,"Distance = " + distance);
                     Log.d(TAG,"Weight = " + weight);
 
@@ -153,7 +155,18 @@ public class CompassController {
         return Double.NaN;
     }
 
+    private float normalizedAngle(float angle) {
+
+        Log.d(TAG,"Raw angle = " + angle);
+        angle = angle % 360F;
+        Log.d(TAG,"360 normalized angle = " + angle);
+        return angle;
+    }
+
     public void setRotation(float angle) {
+
+        angle = normalizedAngle(angle);
+
         if(!Double.isNaN(lastAngle)) {
             if(Math.abs(angle - lastAngle) < threshold) {
                 angle = (float)(alpha * lastAngle + (1.0 - alpha) * angle);
