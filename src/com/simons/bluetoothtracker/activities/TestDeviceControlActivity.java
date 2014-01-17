@@ -67,7 +67,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 compassController.addData(rssi,azimuth);
             }
             if(bundle.containsKey(AZIMUTH_KEY)) {
-                int newAzimuth = intent.getIntExtra(AZIMUTH_KEY,-1);
+                float newAzimuth = intent.getFloatExtra(AZIMUTH_KEY,-1);
                 Toast.makeText(TestDeviceControlActivity.this,"Received Azimuth = " + newAzimuth,Toast.LENGTH_SHORT).show();
                 Log.i(TAG,"Received Azimuth = " + newAzimuth);
 
@@ -128,7 +128,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
             //Compass settings
             int maxValuesSize = 5;
             int nrOfFragments = 8;
-            int calibrationLimit = 10;
+            int calibrationLimit = 1;
 
             compassController = new CompassController(nrOfFragments, calibrationLimit, maxValuesSize, compassView);
             compassController.setFilterAlpha(0F);
