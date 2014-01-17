@@ -1,18 +1,8 @@
+//Start terminal (adb should be in PATH variable). This gets you into the UNIX environment on the phone
 adb shell
 
+//Use this to broadcast an action and an RSSI value (-10 as an example)
 am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ei rssi -10
 
-am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ei azimuth_delta 20
-
-for i in {1..18}
-do
-   am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ei azimuth_delta 20
-   echo "Broadcasted"
-done
-
-for (( ; ; ))
-do
-   am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ei azimuth_delta 20
-   sleep 0.5
-   echo "infinite loops [ hit CTRL+C to stop]"
-done
+//Use this to broadcast an action and a new azimuth direction (-10 as an example)
+am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ef azimuth 20
