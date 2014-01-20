@@ -26,12 +26,20 @@ public class Compass {
         }
     }
 
+    /**
+     * Sets all fragments to inactive (non-highlighted)
+     */
     public void deactivateAllFragments() {
         for (Fragment f : fragments) {
             f.setActive(false);
         }
     }
 
+    /**
+     * The fragments implement CompassDataSource which is the interface used by the compass view
+     * to get its data from. This returns the fragments as these interfaces.
+     * @return the fragments as compass data souces
+     */
     public CompassDataSource[] getDataSources() {
         CompassDataSource[] dataSources = new CompassDataSource[fragments.size()];
         for(int i = 0 ; i < dataSources.length ; i++) {
@@ -41,33 +49,27 @@ public class Compass {
         return dataSources;
     }
 
+    /**
+     * Checks if all the fragments are calibrated yet
+     * @return true if all the fragments are calibrated, false otherwise
+     */
     public boolean isCalibrated() {
         for (int i = 0; i < fragments.size(); i++) {
             Fragment fragment = fragments.get(i);
             if (!fragment.isCalibrated()) {
-//                Log.d(TAG, "FRAGMENT #" + i + " IS NOT CALIBRATED");
                 return false;
-            } else {
-//                Log.d(TAG, "FRAGMENT #" + i + " IS CALIBRATED");
             }
         }
         Log.d(TAG, "Compass is completely calibrated.");
         return true;
     }
 
-    private int fragmentIndexForAngle(float angle) {
-        angle += 90F;
-        angle = angle % 360F;
-        return Math.round(angle / 360F * (fragments.size() - 1));
-    }
-
-//    public Fragment fragmentForAngle(float angle) {
-//        if (fragments != null && !fragments.isEmpty()) {
-//            return fragments.get(fragmentIndexForAngle(angle));
-//        } else
-//            return null;
-//    }
-
+    /**
+     * Determines which fragment is closest to the given azimuth. Each fragment's center
+     * is used as reference point
+     * @param azimuth the azimuth to compare with
+     * @return the fragment closest to the given azimuth
+     */
     public Fragment fragmentForAngle(float azimuth) {
         if (fragments != null && !fragments.isEmpty()) {
 
@@ -75,26 +77,38 @@ public class Compass {
             Fragment closestFragment = null;
             for(Fragment fragment : fragments) {
                 double distance = fragment.distanceTo(270D - azimuth);
-                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
+//                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
                 if(distance < bestDistance) {
                     closestFragment = fragment;
                     bestDistance = distance;
                 }
             }
-            Log.d(TAG,"Fragment #" + closestFragment.getId() + " has the best distance = " + bestDistance);
+//            Log.d(TAG,"Fragment #" + closestFragment.getId() + " has the best distance = " + bestDistance);
             return closestFragment;
         } else
             return null;
     }
 
+    /**
+     * Set the compass azimuth to this value
+     * @param newAzimuth the new azimuth to be set
+     */
     public void setAzimuth(float newAzimuth) {
         azimuth = newAzimuth;
     }
 
+    /**
+     * Return the current azimuth of the compass
+     * @return
+     */
     public double getAzimuth() {
         return azimuth;
     }
 
+    /**
+     *
+     * @return the number of fragments that are calibrated
+     */
     public int numberOfFragmentsCalibrated() {
         int i = 0;
         for (Fragment fragment : fragments) {
@@ -109,12 +123,18 @@ public class Compass {
         return fragments;
     }
 
+    /**
+     * Clears the data from all fragments
+     */
     public void clearData() {
         for (Fragment f : fragments) {
             f.clearData();
         }
     }
 
+    /**
+     * @return the string representation of this compass. Including fragment toString representations
+     */
     public String toString() {
         String s = "CompassController Object with " + numberOfFragmentsCalibrated() + " of "
                 + fragments.size() + " fragments calibrated [\n";
@@ -123,5 +143,12 @@ public class Compass {
         }
         s += "]";
         return s;
+    }
+
+    /**
+     * Exports this compass's values and measurements as a CSV file
+     */
+    public void export() {
+        
     }
 }

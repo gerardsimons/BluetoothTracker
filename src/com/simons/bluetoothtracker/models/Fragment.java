@@ -1,7 +1,5 @@
 package com.simons.bluetoothtracker.models;
 
-import android.util.Log;
-
 import com.simons.bluetoothtracker.Utilities;
 
 import java.util.ArrayList;
@@ -27,8 +25,6 @@ public class Fragment implements CompassDataSource {
 
     private boolean calibrated = false;
     private double calibrationValue;
-
-    private double value = Double.NaN;
 
     private double averageAngle = Double.NaN;
 
@@ -133,8 +129,8 @@ public class Fragment implements CompassDataSource {
         angles.add(angle);
         timeStamps.add(System.nanoTime());
 
-        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssi + ", " + angle);
-        Log.d(TAG, "Values size : " + rssiValues.size());
+//        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssi + ", " + angle);
+//        Log.d(TAG, "Values size : " + rssiValues.size());
 
         if(angles.size() > maxSizeValues) {
 
@@ -142,15 +138,6 @@ public class Fragment implements CompassDataSource {
             rssiValues.remove(0);
         }
     }
-
-//    public String toString() {
-//        String toString = String.format("Fragment #%d has %d values [",id,rssiValues.size());
-//        for(double value : rssiValues) {
-//            toString += value + " ";
-//        }
-//        toString += "]";
-//        return toString;
-//    }
 
     public boolean isCalibrated() {
         // Log.d(TAG, "rssiValues.size() = " + rssiValues.size());
@@ -170,18 +157,9 @@ public class Fragment implements CompassDataSource {
     }
 
     public double distanceTo(double angle) {
-//        double avgAngle = getAverageAngle();
-//        angle += 90.0;
         double rawDistance = rawDistanceTo(angle);
         double distance = Math.min(rawDistance, 360D - rawDistance);
-        Log.d(TAG,"Raw distance = " + distance);
-//        if(distance != 180D)
-//            distance = distance % 180D;
 
-//        Log.d(TAG,"Normalized distance = " + distance);
-        Log.d(TAG,"Center angle = " + centerAngle);
-        Log.d(TAG,"Other angle = " + angle);
-        Log.d(TAG,"Distance = " + distance);
         return Math.abs(distance);
     }
 

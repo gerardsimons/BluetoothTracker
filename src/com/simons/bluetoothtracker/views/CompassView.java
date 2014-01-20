@@ -15,6 +15,18 @@ import com.simons.bluetoothtracker.models.CompassDataSource;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+/**
+ * This class is the view of a compass. It is setup as being a circle divided in several parts called
+ * fragments. The compassview uses interfaces called CompassDataSources for getting the values to
+ * determine the color of each fragment.
+ *
+ * The compass view exists in either a uncalibrated state, or a calibrated one. In the uncalibrated
+ * state the compass looks at the values required for calibration. When calibrated the compass
+ * indicates colors as a visualization of the signal strengths around the user. The compassview is
+ * meant to be rotated according to the actual magnetic field (implementation not here)
+ * @author Gerard Simons
+ *
+ */
 public class CompassView extends View {
 
     private static final String TAG = CompassView.class.getSimpleName();
@@ -27,7 +39,16 @@ public class CompassView extends View {
     private int[][] colors;
     private int[][] fragmentColors;
 
+    private boolean uiDimensionsDetermined = false;
+
+    //Dimension values for the compass
+    private int width,height;
+    private int cX,cY;
+    private float radius;
+    private int textSize = 30;
     private int strokeWidth = 200;
+
+    private boolean drawDebugText = false;
 
     private CompassDataSource[] dataSources;
 
@@ -61,6 +82,9 @@ public class CompassView extends View {
         initRandomColors();
     }
 
+    /**
+     * Initialize some basic objects used in the onDraw method
+     */
     private void initialize() {
         decimalFormat = new DecimalFormat(decimalFormatString);
 
@@ -74,47 +98,75 @@ public class CompassView extends View {
         // Object initialization
         rand = new Random();
         rectangle = new RectF();
-
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        uiDimensionsDetermined = false;
+    }
 
-        float width = canvas.getWidth();
-        float height = canvas.getHeight();
+    /**
+     * Calculate the size of the compass and the font size according to the canvas size.
+     * @param canvas the canvas which determines the space available for UI elements
+     */
+    private void determineUIDimensions(Canvas canvas) {
+        width = canvas.getWidth();
+        height = canvas.getHeight();
 
-        int cx = Math.round(width / 2F);
-        int cy = Math.round(height / 2F);
+        int minDimension = Math.min(width,height);
 
-        paint.setStyle(Style.STROKE);
+        //Let a fragments width be proportional to the size of the screen
+        strokeWidth = Math.round(.3F * minDimension);
+        paint.setStrokeWidth(strokeWidth);
+
+        textSize = Math.round(.05F * minDimension);
+        Log.d(TAG, "New text size = " + textSize);
+
+        cX = Math.round(width / 2F);
+        cY = Math.round(height / 2F);
+
         // Outer circle
-        float radius = Math.min(width, height) / 2.5F - strokeWidth / 2.5F;
+        radius = Math.min(width, height) / 2.2F - strokeWidth / 2.5F;
 
         // Example values
         rectangle.set(width / 2 - radius, height / 2 - radius, width / 2
                 + radius, height / 2 + radius);
 
+
+
+        uiDimensionsDetermined = true;
+    }
+
+    /**
+     * Draws the compass. A compass is divided in fragments where all fragments together make a full circle of 360 degrees.
+     * A fragment is drawn as an arced rectangle. The color of a fragment is either some gray color (when the compass is not yet calibrated)
+     * or as a color between red and green to indicate signal strength in the given fragment.
+     * Texts are also drawn.
+     * @param canvas the canvas to draw on
+     */
+    @Override
+    //TODO:Remove code duplicity! The only real difference between calibrated and uncalibrated is the color computation
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        if(!uiDimensionsDetermined) {
+            determineUIDimensions(canvas);
+        }
+
+        paint.setStyle(Style.STROKE);
+
+        float fragmentSize = 360F / nrOfFragments;
+
         if (isCalibrated) {
-
-            //Should I recalculate colors?
-
-//                drawRound = 0;
-//                Log.d(TAG,"RECALCULATE COLORS");
-                calculateColors();
-
-
-            float fragmentSize = 360F / nrOfFragments;
+            calculateColors();
             for (int i = 0; i < nrOfFragments; i++) {
 
                 CompassDataSource dataSource = dataSources[i];
 
                 double value = dataSource.getValue();
                 double calibrationValue = dataSource.getCalibrationValue();
-                boolean highlighted = dataSource.highlighted();
 
-                // paint.setARGB(255, colors[i][0], colors[i][1], colors[i][2]);
-                // Log.d(TAG, "Drawing interpolated colors.");
                 float fragmentSizeRadians = (float) (2 * Math.PI / nrOfFragments);
 
                 double rotationRadians = rotation * Math.PI / 180D;
@@ -128,37 +180,28 @@ public class CompassView extends View {
                         + rotationRadians)
                         * radius;
 
-                if(dataSource.highlighted()) {
-                    paint.setARGB(255, fragmentColors[i][0], fragmentColors[i][1],fragmentColors[i][2]);
-                }
-                else paint.setARGB(255, fragmentColors[i][0], fragmentColors[i][1],fragmentColors[i][2]);
+                paint.setARGB(255, fragmentColors[i][0], fragmentColors[i][1],fragmentColors[i][2]);
                 paint.setStyle(Style.STROKE);
+
+                //Use slightly more width to avoid gaps
                 canvas.drawArc(rectangle,
                         (float) (i * fragmentSize + rotation),
                         fragmentSize * 1.01f, false, paint);
 
-                int textSize = 40;
+                if(drawDebugText) {
+                    paint.setTextSize(textSize);
+                    paint.setStyle(Style.FILL);
+                    paint.setColor(Color.BLACK);
 
-                paint.setTextSize(50);
-                paint.setStyle(Style.FILL);
-                paint.setColor(Color.BLACK);
-
-                int center = Math.round(textSize / 2F);
-
-                canvas.drawText("" + decimalFormat.format(value) + "(" + decimalFormat.format(calibrationValue) + ") #" + dataSource.getId(),
-                        (float) x + cx - center, (float) y + cy + center, paint);
+                    int center = Math.round(textSize / 2F);
+                    canvas.drawText("" + decimalFormat.format(value) + "(" + decimalFormat.format(calibrationValue) + ") #" + dataSource.getId(),
+                        (float) x + cX - center, (float) y + cY + center, paint);
+                }
             }
-        } else { // The compass is not yet calibrated, draw the uncalibrated
-            // version
+        } else { // The compass is not yet calibrated, draw the uncalibrated version
             float fragmentSizeRadians = (float) (2 * Math.PI / nrOfFragments);
-            float fragmentSize = 360F / nrOfFragments;
 
             for (int i = 0; i < nrOfFragments; i++) {
-                // paint.setARGB(255, colors[i][0], colors[i][1], colors[i][2]);
-                // Log.d(TAG, "Drawing interpolated colors.");
-
-
-
                 double rotationRadians = rotation * Math.PI / 180D;
 
                 double nextRot = ((i + 1)) * fragmentSizeRadians;
@@ -170,66 +213,59 @@ public class CompassView extends View {
                         + rotationRadians)
                         * radius;
 
-
-
-
                 CompassDataSource dataSource = dataSources[i];
 
-
-                int valuesMeasured = dataSource.getNrOfValuesMeasured();
+                int valuesMeasured = Math.max(0,dataSource.getNrOfValuesMeasured());
                 int calibrationLimit = dataSource.getCalibrationLimit();
                 boolean highlighted = dataSource.highlighted();
 
                 int[] color = interpolateColors((valuesMeasured / (double)calibrationLimit),
-                        new int[]{50, 50, 50}, new int[]{255, 255, 255});
-
-//                if (Double.isNaN(value)) {
-//                    color = new int[]{255, 255, 255};
-//                }
-
-
-
-                // Log.d(TAG, "Color #" + i + " = " +
-                // Utilities.arrayToString(color));
+                        new int[]{100, 100, 100}, new int[]{255, 255, 255});
 
                 paint.setStyle(Style.STROKE);
-                // paint.setARGB(1, color[0], color[1], color[2]);
 
                 if (highlighted) {
                     paint.setARGB(255,highlightColor[0],highlightColor[1],highlightColor[2]);
                 } else {
                     paint.setARGB(255, color[0], color[1], color[2]);
                 }
-                // paint.setColor(Color.RED);
+
                 canvas.drawArc(rectangle,
                         (float) (i * fragmentSize + rotation),
                         fragmentSize * 1.01F, false, paint);
 
-                int textSize = 40;
 
-                paint.setTextSize(50);
-                paint.setStyle(Style.FILL);
-                paint.setColor(Color.BLACK);
+                    paint.setTextSize(textSize);
+                    paint.setStyle(Style.FILL);
+                    paint.setColor(Color.BLACK);
 
-                int center = Math.round(textSize / 2F);
+                    int center = Math.round(textSize / 2F);
 
-                canvas.drawText("" + valuesMeasured + " #" + dataSource.getId(),
-                        (float) x + cx - center, (float) y + cy + center, paint);
+                String contextText = "" + valuesMeasured;
+                if(drawDebugText)
+                    contextText += " #" + dataSource.getId();
+
+                canvas.drawText(contextText,
+                        (float) x + cX - center, (float) y + cY + center, paint);
+
 
             }
             drawRound++;
         }
 
-        // Draw the angle
-        paint.setStyle(Style.FILL);
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(50);
-        // String azimuth = new BigDecimal(String.valueOf(rotation)).setScale(5,
-        // BigDecimal.ROUND_HALF_UP).toString();
-        String azimuth = Math.round(rotation) + "";
-        canvas.drawText(azimuth, cx, cy, paint);
+        if(drawDebugText) {
+            // Draw the angle text
+            paint.setStyle(Style.FILL);
+            paint.setColor(Color.BLACK);
+
+            String azimuth = Math.round(rotation) + "";
+            canvas.drawText(azimuth, cX, cY, paint);
+        }
     }
 
+    /**
+     * Random color generation, useful for testing
+     */
     private void initRandomColors() {
         // Random color generation
         colors = new int[12][3];
@@ -241,28 +277,30 @@ public class CompassView extends View {
         }
     }
 
+    /**
+     * The number of fragments this compass view should have
+     * @param nrOfFragments
+     */
     public void setNumberOfFragments(int nrOfFragments) {
         this.nrOfFragments = nrOfFragments;
     }
 
+    /**
+     * Set the rotation of the compass
+     * @param angle the new rotation
+     */
     public void setRotation(float angle) {
-        // The given angle is in radions from -PI to PI.
-        // First translate in range to [0,2*PI]
-        // angle += Math.PI;
-
         rotation = angle;
         invalidate();
-
     }
 
     /**
-     * Determine the color for each fragment using linear interpolation
+     * Determine the color for each fragment using linear interpolation between red and green
      */
     private void calculateColors() {
         if (dataSources != null) {
 
-//            Log.d(TAG,"Calculating Colors");
-
+            //First determine the min and max values.
             double maxRSSI = Integer.MIN_VALUE;
             double minRSSI = Integer.MAX_VALUE;
             for (CompassDataSource dataSource : dataSources) {
@@ -275,19 +313,26 @@ public class CompassView extends View {
                 }
             }
 
-//            Log.d(TAG, "minRSSI = " + minRSSI);
-//            Log.d(TAG, "maxRSSI = " + maxRSSI);
             double delta = maxRSSI - minRSSI;
+
             // The second pass does the linear interpolation
             fragmentColors = new int[dataSources.length][3];
             for (int i = 0; i < dataSources.length ; i++) {
                 double ratio = (dataSources[i].getValue() - minRSSI) / delta;
-//                Log.d(TAG, "ratio = " + ratio);
                 fragmentColors[i] = interpolateColors(ratio, green, red);
             }
         }
     }
 
+    /**
+     * Returns the color interpolated between colorOne and colorTwo. Ratio should be on the closed
+     * [0,1] interval, where 0 means a color equivalent to colorOne and 1 to colorTwo, arbitrary values
+     * between 0 and 1 means a weighted average of the two
+     * @param ratio a measure of interpolation
+     * @param colorOne color parameter to interpolate from
+     * @param colorTwo the other color parameter to interpolate from
+     * @return the linearly interpolated color
+     */
     public int[] interpolateColors(double ratio, int[] colorOne, int[] colorTwo) {
         if (colorOne.length == colorTwo.length) {
             int[] interpolatedColors = new int[colorOne.length];
@@ -306,13 +351,20 @@ public class CompassView extends View {
             return null;
     }
 
+    /**
+     * Set the compass view to draw the calibrated version. When this is set (typically by the compass
+     * controller, the compassview will draw the fragments according to the datasource values.
+     */
     public void setCalibrated() {
-        Log.d(TAG,"CompassView set to calibrated.");
         isCalibrated = true;
         calculateColors();
         invalidate();
     }
 
+    /**
+     *  Sets the datasources to be used as sources for the fragments
+     * @param dataSources the data sources to be used
+     */
     public void setDataSources(CompassDataSource[] dataSources) {
         this.dataSources = dataSources;
     }

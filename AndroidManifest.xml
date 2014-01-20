@@ -40,6 +40,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SettingsActivity" />
+
         <service
             android:name=".controllers.BluetoothLeService"
             android:enabled="true" />
