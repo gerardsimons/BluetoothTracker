@@ -1,0 +1,119 @@
+* {
+	margin:0;
+	padding:0;
+	border-collapse:collapse;
+}
+
+img {
+	border:none;
+}
+
+body {
+
+	color:#000;
+	font-size:12px;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-weight:lighter;
+}
+
+a {
+	text-decoration:none;
+	color:#007eff;
+}
+a:hover {
+	color:#005fc0;
+}
+
+#wrapper {
+	position:fixed;
+	width:100%;
+	height:100%;
+	overflow:auto;
+background: #eeeeee; /* Old browsers */
+background: -moz-linear-gradient(top,  #eeeeee 0%, #eeeeee 65%, #ffffff 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(65%,#eeeeee), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #eeeeee 0%,#eeeeee 65%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #eeeeee 0%,#eeeeee 65%,#ffffff 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #eeeeee 0%,#eeeeee 65%,#ffffff 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #eeeeee 0%,#eeeeee 65%,#ffffff 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
+
+#container {
+	width:960px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-bottom:10px;
+	background:#fff;
+	border:1px #e6e6e6 solid;
+	border-top:none;
+}
+#innerborder {
+	border:1px #f6f6f6 solid;
+	border-top:none;
+}
+
+#header {
+	width:100%;
+	height:150px;
+	background:url(header.png) left top no-repeat;
+}
+
+#menuplaceholder {
+	display:none;
+	margin-bottom:10px;
+	height:40px;
+}
+
+#menu {
+	background:#eee;
+	margin-left:-1px;
+	margin-right:-1px;
+}
+#menu ul {
+	border-bottom:10px solid #fff;
+	width:960px;
+	margin-left:auto;
+	margin-right:auto;
+	list-style:none;
+	text-align:center;
+}
+#menu ul li {
+	display:inline-block;
+	text-align:center;
+}
+#menu ul li a {
+	width:200px;
+	display:block;
+	line-height:40px;
+}
+#menu ul li.active a {
+	background:#ddd;
+}
+#menu ul li a:hover {
+	background:#fff;
+}
+
+#content {
+	padding:0 10px;
+}
+#content h1#title {
+	margin-bottom:10px;
+	text-shadow:1px 1px 2px #ddd;
+}
+
+#footer {
+	color:#666;
+	width:940px;
+	margin-left:auto;
+	margin-right:auto;
+	padding-top:10px;
+	padding-bottom:10px;
+	margin-top:10px;
+	border-top:1px #aaa solid;
+}
+#footer #disclaimer {
+	font-size:10px;
+	padding-top:5px;
+	padding-left:10px;
+}
