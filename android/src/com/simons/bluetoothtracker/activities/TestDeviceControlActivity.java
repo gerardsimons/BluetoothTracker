@@ -78,14 +78,14 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 compassController.setRotation(azimuth);
             }
             if(bundle.containsKey(AZIMUTH_DELTA_KEY)) {
-                int azimuthDelta = intent.getIntExtra(AZIMUTH_DELTA_KEY,-1);
+                float azimuthDelta = intent.getFloatExtra(AZIMUTH_DELTA_KEY,-1);
                 Toast.makeText(TestDeviceControlActivity.this,"Received Azimuth Delta = " + azimuthDelta,Toast.LENGTH_SHORT).show();
                 Log.i(TAG,"Received Azimuth Delta = " + azimuthDelta);
 
                 Random r = new Random();
 
                 azimuth += azimuthDelta;
-                compassController.addData(-1 * r.nextInt(100),azimuth);
+                //compassController.addData(-1 * r.nextInt(100),azimuth);
                 compassController.setRotation(azimuth);
             }
         }
@@ -139,12 +139,14 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //            //Fill the compass with equal values
 //
             float rotationDelta = 360F / nrOfFragments;
-            float rotation = 90F + rotationDelta;
+            float rotation = rotationDelta / 2;
 
             for(int i = 0 ; i < nrOfFragments ; i++) {
-                compassController.addData(0,rotation);
+                compassController.addData(-i * 10,rotation);
                 rotation += rotationDelta;
             }
+            azimuth = rotationDelta / 2F;
+            compassController.setRotation(azimuth);
 
 //            compassController.addData(0,180);
 //            compassController.addData(0,0);

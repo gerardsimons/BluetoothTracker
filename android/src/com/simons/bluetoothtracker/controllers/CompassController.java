@@ -63,47 +63,49 @@ public class CompassController {
             fragment.addValues(rssi, angle);
             if (compass.isCalibrated()) {
                 calibrationFinished = true;
+
+                computePointer();
                 // computePointer(Math.round(fragments.size() / 3F));
                 Log.d(TAG, this.toString());
                 compassView.setCalibrated();
             }
         } else {
             Fragment fragment = compass.fragmentForAngle(angle);
-
             fragment.setActive(true);
 
-            double oldValue = fragment.getLastRssiValue();
-
-            fragment.addValues(rssi, angle);
-
-            double newValue = fragment.getValue();
-            double delta = rssi - oldValue;
-
-
-            Log.d(TAG,"Receiving fragment #" + fragment.getId());
-            Log.d(Fragment.TAG,fragment.toString());
-            Log.d(TAG,"Old RSSI Value = " + oldValue);
-            Log.d(TAG,"New RSSI Value = " + newValue);
-            Log.d(TAG,"Delta RSSI Value = " + delta);
-
-            /* PROPAGATE VALUES TO OTHER FRAGMENTS */
-
-            //Also update other fragments
-            List<Fragment> allFragments = compass.getFragments();
-            for(Fragment f : allFragments) {
-                if(!f.equals(fragment)) {
-                    double distance = f.distanceTo(fragment.getCenterAngle());
-                    double weight = 1 - distance / 90D;
-                    double value = f.getLastRssiValue();
-                    Log.d(TAG,"Fragment ID = " + f.getId());
-                    Log.d(TAG,"Last RSSI Value = " + value);
-                    Log.d(TAG,"Distance = " + distance);
-                    Log.d(TAG,"Weight = " + weight);
-
-
-                    f.addValues(value + weight * delta,f.getAverageAngle());
-                }
-            }
+//            double oldValue = fragment.getLastRssiValue();
+//
+//            fragment.addValues(rssi, angle);
+//
+//            double newValue = fragment.getValue();
+//            double delta = rssi - oldValue;
+//
+//            Log.d(TAG,"Receiving fragment #" + fragment.getId());
+////            Log.d(Fragment.TAG,fragment.toString());
+//            Log.d(TAG,"Old RSSI Value = " + oldValue);
+//            Log.d(TAG,"New RSSI Value = " + newValue);
+//            Log.d(TAG,"Delta RSSI Value = " + delta);
+//
+//            /* PROPAGATE VALUES TO OTHER FRAGMENTS */
+//
+//            //Also update other fragments
+//            List<Fragment> allFragments = compass.getFragments();
+//            for(Fragment f : allFragments) {
+//                if(!f.equals(fragment)) {
+////                    double distance = f.distanceTo(fragment.getCenterAngle());
+////                    double weight = 1 - distance / 90D;
+////                    double value = f.getLastRssiValue();
+//                    Log.d(TAG,"Fragment ID = " + f.getId());
+////                    Log.d(TAG,"Last RSSI Value = " + value);
+////                    Log.d(TAG,"Distance = " + distance);
+////                    Log.d(TAG,"Weight = " + weight);
+//
+//
+//                    f.addValues(f.getLastRssiValue() + delta,f.getAverageAngle());
+//                }
+//            }
+            compass.printRSSIValues();
+//            compass.printAngles();
         }
         compassView.invalidate();
     }
@@ -135,6 +137,7 @@ public class CompassController {
                 Log.d(TAG, "Computing pointer.");
                 sortFragments();
                 double bestRSSI = fragments.get(0).getValue();
+                double worstRSSI = fragments.get(fragments.size() - 1);
                 Log.d(TAG, "Best RSSI = " + bestRSSI);
                 double angle = 0D;
                 double ratioSum = 0D;
@@ -146,8 +149,8 @@ public class CompassController {
                     angle += avgAngle * ratio;
                     ratioSum += ratio;
                 }
-                Log.d(TAG, "Angle Sum = " + ratioSum);
-                Log.d(TAG, "Ratio Sum = " + ratioSum);
+//                Log.d(TAG, "Angle Sum = " + ratioSum);
+//                Log.d(TAG, "Ratio Sum = " + ratioSum);
                 angle /= ratioSum;
                 return angle;
             }
@@ -166,7 +169,6 @@ public class CompassController {
     public void setRotation(float angle) {
 
         angle = normalizedAngle(angle);
-
         if(!Double.isNaN(lastAngle)) {
             if(Math.abs(angle - lastAngle) < threshold) {
                 angle = (float)(alpha * lastAngle + (1.0 - alpha) * angle);

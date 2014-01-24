@@ -18,8 +18,7 @@ public class BluetoothTrackerApplication extends Application {
     public static final int MAX_VALUES_DEFAULT = 10;
     public static final int BT_REFRESH_RATE_DEFAULT = 100;
 
-
-    private static final String TAG = BluetoothTrackerApplication.class.getSimpleName();
+    private static final String TAG = "BluetoothtrackerApplication";
 
     private static final String FLIGHT_APP_TOKEN = "9f44d40a-d87d-4385-90df-8ae60ab8e02a";
 

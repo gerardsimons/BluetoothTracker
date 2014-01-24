@@ -35,6 +35,12 @@ public class Compass {
         }
     }
 
+    public void printRSSIValues() {
+        for(Fragment fragment : fragments) {
+
+        }
+    }
+
     /**
      * The fragments implement CompassDataSource which is the interface used by the compass view
      * to get its data from. This returns the fragments as these interfaces.

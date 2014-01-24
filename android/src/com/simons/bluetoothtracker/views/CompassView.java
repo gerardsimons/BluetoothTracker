@@ -48,7 +48,7 @@ public class CompassView extends View {
     private int textSize = 30;
     private int strokeWidth = 200;
 
-    private boolean drawDebugText = false;
+    private boolean drawDebugText = true;
 
     private CompassDataSource[] dataSources;
 
@@ -299,7 +299,6 @@ public class CompassView extends View {
      */
     private void calculateColors() {
         if (dataSources != null) {
-
             //First determine the min and max values.
             double maxRSSI = Integer.MIN_VALUE;
             double minRSSI = Integer.MAX_VALUE;
