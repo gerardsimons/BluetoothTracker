@@ -31,10 +31,11 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     //private CompassView compassView;
     private CompassController compassController;
 
+    private boolean enableSensors = false;
+
     //    private GraphViewSeries motionSeries;
     //    private GraphViewSeries thresholdSeries;
     //    private LineGraphView graphView;
-
 
 
     private SensorManager mSensorManager;
@@ -59,28 +60,28 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
         @Override
         public void onReceive(Context ctx, Intent intent) {
             Bundle bundle = intent.getExtras();
-            if(bundle.containsKey(RSSI_KEY)) {
-                int rssi = intent.getIntExtra(RSSI_KEY,999);
-                Toast.makeText(TestDeviceControlActivity.this,"Received RSSI = " + rssi,Toast.LENGTH_SHORT).show();
-                Log.i(TAG,"Received RSSI = " + rssi);
+            if (bundle.containsKey(RSSI_KEY)) {
+                int rssi = intent.getIntExtra(RSSI_KEY, 999);
+                Toast.makeText(TestDeviceControlActivity.this, "Received RSSI = " + rssi, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Received RSSI = " + rssi);
 
-                compassController.addData(rssi,azimuth);
+                compassController.addData(rssi, azimuth);
             }
-            if(bundle.containsKey(AZIMUTH_KEY)) {
-                float newAzimuth = intent.getFloatExtra(AZIMUTH_KEY,-1);
-                Toast.makeText(TestDeviceControlActivity.this,"Received Azimuth = " + newAzimuth,Toast.LENGTH_SHORT).show();
-                Log.i(TAG,"Received Azimuth = " + newAzimuth);
+            if (bundle.containsKey(AZIMUTH_KEY)) {
+                float newAzimuth = intent.getFloatExtra(AZIMUTH_KEY, -1);
+                Toast.makeText(TestDeviceControlActivity.this, "Received Azimuth = " + newAzimuth, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Received Azimuth = " + newAzimuth);
 
                 Random r = new Random();
 
                 azimuth = newAzimuth;
-                compassController.addData(-1 * r.nextInt(100),azimuth);
+                compassController.addData(-1 * r.nextInt(100), azimuth);
                 compassController.setRotation(azimuth);
             }
-            if(bundle.containsKey(AZIMUTH_DELTA_KEY)) {
-                float azimuthDelta = intent.getFloatExtra(AZIMUTH_DELTA_KEY,-1);
-                Toast.makeText(TestDeviceControlActivity.this,"Received Azimuth Delta = " + azimuthDelta,Toast.LENGTH_SHORT).show();
-                Log.i(TAG,"Received Azimuth Delta = " + azimuthDelta);
+            if (bundle.containsKey(AZIMUTH_DELTA_KEY)) {
+                float azimuthDelta = intent.getFloatExtra(AZIMUTH_DELTA_KEY, -1);
+                Toast.makeText(TestDeviceControlActivity.this, "Received Azimuth Delta = " + azimuthDelta, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Received Azimuth Delta = " + azimuthDelta);
 
                 Random r = new Random();
 
@@ -91,6 +92,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
         }
     };
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +101,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
         application = (BluetoothTrackerApplication) getApplication();
 
         loadCompass();
-
 
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -126,32 +127,45 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //            int calibrationLimit = application.loadIntValue(BluetoothTrackerApplication.CALIBRATION_LIMIT_KEY);
 
             //Compass settings
-            int maxValuesSize = 5;
-            int nrOfFragments = 8;
+            int maxValuesSize = 1;
+            int nrOfFragments = 10;
             int calibrationLimit = 1;
 
             compassController = new CompassController(nrOfFragments, calibrationLimit, maxValuesSize, compassView);
             compassController.setFilterAlpha(0F);
+//            compassController.addData(-1,355);
+//            compassController.addData(-1,5);
+//            compassController.addData(-10,15);
+
+//            compassController.addData(new int[]{-1,10,-10},new float[]{355,5,15});
+
+//            compassController.computePointer();
+
 
             //Test values for 5 fragments
 //            compassController.setRotation(90);
 //
 //            //Fill the compass with equal values
 //
-            float rotationDelta = 360F / nrOfFragments;
-            float rotation = rotationDelta / 2;
+            if (true) {
+                float rotationDelta = 360F / nrOfFragments;
+                float rotation = rotationDelta / 2;
 
-            for(int i = 0 ; i < nrOfFragments ; i++) {
-                compassController.addData(-i * 10,rotation);
-                rotation += rotationDelta;
+                for (int i = 0; i < nrOfFragments; i++) {
+                    if ((i > .2 * nrOfFragments && i < .6 * nrOfFragments) || (i > .8 * nrOfFragments))
+                        compassController.addData(-50, rotation);
+                    else
+                        compassController.addData(-100, rotation);
+                    rotation += rotationDelta;
+                }
+                azimuth = rotationDelta / 2F;
+                compassController.setRotation(0);
             }
-            azimuth = rotationDelta / 2F;
-            compassController.setRotation(azimuth);
-
 //            compassController.addData(0,180);
 //            compassController.addData(0,0);
         }
     }
+
 
     @Override
     protected void onResume() {
@@ -162,7 +176,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
 
         registerReceiver(receiver, actionFilter);
-        if (orientationSensor != null)
+        if (orientationSensor != null && enableSensors)
             orientationSensor.register(this, MEASUREMENTS_RATE);
     }
 
@@ -185,24 +199,16 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    private float toDegrees(float rads) {
-        float degrees = (float) (rads * (180F / Math.PI));
-        if (degrees < 0) {
-            degrees = 360 + degrees;
-        }
-        return degrees;
+        Log.i(TAG,"Accuracy sensors has changed to : " + accuracy);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (orientationSensor != null && compassController != null) {
 
-            azimuth = toDegrees(orientationSensor.getM_azimuth_radians());
+            azimuth = (float)Math.toDegrees(orientationSensor.getM_azimuth_radians());
             //Flip the orientation
-            azimuth = 360F - azimuth;
+//            azimuth = 360F - azimuth;
             //Log.d(TAG, "azimuth = " + azimuth);
             compassController.setRotation(azimuth);
         }

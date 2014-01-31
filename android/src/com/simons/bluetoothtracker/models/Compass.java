@@ -15,6 +15,9 @@ public class Compass {
     private static final String TAG = "Compass";
     private List<Fragment> fragments;
 
+    public static final int MIN_RSSI = -130;
+    public static final int MAX_RSSI = 0;
+
     private double azimuth;
 
     public Compass(int nrOfFragments, int calibrationLimit, int maxValuesSize) {
@@ -35,10 +38,26 @@ public class Compass {
         }
     }
 
-    public void printRSSIValues() {
+    public String azimuthValuesToString() {
+        String azimuthValuesString = "[";
         for(Fragment fragment : fragments) {
-
+            for(RSSIMeasurement rssiMeasurement : fragment.getRssiMeasurements()) {
+                azimuthValuesString += rssiMeasurement.getAzimuth() + " ";
+            }
         }
+        azimuthValuesString += "]";
+        return azimuthValuesString;
+    }
+
+    public String rssiValuesToString() {
+        String rssiValuesString = "[";
+        for(Fragment fragment : fragments) {
+            for(RSSIMeasurement rssiMeasurement : fragment.getRssiMeasurements()) {
+                rssiValuesString += rssiMeasurement.getRSSI() + " ";
+            }
+        }
+        rssiValuesString += "]";
+        return rssiValuesString;
     }
 
     /**
@@ -76,13 +95,24 @@ public class Compass {
      * @param azimuth the azimuth to compare with
      * @return the fragment closest to the given azimuth
      */
+//    public Fragment fragmentForAngle(float azimuth) {
+//        azimuth = 360F - azimuth;
+//        if (fragments != null && !fragments.isEmpty()) {
+////            int index = Math.round((270F - azimuth) / 360F) % 360;
+//            int index = (int) Math.round(azimuth / 360F * (fragments.size() - 1));
+////            Log.d(TAG,"Index = " + index);
+//            return fragments.get(index);
+//        } else
+//            return null;
+//    }
+
     public Fragment fragmentForAngle(float azimuth) {
         if (fragments != null && !fragments.isEmpty()) {
-
+            azimuth = 360F - azimuth;
             double bestDistance = Double.MAX_VALUE;
             Fragment closestFragment = null;
             for(Fragment fragment : fragments) {
-                double distance = fragment.distanceTo(270D - azimuth);
+                double distance = fragment.distanceTo(azimuth);
 //                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
                 if(distance < bestDistance) {
                     closestFragment = fragment;
@@ -91,8 +121,9 @@ public class Compass {
             }
 //            Log.d(TAG,"Fragment #" + closestFragment.getId() + " has the best distance = " + bestDistance);
             return closestFragment;
-        } else
+        } else {
             return null;
+        }
     }
 
     /**
@@ -136,6 +167,18 @@ public class Compass {
         for (Fragment f : fragments) {
             f.clearData();
         }
+    }
+
+    /**
+     * Create an angle within the range of 0,360, -90 should become 270 etc.
+     * @param angle
+     * @return
+     */
+    public static float NormalizeAngle(float angle) {
+        if(angle < 0) {
+            angle += 360F;
+        }
+        return 360F - angle % 360F;
     }
 
     /**

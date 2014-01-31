@@ -18,7 +18,26 @@ public class Utilities {
         return s + "]";
     }
 
+    public static double mean(double[] values) {
+        double sum = 0;
+        for(double value : values) {
+            sum += value;
+        }
+        return sum / values.length;
+    }
+
     public static String arrayToString(float[] values) {
+        String s = "[";
+        for (int i = 0; i < values.length; i++) {
+            s += values[i];
+            if (i < values.length - 1) {
+                s += ", ";
+            }
+        }
+        return s + "]";
+    }
+
+    public static String arrayToString(double[] values) {
         String s = "[";
         for (int i = 0; i < values.length; i++) {
             s += values[i];

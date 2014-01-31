@@ -11,9 +11,7 @@ public class Fragment implements CompassDataSource {
 
     private int maxSizeValues;
 
-    private List<Double> rssiValues;
-    private List<Double> angles;
-    private List<Long> timeStamps;
+    private List<RSSIMeasurement> rssiMeasurements;
 
     private int id;
 
@@ -36,10 +34,8 @@ public class Fragment implements CompassDataSource {
         this.maxSizeValues = maxSizeValues;
         this.centerAngle = centerAngle;
         this.calibrationLimit = calibrationLimit;
-        rssiValues = new ArrayList<Double>();
-        angles = new ArrayList<Double>();
         this.id = id;
-        timeStamps = new ArrayList<Long>();
+        rssiMeasurements = new ArrayList<RSSIMeasurement>();
     }
 
     /**
@@ -48,13 +44,13 @@ public class Fragment implements CompassDataSource {
      * weighted averages
      *
      * @return double the value, double is used to ensure sufficient accuracy
-     * allowing for multiple types of calculations
+     * allowing for multiple types of calculations.
      */
     public double getValue() {
-        if(true || !isCalibrated()) {
+        if(isCalibrated()) {
             return averageRSSI();
         }
-        else return weightedTimeAverageRSSI();
+        else return Double.NaN;
     }
 
     @Override
@@ -63,33 +59,33 @@ public class Fragment implements CompassDataSource {
     }
 
 
-    private float weightedTimeAverageRSSI() {
-        float value = 0;
-        Long oldestTime = null;
-        Long newestTime = timeStamps.get(timeStamps.size() - 1);
-
-        long tInterval = 0L;
-
-        int N = rssiValues.size();
-
-        for(int i = 0 ; i < rssiValues.size() ; i++) {
-            Double rssiValue = rssiValues.get(i);
-            if(rssiValue != null) {
-                if(oldestTime == null) {
-                    oldestTime = timeStamps.get(i);
-                    tInterval = oldestTime - newestTime;
-                }
-                else {
-                    value += (timeStamps.get(i) - oldestTime) / tInterval;
-                }
-            }
-        }
-        return value;
-    }
+//    private float weightedTimeAverageRSSI() {
+//        float value = 0;
+//        Long oldestTime = null;
+//        Long newestTime = timeStamps.get(timeStamps.size() - 1);
+//
+//        long tInterval = 0L;
+//
+//        int N = rssiValues.size();
+//
+//        for(int i = 0 ; i < rssiValues.size() ; i++) {
+//            Double rssiValue = rssiValues.get(i);
+//            if(rssiValue != null) {
+//                if(oldestTime == null) {
+//                    oldestTime = timeStamps.get(i);
+//                    tInterval = oldestTime - newestTime;
+//                }
+//                else {
+//                    value += (timeStamps.get(i) - oldestTime) / tInterval;
+//                }
+//            }
+//        }
+//        return value;
+//    }
 
     @Override
     public int getNrOfValuesMeasured() {
-        return calibrationLimit - rssiValues.size();
+        return calibrationLimit - rssiMeasurements.size();
     }
 
     public int getCalibrationLimit() {
@@ -109,44 +105,36 @@ public class Fragment implements CompassDataSource {
             s = "Uncalibrated ";
         s += "fragment with representative value = " + getValue()
                 + " Values= ";
-        s += Utilities.listToString(rssiValues) + "\n";
+        s += Utilities.listToString(rssiMeasurements) + "\n";
         return s;
     }
 
     private double averageRSSI() {
-        if (!rssiValues.isEmpty()) {
+        if (!rssiMeasurements.isEmpty()) {
             int sum = 0;
-            for (double i : rssiValues) {
-                sum += i;
+            for (RSSIMeasurement measurement : rssiMeasurements) {
+                sum += measurement.getRSSI();
             }
-            return sum / (double) rssiValues.size();
+            return sum / (double) rssiMeasurements.size();
         } else
             return Double.NaN;
     }
 
-    public void addValues(double rssi, double angle) {
-        rssiValues.add(rssi);
-        angles.add(angle);
-        timeStamps.add(System.nanoTime());
+    public void addValues(int rssi, double angle) {
+        rssiMeasurements.add(new RSSIMeasurement(rssi,angle));
 
 //        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssi + ", " + angle);
 //        Log.d(TAG, "Values size : " + rssiValues.size());
 
-        if(angles.size() > maxSizeValues) {
-
-            angles.remove(0);
-            rssiValues.remove(0);
+        if(rssiMeasurements.size() > maxSizeValues) {
+            rssiMeasurements.remove(0);
         }
     }
 
     public boolean isCalibrated() {
         // Log.d(TAG, "rssiValues.size() = " + rssiValues.size());
         // Log.d(TAG, "calibrationLimit = " + calibrationLimit);
-        if(calibrated || rssiValues.size() >= calibrationLimit) {
-            if(!calibrated) //First time it is calibrated
-            {
-                calibrationValue = getValue();
-            }
+        if(rssiMeasurements.size() >= calibrationLimit) {
             calibrated = true;
         }
         return calibrated;
@@ -168,8 +156,7 @@ public class Fragment implements CompassDataSource {
     }
 
     public void clearData() {
-        rssiValues.clear();
-        angles.clear();
+        rssiMeasurements.clear();
     }
 
     public boolean equals(Object o) {
@@ -178,6 +165,10 @@ public class Fragment implements CompassDataSource {
             return f.getId() == id;
         }
         else return false;
+    }
+
+    public int getMaxSizeValues() {
+        return maxSizeValues;
     }
 
     public double getCenterAngle() {
@@ -191,18 +182,16 @@ public class Fragment implements CompassDataSource {
     public double getAverageAngle() {
         double avgAngle = 0D;
         if (Double.isNaN(averageAngle)) {
-            for (double angle : angles) {
-                avgAngle += angle;
+            for (RSSIMeasurement rssiMeasurement : rssiMeasurements) {
+                avgAngle += rssiMeasurement.getAzimuth();
             }
         } else {
             return averageAngle;
         }
-        return avgAngle / angles.size();
+        return avgAngle / rssiMeasurements.size();
     }
 
-    public double getLastRssiValue() {
-        if(rssiValues != null && !rssiValues.isEmpty())
-            return rssiValues.get(rssiValues.size() - 1);
-        else return Double.NaN;
+    public List<RSSIMeasurement> getRssiMeasurements() {
+        return rssiMeasurements;
     }
 }

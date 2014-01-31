@@ -5,8 +5,10 @@ import android.util.Log;
 import com.simons.bluetoothtracker.Utilities;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.Fragment;
+import com.simons.bluetoothtracker.models.RSSIMeasurement;
 import com.simons.bluetoothtracker.views.CompassView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -31,6 +33,7 @@ public class CompassController {
     private final float threshold = 270F;
     private double lastAngle = Double.NaN;
 
+    private Pointer pointer;
 
 //	private int checkCalibrationThrottle = 50;
 //	private int round = 0;
@@ -51,27 +54,45 @@ public class CompassController {
         compass.deactivateAllFragments();
     }
 
-    public void addData(int rssi, float angle) {
-        angle = normalizedAngle(angle);
+    public void addData(int[] rssiValues, float[] azimuthValues) {
+        if(rssiValues.length != azimuthValues.length) {
+            Log.e(TAG,"rssiValues length should match azimuthValues length");
+            return;
+        }
+        for(int i = 0 ; i < rssiValues.length ; i++) {
+            addData(rssiValues[i],azimuthValues[i]);
+        }
+    }
+
+    public void addData(int rssi, float azimuth) {
+        azimuth = Compass.NormalizeAngle(azimuth);
         deactivateAllFragments();
         if (!calibrationFinished) {
-            Fragment fragment = compass.fragmentForAngle(angle);
+            Fragment fragment = compass.fragmentForAngle(azimuth);
             fragment.setActive(true);
 
-            // Log.d(TAG, "Adding data to compass (rssi,value) = (" + rssi + ","
-            // + angle + ")");
-            fragment.addValues(rssi, angle);
+            Log.d(TAG, "Adding data to compass (rssi,value) = (" + rssi + "," + azimuth + ")");
+            fragment.addValues(rssi, azimuth);
             if (compass.isCalibrated()) {
                 calibrationFinished = true;
 
-                computePointer();
-                // computePointer(Math.round(fragments.size() / 3F));
                 Log.d(TAG, this.toString());
+
+                Pointer pointer = computePointer();
+
+                compassView.setDataSources(compass.getDataSources());
+                compassView.setPointer(pointer);
                 compassView.setCalibrated();
             }
         } else {
-            Fragment fragment = compass.fragmentForAngle(angle);
+            Fragment fragment = compass.fragmentForAngle(azimuth);
             fragment.setActive(true);
+
+            //TODO: Update the pointer direction and color wise
+            if(pointer != null) {
+                pointer.update(rssi,azimuth);
+            }
+
 
 //            double oldValue = fragment.getLastRssiValue();
 //
@@ -81,7 +102,7 @@ public class CompassController {
 //            double delta = rssi - oldValue;
 //
 //            Log.d(TAG,"Receiving fragment #" + fragment.getId());
-////            Log.d(Fragment.TAG,fragment.toString());
+//            Log.d(Fragment.TAG,fragment.toString());
 //            Log.d(TAG,"Old RSSI Value = " + oldValue);
 //            Log.d(TAG,"New RSSI Value = " + newValue);
 //            Log.d(TAG,"Delta RSSI Value = " + delta);
@@ -92,19 +113,19 @@ public class CompassController {
 //            List<Fragment> allFragments = compass.getFragments();
 //            for(Fragment f : allFragments) {
 //                if(!f.equals(fragment)) {
-////                    double distance = f.distanceTo(fragment.getCenterAngle());
-////                    double weight = 1 - distance / 90D;
-////                    double value = f.getLastRssiValue();
+//                    double distance = f.distanceTo(fragment.getCenterAngle());
+//                    double weight = 1 - distance / 90D;
+//                    double value = f.getLastRssiValue();
 //                    Log.d(TAG,"Fragment ID = " + f.getId());
-////                    Log.d(TAG,"Last RSSI Value = " + value);
-////                    Log.d(TAG,"Distance = " + distance);
-////                    Log.d(TAG,"Weight = " + weight);
+//                    Log.d(TAG,"Last RSSI Value = " + value);
+//                    Log.d(TAG,"Distance = " + distance);
+//                    Log.d(TAG,"Weight = " + weight);
 //
 //
 //                    f.addValues(f.getLastRssiValue() + delta,f.getAverageAngle());
 //                }
 //            }
-            compass.printRSSIValues();
+//            compass.printRSSIValues();
 //            compass.printAngles();
         }
         compassView.invalidate();
@@ -126,61 +147,145 @@ public class CompassController {
     }
 
     /**
-     * Take average angle of the N best fragments weighted by their comparative
+     *
      * rssi values.
      */
-    private double computePointer(int N) {
+    public Pointer computePointer() {
         if (compass != null) {
             List<Fragment> fragments = compass.getFragments();
             if (fragments != null && !fragments.isEmpty()) {
-                // Sort the fragments
                 Log.d(TAG, "Computing pointer.");
-                sortFragments();
-                double bestRSSI = fragments.get(0).getValue();
-                double worstRSSI = fragments.get(fragments.size() - 1);
-                Log.d(TAG, "Best RSSI = " + bestRSSI);
-                double angle = 0D;
-                double ratioSum = 0D;
-                // Average angle.
-                for (int i = 0; i < N; i++) {
-                    Fragment f = fragments.get(i);
-                    double ratio = f.getValue() / bestRSSI;
-                    double avgAngle = f.getAverageAngle();
-                    angle += avgAngle * ratio;
-                    ratioSum += ratio;
+                long startTime = System.nanoTime();
+
+                Double maxRSSI = null;
+                Double minRSSI = null;
+
+                //The size of this list should be nr of fragments * max size values, although this could
+                //vary from fragment to fragment it is a decent estimation
+                List<RSSIMeasurement> rssiMeasurements = new ArrayList<RSSIMeasurement>(fragments.get(0).getMaxSizeValues() * fragments.size());
+
+                for(Fragment f : fragments) {
+                    for(RSSIMeasurement measurement : f.getRssiMeasurements()) {
+                        double rssi = measurement.getRSSI();
+                        if(maxRSSI == null || rssi > maxRSSI) {
+                            maxRSSI = rssi;
+                        }
+                        else if (minRSSI == null || rssi < minRSSI){
+                            minRSSI = rssi;
+                        }
+                        rssiMeasurements.add(measurement);
+                    }
                 }
-//                Log.d(TAG, "Angle Sum = " + ratioSum);
-//                Log.d(TAG, "Ratio Sum = " + ratioSum);
-                angle /= ratioSum;
-                return angle;
+
+                double deltaRSSI = maxRSSI - minRSSI;
+
+                Log.d(TAG, "Max RSSI = " + maxRSSI);
+                Log.d(TAG, "Min RSSI = " + minRSSI);
+                Log.d(TAG, "Delta RSSI = " + deltaRSSI);
+
+                double[] weights = new double[rssiMeasurements.size()];
+                double[] xDir = new double[rssiMeasurements.size()];
+                double[] yDir = new double[rssiMeasurements.size()];
+                float sumWeights = 0;
+
+                //Compute weights
+                for(int i = 0 ; i < rssiMeasurements.size() ; i++) {
+                    double rssiValue = rssiMeasurements.get(i).getRSSI();
+                    double weight = (rssiValue - minRSSI) / deltaRSSI;
+
+                    weight = weightFunction(weight);
+
+                    weights[i] = weight;
+                    sumWeights += weight;
+                }
+
+                float averageRSSI = 0;
+                float sumSquares = 0;
+
+                //Compute average unit vector and weighted standard deviation
+                for(int i = 0 ; i < rssiMeasurements.size() ; i++) {
+                    double azimuth = Math.toRadians(rssiMeasurements.get(i).getAzimuth());
+                    int rssi = rssiMeasurements.get(i).getRSSI();
+                    double weight = weights[i];
+
+                    float delta = rssi - averageRSSI;
+
+                    sumSquares += weights[i] * delta * delta;
+
+                    averageRSSI += weight * rssi;
+
+                    xDir[i] = Math.cos(azimuth) * weight;
+                    yDir[i] = Math.sin(azimuth) * weight;
+                }
+                averageRSSI /= sumWeights;
+
+                //TODO : Variance calculation not working!
+                Log.d(TAG,"Sum Squares = " + sumSquares );
+
+                sumSquares = (float) Math.sqrt(sumSquares / sumWeights);
+                float varianceRSSI = (float) Math.sqrt(sumSquares);
+
+                //From simulations run using MATLAB I found that a truly random distribution (the least informative one)
+                //gave a standard deviation of around 20.
+                int pointerWidth = Math.max(Pointer.MIN_WIDTH, Math.round(varianceRSSI / 20 * 360));
+
+                Log.d(TAG,"Pointer Width = " + pointerWidth );
+                Log.d(TAG,"rssis = " + compass.rssiValuesToString());
+                Log.d(TAG,"azimuths = " + compass.azimuthValuesToString());
+                Log.d(TAG,"weights = " + Utilities.arrayToString(xDir));
+                Log.d(TAG,"xDir = " + Utilities.arrayToString(xDir));
+                Log.d(TAG,"yDir = " + Utilities.arrayToString(yDir));
+                float avgAngleRadians = (float) (Math.atan2(Utilities.mean(yDir),Utilities.mean(xDir)));
+                Log.d(TAG,"Average Angle (radians) = " + avgAngleRadians);
+                float averageAngle = (float) Math.toDegrees(avgAngleRadians);
+                Log.d(TAG,"Average Angle (degrees) = " + averageAngle);
+                averageAngle = Compass.NormalizeAngle(averageAngle);
+                Log.d(TAG,"Average Angle (degrees & normalized) = " + averageAngle);
+                Log.d(TAG,"Variance RSSI = " + varianceRSSI );
+                Log.d(TAG,"Pointer Width = " + pointerWidth );
+                Log.d(TAG,"averageRSSI = " + averageRSSI);
+
+                //Check whether this or the mirrored version is best.
+                for(RSSIMeasurement measurement : rssiMeasurements) {
+
+                }
+
+//                float pointerCenterAngle = Compass.NormalizeAngle(averageAngle);
+//                float pointerCenterAngle = averageAngle;
+//                Log.d(TAG,"pointerCenterAngle = " + pointerCenterAngle);
+
+                long timePassed = System.nanoTime() - startTime;
+                Log.d(TAG,"Computing pointer finished in " + timePassed / 1000000000D + " seconds.");
+
+                return new Pointer(averageAngle,averageRSSI);
             }
         }
-        return Double.NaN;
+        return null;
     }
 
-    private float normalizedAngle(float angle) {
-
-        Log.d(TAG,"Raw angle = " + angle);
-        angle = angle % 360F;
-        Log.d(TAG,"360 normalized angle = " + angle);
-        return angle;
+    //Some magical function that gives more attention to good values by transforming the weights correctly.
+    public double weightFunction(double weight) {
+//        return weight * weight;
+        return weight;
     }
 
-    public void setRotation(float angle) {
-
-        angle = normalizedAngle(angle);
+    public void setRotation(float azimuth) {
+        deactivateAllFragments();
+        //I think below is wrong for the azimuth
+        azimuth = Compass.NormalizeAngle(azimuth);
         if(!Double.isNaN(lastAngle)) {
-            if(Math.abs(angle - lastAngle) < threshold) {
-                angle = (float)(alpha * lastAngle + (1.0 - alpha) * angle);
+            if(Math.abs(azimuth - lastAngle) < threshold) {
+                azimuth = (float)(alpha * lastAngle + (1.0 - alpha) * azimuth);
             }
-            compass.setAzimuth(angle);
-            compassView.setRotation(angle);
+            compass.fragmentForAngle(azimuth).setActive(true);
+            compass.setAzimuth(azimuth);
+            compassView.setRotation(azimuth);
         }
         else {
-            compass.setAzimuth(angle);
-            compassView.setRotation(angle);
+            compass.setAzimuth(azimuth);
+            compassView.setRotation(azimuth);
         }
-        lastAngle = angle;
+        lastAngle = azimuth;
     }
 
     public void clearData() {
@@ -194,5 +299,9 @@ public class CompassController {
         else {
             Log.e(TAG,"Invalid alpha coefficient.");
         }
+    }
+
+    public void exportCompassData() {
+
     }
 }

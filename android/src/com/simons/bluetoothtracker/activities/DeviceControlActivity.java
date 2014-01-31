@@ -35,12 +35,13 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
+import com.simons.bluetoothtracker.R;
+import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
 import com.simons.bluetoothtracker.controllers.DeviceMeasurmentsManager;
 import com.simons.bluetoothtracker.controllers.OrientationSensor;
-import com.simons.bluetoothtracker.R;
+import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.views.CompassView;
 
 import java.util.List;
@@ -93,8 +94,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
     public static final int MEASUREMENTS_RATE = 100;
 
-    public static final int MIN_RSSI = -130;
-    public static final int MAX_RSSI = 0;
+
 
     private int refreshRate;
 
@@ -154,7 +154,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     };
 
     private boolean isValidRSSI(int rssi) {
-        return (rssi > MIN_RSSI && rssi < MAX_RSSI);
+        return (rssi > Compass.MIN_RSSI && rssi < Compass.MAX_RSSI);
     }
 
     private void updateMeasurements(int rssi) {
@@ -367,6 +367,10 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     }
 
+    private void exportData() {
+        compassController.exportCompassData();
+    }
+
     private float toDegrees(float rads) {
         float degrees = (float) (rads * (180F / Math.PI));
         if (degrees < 0) {
@@ -378,10 +382,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (measurementsManager != null && orientationSensor != null && compassController != null) {
-
             azimuth = toDegrees(orientationSensor.getM_azimuth_radians());
-            //Flip the orientation
-            azimuth = 360F - azimuth;
             //Log.d(TAG, "azimuth = " + azimuth);
             compassController.setRotation(azimuth);
         }
