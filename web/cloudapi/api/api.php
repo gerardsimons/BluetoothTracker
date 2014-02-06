@@ -14,14 +14,11 @@ class API
 	public $insertid = 0;
 	
 	private $cache = false;
-	private $usecache = false;																												//turn on for live!
 	private $cachetimeout = 3600; //sec
 	
 	public $sessionid = "";
 	public $sessprefix = "api";
 	
-	public $sessiontimeout = 86400; //sec
-	public $sessiontimeoutnoaction = 3600; //sec
 	public $lastaction = false;
 	public $sessionstart = false;
 	
@@ -31,14 +28,17 @@ class API
 	public $apikeyactive = false;
 	public $apikeymsg = "";
 	
-	public $apiactive = true;
-	public $apimsg = "";
+	public $apiactive = false;
+	public $apimsg = "Not enabled by settings file.";
 	
 	private $subclasses = array();
-	private $reqsubclasses = array("auth", "apikey");
+	private $reqsubclasses = array("auth");
 	private $subclassfolder = "api";
 	
 	public function __construct($apikey, $sessionid = false) {
+		//check API status
+		$this->apiactive = APISettings::$apiactive;
+		$this->apimsg = APISettings::$apimsg;
 		if ($this->apiactive == false) return;
 		
 		//setup session
@@ -73,22 +73,18 @@ class API
 		if (!isset($this->session["sessionstart"])) $this->session["sessionstart"] = time();
 		$this->sessionstart = $this->session["sessionstart"];
 		
-		//check if session has timed out
-		$timeout = false;
-		if (isset($this->session["lastaction"])) $this->lastaction = $this->session["lastaction"];
-		if ($this->lastaction !== false)
-		{
-			if ($this->lastaction < time() - $this->sessiontimeoutnoaction) $imeout = true;
-		}
-		if ($this->sessionstart < time() - $this->sessiontimeout) $timeout = true;
-		if ($timeout == true) $this->resetSession();
-		
 		//set API key
 		$this->apikey = $apikey;
 		
 		//connect to database
-		$connstr = "mysql:host=".APISettings::$dbhost.";dbname=".APISettings::$dbname.";charset=utf8";
-		$this->db = new PDO($connstr, APISettings::$dbuser, APISettings::$dbpass);
+		try {
+			$connstr = "mysql:host=".APISettings::$dbhost.";dbname=".APISettings::$dbname.";charset=utf8";
+			$this->db = new PDO($connstr, APISettings::$dbuser, APISettings::$dbpass);
+		} catch (Expression $e) {
+			$this->apiactive = false;
+			$this->apimsg = "Could not connect to database.";
+		}
+		if ($this->apiactive == false) return;
 		
 		//load all API subparts
 		$files = scandir("./".$this->subclassfolder);
@@ -118,25 +114,30 @@ class API
 				break;
 			}
 		}
-		
-		//only continue starting up if the API is actually active
 		if ($this->apiactive == false) return;
 		
-		//check if API key is active
-		$this->apikeyactive = true;
-		$this->apikeyactive = $this->regularCall("apikey", "isactive", array($this->apikey));
+		//load default key settings
+		foreach (APISettings::$defaultsettings as $var=>$val) $this->$var = $val;
+		
+		//check if API key is active and load API key specific settings
+		$this->apikeyactive = $this->keyIsActive($this->apikey);
+		if ($this->apikeyactive == false) return;
+		
+		//check if session has timed out
+		$timeout = false;
+		if (isset($this->session["lastaction"])) $this->lastaction = $this->session["lastaction"];
+		if ($this->lastaction !== false)
+		{
+			if ($this->lastaction < time() - $this->sessiontimeoutnoaction) $imeout = true;
+		}
+		if ($this->sessionstart < time() - $this->sessiontimeout) $timeout = true;
+		if ($timeout == true) $this->resetSession();
 	}
 	
 	//function to reset the API internal session
 	public function resetSession() {
 		$this->session = array();
 		$this->session["sessionstart"] = time();
-	}
-	
-	//function to just get the output of the function without the error results
-	public function regularCall($class, $method, $input) {
-		$output = $this->call($class, $method, $input);
-		return $output["output"];
 	}
 	
 	//function wrapper
@@ -156,7 +157,7 @@ class API
 		if (!isset($this->subclasses[$class])) return $this->throwError(3, "Class $class does not exist.");
 		
 		//check if function exists
-		if (!method_exists($this->subclasses[$class], $method)) return $this->throwError(3, "Function $method does not exist.");
+		if (!method_exists($this->subclasses[$class], $method)) return $this->throwError(3, "Function $class.$method does not exist.");
 		
 		//check if enough input arguments are supplied
 		$methodcheck = new ReflectionMethod($this->subclasses[$class], $method);
@@ -177,7 +178,7 @@ class API
 		if ($mustlogin == true)
 		{
 			//check if logged in
-			$loggedin = $this->regularCall("auth", "isloggedin", array());
+			$loggedin = $this->loggedIn();
 			if ($loggedin == false) return $this->throwError(2, "Must be logged in to access this function.");
 		}
 		
@@ -226,6 +227,47 @@ class API
 		);
 	}
 	
+	//check if API key is active and if active, load API key specific settings
+	private function keyIsActive($key, $loadsettings = true) {
+		$sql = "SELECT * FROM APIKeys WHERE APIKey=?";
+		$res = $this->getRow($sql, $key);
+		
+		//stop if key was not found
+		if ($res === false) return false;
+		
+		//set message if available
+		if ($res["Message"] !== NULL) $this->apikeymsg = $res["Message"];
+		
+		//stop if key not active
+		if ($res["Active"] != 1) return false;
+		
+		//load custom settings if applicable
+		if ($loadsettings == true)
+		{
+			if ($res["Settings"] !== NULL)
+			{
+				$settings = explode(",", $res["Settings"]);
+				foreach ($settings as $setting)
+				{
+					$setting = explode("=", trim($setting));
+					if (count($setting) == 2)
+					{
+						$key = $setting[0];
+						$val = $setting[1];
+						$this->$key = $val;
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	//check if logged in
+	private function loggedIn() {
+		return false;																										//UNDER CONSTRUCTION
+	}
+	
 	//gives the correct error throwing format
 	public function throwError($type, $msg) {
 		return array(
@@ -237,12 +279,15 @@ class API
 	}
 	
 	//execute a query without expecting response
-	public function query($sql) {
-		$res = $this->db->exec($sql);
+	public function query($sql, $fields = false) {
+		if ($fields === false) $fields = array();
+		if (!is_array($fields)) $fields = array($fields);
+		$query = $this->db->prepare($sql);
+		$res = $query->execute($fields);
 		if ($res === false)
 		{
 			$errorinfo = $this->db->errorInfo();
-			$this->dberror = $errorinfo[2];
+			if ($errorinfo[0] > 0) $this->dberror = $errorinfo[2];
 			return false;
 		}
 		else
@@ -253,13 +298,15 @@ class API
 	}
 	
 	//execute a query while expecting multiple rows as response
-	public function getRows($sql) {
+	public function getRows($sql, $fields = false) {
+		if ($fields === false) $fields = array();
+		if (!is_array($fields)) $fields = array($fields);
 		$query = $this->db->prepare($sql);
-		$res = $query->execute();
+		$res = $query->execute($fields);
 		if ($res === false)
 		{
 			$errorinfo = $this->db->errorInfo();
-			$this->dberror = $errorinfo[2];
+			if ($errorinfo[0] > 0) $this->dberror = $errorinfo[2];
 			return array();
 		}
 		else
@@ -271,7 +318,9 @@ class API
 	}
 	
 	//execute a query while expecting one row as response
-	public function getRow($sql) {
+	public function getRow($sql, $fields = false) {
+		if ($fields === false) $fields = array();
+		if (!is_array($fields)) $fields = array($fields);
 		if (!strpos($sql, "LIMIT") === false)
 			$sql = trim($sql)." LIMIT 1";
 		else
@@ -280,11 +329,11 @@ class API
 			$sql = trim($sql[0])." LIMIT 1";
 		}
 		$query = $this->db->prepare($sql);
-		$res = $query->execute();
+		$res = $query->execute($fields);
 		if ($res === false)
 		{
 			$errorinfo = $this->db->errorInfo();
-			$this->dberror = $errorinfo[2];
+			if ($errorinfo[0] > 0) $this->dberror = $errorinfo[2];
 			return false;
 		}
 		else
@@ -305,7 +354,7 @@ class API
 			{
 				if ($inputstr === false) $inputstr = "f";
 				if ($inputstr === true) $inputstr = "t";
-				$input[$i] = addslashes($inputstr);
+				$input[$i] = $inputstr;
 			}
 			$input = implode(":", $input);
 			if (isset($this->cache[$class][$method][$input]))
@@ -327,7 +376,7 @@ class API
 			{
 				if ($inputstr === false) $inputstr = "f";
 				if ($inputstr === true) $inputstr = "t";
-				$input[$i] = addslashes($inputstr);
+				$input[$i] = $inputstr;
 			}
 			$input = implode(":", $input);
 			$output = serialize($output);
