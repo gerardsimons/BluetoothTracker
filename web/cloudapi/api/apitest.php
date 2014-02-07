@@ -1,5 +1,36 @@
 <?php
 session_start();
+
+$functions = array();
+$files = scandir("api");
+foreach ($files as $file)
+{
+	if (strpos($file, ".php") !== false)
+	{
+		$content = file("api/".$file);
+		$class = false;
+		foreach ($content as $line)
+		{
+			if (strpos($line, "class") !== false)
+			{
+				$line = explode(" ", trim($line));
+				$classname = strtolower($line[1]);
+				$class = substr($classname, 3);
+			}
+			elseif ($class !== false)
+			{
+				if (strpos($line, "public function") !== false)
+				{
+					$line = explode(" ", trim($line));
+					$function = strtolower($line[2]);
+					$function = substr($function, 0, strpos($function, "("));
+					$functions[] = "$class.$function";
+				}
+			}
+		}
+	}
+}
+
 $apiurl = "/?";
 $apikey = "wgPQEWFRufqJwqfCrT6DKKUP";
 $passhash = "c9e6f656f133517c4fc99a77add9efe4";
@@ -149,7 +180,9 @@ function appendConsole(str) {
         ?></select>
         <div id="functiondiv">
             <br />
-            Function: <input type="text" id="function" style="width:300px" value="status.status" /><br />
+            Function: <select id="function"><?php
+            foreach ($functions as $function) echo "<option value='$function'>$function</option>";
+            ?></select><br />
             Nr of input fields: <select id="nrinput" onchange="showInput();"><?php
             for ($a=0;$a<=$nrinput;$a++) echo "<option value='$a'>$a</option>";
             ?></select>
@@ -163,7 +196,9 @@ function appendConsole(str) {
             <?php for ($i=1;$i<=$nrfunctions;$i++) { ?>
             <div id="function<?php echo $i; ?>div">
                 <br />
-                Function <?php echo $i; ?>: <input type="text" id="function<?php echo $i; ?>" style="width:300px" /><br />
+                Function <?php echo $i; ?>: <select id="function<?php echo $i; ?>"><?php
+				foreach ($functions as $function) echo "<option value='$function'>$function</option>";
+				?></select><br />
                 Nr of input fields: <select id="nrinput<?php echo $i; ?>" onchange="showInput();"><?php
                 for ($a=0;$a<=$nrinput;$a++) echo "<option value='$a'>$a</option>";
                 ?></select>

@@ -229,6 +229,10 @@ class API
 	
 	//check if API key is active and if active, load API key specific settings
 	private function keyIsActive($key, $loadsettings = true) {
+		//key cannot be empty
+		if ($key == "") return false;
+		
+		//see if key exists
 		$sql = "SELECT * FROM APIKeys WHERE APIKey=?";
 		$res = $this->getRow($sql, $key);
 		
