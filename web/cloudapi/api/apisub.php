@@ -10,6 +10,8 @@ class APISub
 	public $enablecaching = array();
 	public $resetcaching = array();
 	
+	public $txt = array();
+	
 	//setting up the framework
 	public function __construct($mainclassref) {
 		$this->up = &$mainclassref;
@@ -18,14 +20,14 @@ class APISub
 	}
 	
 	//database calling relay functions
-	public function query($sql) {
-		return $this->up->query($sql);
+	public function query($sql, $fields = false) {
+		return $this->up->query($sql, $fields);
 	}
-	public function getRows($sql) {
-		return $this->up->getRows($sql);
+	public function getRows($sql, $fields = false) {
+		return $this->up->getRows($sql, $fields);
 	}
-	public function getRow($sql) {
-		return $this->up->getRow($sql);
+	public function getRow($sql, $fields = false) {
+		return $this->up->getRow($sql, $fields);
 	}
 	
 	//throw error

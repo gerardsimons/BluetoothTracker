@@ -1,4 +1,5 @@
 <?php
+@include_once("../apisub.php"); //to enable code hinting
 class APIStatus extends APISub
 {
 	public function status() {

@@ -1,4 +1,5 @@
 <?php
+@include_once("../apisub.php"); //to enable code hinting
 class APITest extends APISub
 {
 	public $loginreq = array("");

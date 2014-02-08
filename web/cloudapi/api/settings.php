@@ -27,8 +27,10 @@ class APISettings
 		"addrreqlost" => false,
 		"addrcoordsreq" => false,
 		"sessiontimeout" => 86400, //1 day
-		"sessiontimeoutnoaction" => 3600, //1 hour
-		"sessionremembertimeout" => 31536000, //1 year
+		"sessiontimeoutnoaction" => 1440, //24 minutes (PHP default)
+		"autologinexpire" => 31536000, //1 year
+		"autologinexpirenoaction" => 2592000, //30 days
+		"validatesessioninterval" => 60, //1 minute
 		"labelpictureupload" => true,
 		"sharedchangename" => false,
 		"transferreqtimeout" => 86400, //1 day,

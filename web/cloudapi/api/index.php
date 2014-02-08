@@ -21,6 +21,7 @@ if (get_magic_quotes_gpc() == true)
 //initialize the API
 $apikey = isset($_GET["apikey"]) ? $_GET["apikey"]: "";
 $sessionid = isset($_GET["sessionid"]) ? $_GET["sessionid"]: false;
+if ($sessionid == false) $sessionid = isset($_COOKIE["PHPSESSID"]) ? $_COOKIE["PHPSESSID"]: false;
 $api = new API($apikey, $sessionid);
 
 //process request

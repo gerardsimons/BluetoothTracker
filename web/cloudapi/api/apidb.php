@@ -60,11 +60,12 @@ class APIDBStructure
 			"Text" => "int",
 			"Push" => "int"
 		),
-		"UserSessions" => array(
+		"UserAutoLogin" => array(
 			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
 			"LoginKey" => "text",
 			"MACHash" => "text",
-			"Timestamp" => "int"
+			"TimestampFirst" => "int",
+			"TimestampLastLogin" => "int"
 		),
 		"SocialNetworks" => array(
 			"ID" => array("int", 1, 1),

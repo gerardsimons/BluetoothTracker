@@ -35,7 +35,12 @@ class API
 	private $reqsubclasses = array("auth");
 	private $subclassfolder = "api";
 	
-	public function __construct($apikey, $sessionid = false) {
+	public $txt = array();
+	public $lang = "en";
+	
+	//API initialization: API Key is required and if available session ID
+	//Note that for normal PHP sessions (using the PHPSESSID cookie), the sessionid also must be sent, or the local session must already be started using session_start
+	public function __construct($apikey, $sessionid = false, $language = false) {
 		//check API status
 		$this->apiactive = APISettings::$apiactive;
 		$this->apimsg = APISettings::$apimsg;
@@ -44,18 +49,13 @@ class API
 		//setup session
 		if (session_id() == "") //if PHP already started a session, then it's fine
 		{
-			if (isset($_COOKIE["PHPSESSID"]))
-				session_start(); //cookies enabled system!
+			if ($sessionid === false)
+				session_start(); //start new session
 			else
 			{
-				if ($sessionid === false)
-					session_start(); //start new session
-				else
-				{
-					//continue session from session ID provided
-					session_id($sessionid);
-					session_start();
-				}
+				//continue session from session ID provided
+				session_id($sessionid);
+				session_start();
 			}
 		}
 		$this->sessionid = session_id();
@@ -73,6 +73,13 @@ class API
 		if (!isset($this->session["sessionstart"])) $this->session["sessionstart"] = time();
 		$this->sessionstart = $this->session["sessionstart"];
 		
+		//load text translations
+		if ($language === false) $language = "en";
+		$language = (isset($this->session["lang"])) ? $this->session["lang"]: $language;
+		$this->txt = $this->loadText("main", $language);
+		$this->session["lang"] = $language;
+		$this->lang = $language;
+		
 		//set API key
 		$this->apikey = $apikey;
 		
@@ -82,7 +89,7 @@ class API
 			$this->db = new PDO($connstr, APISettings::$dbuser, APISettings::$dbpass);
 		} catch (Expression $e) {
 			$this->apiactive = false;
-			$this->apimsg = "Could not connect to database.";
+			$this->apimsg = $this->txt["nodbconnection"];
 		}
 		if ($this->apiactive == false) return;
 		
@@ -100,6 +107,7 @@ class API
 					$classname = "api$subname";
 					include($this->subclassfolder."/".$filename);
 					$this->subclasses[$subname] = new $classname($this);
+					$this->subclasses[$subname]->txt = $this->loadText($subname, $this->lang);
 				}
 			}
 		}
@@ -110,7 +118,7 @@ class API
 			if (!isset($this->subclasses[$reqsubclass]))
 			{
 				$this->apiactive = false;
-				$this->apimsg = "API broken.";
+				$this->apimsg = $this->txt["apibroken"];
 				break;
 			}
 		}
@@ -134,6 +142,50 @@ class API
 		if ($timeout == true) $this->resetSession();
 	}
 	
+	//function load text translations
+	public function loadText($module, $lang) {
+		$filepath = "./text/$module.$lang.txt";
+		if (file_exists($filepath))
+		{
+			$lines = file($filepath);
+			
+			//if the language is other than english, load the default english keys so none is missed in case of outdated translations
+			$text = ($lang == "en") ? array(): $this->loadText($module, "en");
+			
+			//load the keys
+			foreach ($lines as $line)
+			{
+				if (trim($line) != "")
+				{
+					if (strpos($line, "=") !== false)
+					{
+						$line = explode("=", $line);
+						$key = trim(strtolower($line[0]));
+						$val = trim($line[1]);
+						$text[$key] = $val;
+					}
+				}
+			}
+			
+			//make sure it is utf8 encoded
+			$check = implode("", array_values($text));
+			if (!mb_check_encoding($check, "UTF-8"))
+			{
+				foreach ($text as $key=>$value) $text[$key] = utf8_encode($value);
+			}
+			
+			return $text;
+		}
+		else
+		{
+			//if file is not found, try to load the (default) english translation
+			if ($lang != "en")
+				return $this->loadText($module, "en");
+			else
+				return array();
+		}
+	}
+	
 	//function to reset the API internal session
 	public function resetSession() {
 		$this->session = array();
@@ -151,18 +203,18 @@ class API
 		
 		//check if API key is active
 		$msg = ($this->apikeymsg != "") ? ": ".$this->apikeymsg: ".";
-		if ($this->apikeyactive == false) return $this->throwError(1, "API key not active$msg");
+		if ($this->apikeyactive == false) return $this->throwError(1, $this->txt["apikeynotactive"]."$msg");
 		
 		//check if subpart exists
-		if (!isset($this->subclasses[$class])) return $this->throwError(3, "Class $class does not exist.");
+		if (!isset($this->subclasses[$class])) return $this->throwError(3, $this->txt["class"]." $class ".$this->txt["doesnotexist"]);
 		
 		//check if function exists
-		if (!method_exists($this->subclasses[$class], $method)) return $this->throwError(3, "Function $class.$method does not exist.");
+		if (!method_exists($this->subclasses[$class], $method)) return $this->throwError(3, $this->txt["function"]." $class.$method ".$this->txt["doesnotexist"]);
 		
 		//check if enough input arguments are supplied
 		$methodcheck = new ReflectionMethod($this->subclasses[$class], $method);
 		$nrargs = $methodcheck->getNumberOfRequiredParameters();
-		if (count($input) < $nrargs) return $this->throwError(4, "Not enough input arguments.");
+		if (count($input) < $nrargs) return $this->throwError(4, $this->txt["notenoughinput"]);
 		
 		//set last action time to keep session alive
 		$this->lastaction = time();
@@ -179,7 +231,7 @@ class API
 		{
 			//check if logged in
 			$loggedin = $this->loggedIn();
-			if ($loggedin == false) return $this->throwError(2, "Must be logged in to access this function.");
+			if ($loggedin == false) return $this->throwError(2, $this->txt["mustlogin"]);
 		}
 		
 		//check if the cache should be reset when this function is excecuted
@@ -258,7 +310,33 @@ class API
 					{
 						$key = $setting[0];
 						$val = $setting[1];
-						$this->$key = $val;
+						if (isset(APISettings::$defaultsettings[$key]))
+						{
+							$defaultval = APISettings::$defaultsettings[$key];
+							$defaulttype = gettype($defaultval);
+							$type = gettype($val);
+							$pass = false;
+							//check if the custom setting is of the correct type
+							switch ($defaulttype) {
+								case "boolean":
+									if ($type == "boolean") $pass = true;
+									if (is_numeric($type))
+									{
+										$val = ($val == 1) ? true: false;
+										$pass = true;
+									}
+									break;
+								
+								case "integer":
+								case "double":
+									if (is_numeric($type)) $pass = true;
+									break;
+								
+								default:
+									if ($defaulttype == $type) $pass = true;
+							}
+							if ($pass == true) $this->$key = $val;
+						}
 					}
 				}
 			}
@@ -269,7 +347,7 @@ class API
 	
 	//check if logged in
 	private function loggedIn() {
-		return false;																										//UNDER CONSTRUCTION
+		return $this->subclasses["auth"]->isLoggedIn();
 	}
 	
 	//gives the correct error throwing format
