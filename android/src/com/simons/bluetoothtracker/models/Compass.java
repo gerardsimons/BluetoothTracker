@@ -22,8 +22,8 @@ public class Compass {
 
     public Compass(int nrOfFragments, int calibrationLimit, int maxValuesSize) {
         fragments = new ArrayList<Fragment>(nrOfFragments);
-        double angleDelta = 360D / nrOfFragments;
-        double angleStart = angleDelta / 2D;
+        float angleDelta = 360F / nrOfFragments;
+        float angleStart = angleDelta / 2F;
         for (int i = 0; i < nrOfFragments; i++) {
             fragments.add(new Fragment(calibrationLimit,i,angleStart + angleDelta * i,maxValuesSize));
         }
@@ -112,7 +112,7 @@ public class Compass {
             double bestDistance = Double.MAX_VALUE;
             Fragment closestFragment = null;
             for(Fragment fragment : fragments) {
-                double distance = fragment.distanceTo(azimuth);
+                double distance = Compass.distanceTo(fragment.getCenterAngle(), azimuth);
 //                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
                 if(distance < bestDistance) {
                     closestFragment = fragment;
@@ -199,5 +199,20 @@ public class Compass {
      */
     public void export() {
         
+    }
+
+    public static float distanceTo(float angle, float otherAngle) {
+        double rawDistance = Math.abs(angle - otherAngle);
+        double distance = Math.min(rawDistance, 360D - rawDistance);
+
+        return (float)Math.abs(distance);
+    }
+
+    public List<RSSIMeasurement> getAllMeasurements() {
+        List<RSSIMeasurement> allMeasurements = new ArrayList<RSSIMeasurement>();
+        for(Fragment f : fragments) {
+            allMeasurements.addAll(f.getRssiMeasurements());
+        }
+        return allMeasurements;
     }
 }

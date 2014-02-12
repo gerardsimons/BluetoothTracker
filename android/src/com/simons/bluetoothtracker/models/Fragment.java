@@ -15,18 +15,18 @@ public class Fragment implements CompassDataSource {
 
     private int id;
 
-    private double centerAngle;
+    private float centerAngle;
 
     private boolean active;
 
     private int calibrationLimit;
 
     private boolean calibrated = false;
-    private double calibrationValue;
+    private float calibrationValue;
 
-    private double averageAngle = Double.NaN;
+    private float averageAngle = Float.NaN;
 
-    public Fragment(int calibrationLimit, int id, double centerAngle, int maxSizeValues) {
+    public Fragment(int calibrationLimit, int id, float centerAngle, int maxSizeValues) {
         //Make sure it can store at least as many values as it needs for calibration.
         if(maxSizeValues < calibrationLimit) {
             maxSizeValues += (calibrationLimit - maxSizeValues);
@@ -120,8 +120,8 @@ public class Fragment implements CompassDataSource {
             return Double.NaN;
     }
 
-    public void addValues(int rssi, double angle) {
-        rssiMeasurements.add(new RSSIMeasurement(rssi,angle));
+    public void addValues(RSSIMeasurement rssiMeasurement) {
+        rssiMeasurements.add(rssiMeasurement);
 
 //        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssi + ", " + angle);
 //        Log.d(TAG, "Values size : " + rssiValues.size());
@@ -144,17 +144,6 @@ public class Fragment implements CompassDataSource {
         active = newActive;
     }
 
-    public double distanceTo(double angle) {
-        double rawDistance = rawDistanceTo(angle);
-        double distance = Math.min(rawDistance, 360D - rawDistance);
-
-        return Math.abs(distance);
-    }
-
-    public double rawDistanceTo(double angle) {
-        return Math.abs(centerAngle - angle);
-    }
-
     public void clearData() {
         rssiMeasurements.clear();
     }
@@ -171,7 +160,7 @@ public class Fragment implements CompassDataSource {
         return maxSizeValues;
     }
 
-    public double getCenterAngle() {
+    public float getCenterAngle() {
         return centerAngle;
     }
 

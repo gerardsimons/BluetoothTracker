@@ -6,26 +6,26 @@ public class RSSIMeasurement {
     private int rssi;
 
     //The azimuth of the measurment
-    private double azimuth;
+    private float azimuth;
 
     // According to System.nanoTime
-    private long time;
+    private long timeStamp;
 
-    public RSSIMeasurement(int rssi, double azimuth) {
+    public RSSIMeasurement(int rssi, float azimuth) {
         this.rssi = rssi;
         this.azimuth = azimuth;
-        this.time = System.nanoTime();
+        this.timeStamp = System.nanoTime();
     }
 
     public int getRSSI() {
         return rssi;
     }
 
-    public long getTime() {
-        return time;
+    public long getTimeStamp() {
+        return timeStamp;
     }
 
-    public double getAzimuth() { return azimuth; }
+    public float getAzimuth() { return azimuth; }
 
     public String toString() {
         return rssi + "";

@@ -33,11 +33,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
     private boolean enableSensors = false;
 
-    //    private GraphViewSeries motionSeries;
-    //    private GraphViewSeries thresholdSeries;
-    //    private LineGraphView graphView;
-
-
     private SensorManager mSensorManager;
 
     private OrientationSensor orientationSensor;
@@ -75,7 +70,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 Random r = new Random();
 
                 azimuth = newAzimuth;
-                compassController.addData(-1 * r.nextInt(100), azimuth);
+//                compassController.addData(-1 * r.nextInt(100), azimuth);
                 compassController.setRotation(azimuth);
             }
             if (bundle.containsKey(AZIMUTH_DELTA_KEY)) {
@@ -152,7 +147,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 float rotation = rotationDelta / 2;
 
                 for (int i = 0; i < nrOfFragments; i++) {
-                    if ((i > .2 * nrOfFragments && i < .6 * nrOfFragments) || (i > .8 * nrOfFragments))
+                    if (i > .8 * nrOfFragments)
                         compassController.addData(-50, rotation);
                     else
                         compassController.addData(-100, rotation);
@@ -161,6 +156,11 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 azimuth = rotationDelta / 2F;
                 compassController.setRotation(0);
             }
+            azimuth = 198;
+            compassController.setRotation(198);
+//            for(int i = 0 ; i < 5 ; i++) {
+//                compassController.addData(-30,azimuth);
+//            }
 //            compassController.addData(0,180);
 //            compassController.addData(0,0);
         }

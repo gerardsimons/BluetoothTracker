@@ -11,11 +11,8 @@ public class Pointer {
     public static final int MIN_WIDTH = 10;
 
     private float centerAngle;
-    private float width = DEFAULT_WIDTH;
+    private int width = DEFAULT_WIDTH;
     private float value;
-
-    private float directionAlpha = 0.96F;
-
 
     public Pointer(float centerAngle, float value, int width) {
         this.centerAngle = 360F - Compass.NormalizeAngle(centerAngle);
@@ -28,11 +25,11 @@ public class Pointer {
         this.centerAngle = 360F - Compass.NormalizeAngle(centerAngle);
     }
 
-    public double getCenterAngle() {
+    public float getCenterAngle() {
         return centerAngle;
     }
 
-    public double getWidth() {
+    public int getWidth() {
         return width;
     }
 
@@ -46,15 +43,11 @@ public class Pointer {
         return startAngle;
     }
 
-    public String toString() {
-       return "Start angle = " + getStartAngle() + "\n" + " centerAngle = " + centerAngle + "\nwidth = " + width + "\nvalue = " + value;
+    public void setCenterAngle(float centerAngle) {
+        this.centerAngle = centerAngle;
     }
 
-    public void update(int rssi, float azimuth) {
-        if(rssi > value) {
-            float delta = rssi - value;
-            float weight = delta / (Compass.MAX_RSSI - Compass.MIN_RSSI);
-            centerAngle = directionAlpha * centerAngle + (1 - directionAlpha) * azimuth;
-        }
+    public String toString() {
+       return "Start angle = " + getStartAngle() + "\n" + " centerAngle = " + centerAngle + "\nwidth = " + width + "\nvalue = " + value;
     }
 }

@@ -1,5 +1,7 @@
 package com.simons.bluetoothtracker;
 
+import com.simons.bluetoothtracker.models.RSSIMeasurement;
+
 import java.util.List;
 
 public class Utilities {
@@ -24,6 +26,26 @@ public class Utilities {
             sum += value;
         }
         return sum / values.length;
+    }
+
+    public static float mean(float[] values) {
+        float sum = 0;
+        for(float value : values) {
+            sum += value;
+        }
+        return sum / values.length;
+    }
+
+    public static RSSIMeasurement mean(List<RSSIMeasurement> measurements) {
+        RSSIMeasurement meanMeasurement = null;
+        float avgRSSI = 0;
+        float avgAzimuth = 0;
+        for(int i = 0 ; i < measurements.size() ; i++) {
+            RSSIMeasurement measurement = measurements.get(i);
+            avgRSSI += measurement.getRSSI();
+            avgAzimuth += measurement.getAzimuth();
+        }
+        return meanMeasurement;
     }
 
     public static String arrayToString(float[] values) {

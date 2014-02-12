@@ -35,6 +35,11 @@ public class CompassController {
 
     private Pointer pointer;
 
+    //Value should be atleast this much more as the pointer in order to move it.
+    private final int rssiTreshold = 5;
+    private final int significantReadingsRequired = 5;
+    private List<RSSIMeasurement> significantReadings;
+
 //	private int checkCalibrationThrottle = 50;
 //	private int round = 0;
 
@@ -43,6 +48,7 @@ public class CompassController {
     public CompassController(int nrOfFragments, int calibrationLimit, int maxValuesSize, CompassView compassView) {
         this.compass = new Compass(nrOfFragments, calibrationLimit, maxValuesSize);
 
+        significantReadings = new ArrayList<RSSIMeasurement>();
 
         this.compassView = compassView;
         compassView.setDataSources(compass.getDataSources());
@@ -66,31 +72,56 @@ public class CompassController {
 
     public void addData(int rssi, float azimuth) {
         azimuth = Compass.NormalizeAngle(azimuth);
-        deactivateAllFragments();
-        if (!calibrationFinished) {
-            Fragment fragment = compass.fragmentForAngle(azimuth);
-            fragment.setActive(true);
+        RSSIMeasurement rssiMeasurement = new RSSIMeasurement(rssi,azimuth);
 
-            Log.d(TAG, "Adding data to compass (rssi,value) = (" + rssi + "," + azimuth + ")");
-            fragment.addValues(rssi, azimuth);
+        deactivateAllFragments();
+
+        Fragment fragment = compass.fragmentForAngle(azimuth);
+        fragment.setActive(true);
+
+//        Log.d(TAG, "Adding data to compass (rssi,value) = (" + rssi + "," + azimuth + ")");
+        fragment.addValues(rssiMeasurement);
+
+        if (!calibrationFinished) {
             if (compass.isCalibrated()) {
                 calibrationFinished = true;
 
                 Log.d(TAG, this.toString());
 
-                Pointer pointer = computePointer();
+                List<RSSIMeasurement> allMeasurements = compass.getAllMeasurements();
+
+                pointer = computePointer(allMeasurements);
 
                 compassView.setDataSources(compass.getDataSources());
                 compassView.setPointer(pointer);
                 compassView.setCalibrated();
+
+                Log.i(TAG,"Calibration complete.");
             }
         } else {
-            Fragment fragment = compass.fragmentForAngle(azimuth);
-            fragment.setActive(true);
+//            Fragment fragment = compass.fragmentForAngle(azimuth);
 
-            //TODO: Update the pointer direction and color wise
+//            if(lastFragmentId != -1 && fragment.getId() != lastFragmentId)
+//                significantReadings.clear();
+//            fragment.setActive(true);
+//            lastFragmentId = fragment.getId();
+
+
             if(pointer != null) {
-                pointer.update(rssi,azimuth);
+                int rssiDelta = Math.round(rssi - pointer.getValue());
+                Log.d(TAG,"RSSI Delta = " + rssiDelta);
+                if(rssiDelta >= rssiTreshold) {
+                    significantReadings.add(rssiMeasurement);
+                    if(significantReadings.size() == significantReadingsRequired) { //Update pointer
+                        Log.d(TAG,"Creating new pointer.");
+                        pointer = computePointer(significantReadings);
+                        compassView.setPointer(pointer);
+                        significantReadings.clear();
+                    }
+                }
+            }
+            else {
+                Log.e(TAG,"Pointer is null.");
             }
 
 
@@ -150,10 +181,9 @@ public class CompassController {
      *
      * rssi values.
      */
-    public Pointer computePointer() {
-        if (compass != null) {
-            List<Fragment> fragments = compass.getFragments();
-            if (fragments != null && !fragments.isEmpty()) {
+    public Pointer computePointer(List<RSSIMeasurement> rssiMeasurements) {
+        if (rssiMeasurements != null) {
+
                 Log.d(TAG, "Computing pointer.");
                 long startTime = System.nanoTime();
 
@@ -162,18 +192,16 @@ public class CompassController {
 
                 //The size of this list should be nr of fragments * max size values, although this could
                 //vary from fragment to fragment it is a decent estimation
-                List<RSSIMeasurement> rssiMeasurements = new ArrayList<RSSIMeasurement>(fragments.get(0).getMaxSizeValues() * fragments.size());
+//                List<RSSIMeasurement> rssiMeasurements = new ArrayList<RSSIMeasurement>(fragments.get(0).getMaxSizeValues() * fragments.size());
 
-                for(Fragment f : fragments) {
-                    for(RSSIMeasurement measurement : f.getRssiMeasurements()) {
-                        double rssi = measurement.getRSSI();
-                        if(maxRSSI == null || rssi > maxRSSI) {
-                            maxRSSI = rssi;
-                        }
-                        else if (minRSSI == null || rssi < minRSSI){
-                            minRSSI = rssi;
-                        }
-                        rssiMeasurements.add(measurement);
+                //Determine max and min
+                for(RSSIMeasurement measurement : rssiMeasurements) {
+                    double rssi = measurement.getRSSI();
+                    if(maxRSSI == null || rssi > maxRSSI) {
+                        maxRSSI = rssi;
+                    }
+                    else if (minRSSI == null || rssi < minRSSI){
+                        minRSSI = rssi;
                     }
                 }
 
@@ -183,6 +211,8 @@ public class CompassController {
                 Log.d(TAG, "Min RSSI = " + minRSSI);
                 Log.d(TAG, "Delta RSSI = " + deltaRSSI);
 
+
+
                 double[] weights = new double[rssiMeasurements.size()];
                 double[] xDir = new double[rssiMeasurements.size()];
                 double[] yDir = new double[rssiMeasurements.size()];
@@ -191,7 +221,10 @@ public class CompassController {
                 //Compute weights
                 for(int i = 0 ; i < rssiMeasurements.size() ; i++) {
                     double rssiValue = rssiMeasurements.get(i).getRSSI();
-                    double weight = (rssiValue - minRSSI) / deltaRSSI;
+                    double weight = 1D;
+
+                    if(deltaRSSI != 0)
+                        weight = (rssiValue - minRSSI) / deltaRSSI;
 
                     weight = weightFunction(weight);
 
@@ -202,7 +235,7 @@ public class CompassController {
                 float averageRSSI = 0;
                 float sumSquares = 0;
 
-                //Compute average unit vector and weighted standard deviation
+                //Compute weighted average unit vector and weighted standard deviation
                 for(int i = 0 ; i < rssiMeasurements.size() ; i++) {
                     double azimuth = Math.toRadians(rssiMeasurements.get(i).getAzimuth());
                     int rssi = rssiMeasurements.get(i).getRSSI();
@@ -245,11 +278,6 @@ public class CompassController {
                 Log.d(TAG,"Pointer Width = " + pointerWidth );
                 Log.d(TAG,"averageRSSI = " + averageRSSI);
 
-                //Check whether this or the mirrored version is best.
-                for(RSSIMeasurement measurement : rssiMeasurements) {
-
-                }
-
 //                float pointerCenterAngle = Compass.NormalizeAngle(averageAngle);
 //                float pointerCenterAngle = averageAngle;
 //                Log.d(TAG,"pointerCenterAngle = " + pointerCenterAngle);
@@ -259,7 +287,7 @@ public class CompassController {
 
                 return new Pointer(averageAngle,averageRSSI);
             }
-        }
+
         return null;
     }
 
