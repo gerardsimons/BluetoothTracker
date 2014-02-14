@@ -5,8 +5,10 @@ class APISub
 	public $up;
 	public $db;
 	public $session = array();
+	public $insertid;
 	
 	public $loginreq = array();
+	public $needstatusrequest = array();
 	public $enablecaching = array();
 	public $resetcaching = array();
 	
@@ -17,6 +19,7 @@ class APISub
 		$this->up = &$mainclassref;
 		$this->db = &$this->up->db;
 		$this->session = &$this->up->session;
+		$this->insertid = &$this->up->insertid;
 	}
 	
 	//database calling relay functions

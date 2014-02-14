@@ -2,9 +2,10 @@
 @include_once("../apisub.php"); //to enable code hinting
 class APIAuth extends APISub
 {
-	public $loginreq = array("");
-	public $enablecaching = array("");
-	public $resetcaching = array("");
+	public $loginreq = array();
+	public $needstatusrequest = array("login", "autlogin", "register");
+	public $enablecaching = array("getregtypes");
+	public $resetcaching = array();
 	
 	//session variable names used for authentication
 	private $isloggedin = "authisloggedin";
@@ -56,14 +57,33 @@ class APIAuth extends APISub
 		$userid = $res["ID"];
 		$username = $res["Name"];
 		
-		//match password
-		$passhash = $res["Password"];
-		$salt = $res["Salt"];
-		if ($passhash != $this->hashPass($pass, $salt)) return $false;
-		
-		//if regtype is other than form, generate new password for security reasons
+		//check password based on registration type
 		$regtype = $res["RegType"];
-		if ($regtype != "form") $pass = $this->generateCode();
+		if ($regtype == "form")
+		{
+			//match password
+			$passhash = $res["Password"];
+			$salt = $res["Salt"];
+			if ($passhash != $this->hashPass($pass, $salt)) return $false;
+		}
+		else
+		{
+			//get status request time
+			$statusts = $this->session["status"]["ts"];
+			
+			//check if regtype actually is allowed
+			if ($this->regTypeAllowed($regtype) == false) return $false;
+			
+			//get social network user ID, perform some checks to make sure the account is legit
+			$networkuserid = explode("_", $loginname);
+			if (count($networkuserid) < 2) return $false;
+			if ($regtype != $networkuserid[0]) return $false;
+			unset($networkuserid[0]);
+			$networkuserid = implode("_", array_values($networkuserid)); //to allow for _ in the network user ID
+			
+			//get and compare the hashes
+			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false;
+		}
 		
 		//generate and save new salt and password hash
 		$newsalt = $this->generateCode();
@@ -73,10 +93,6 @@ class APIAuth extends APISub
 		
 		//continue with login process
 		return $this->processLogin($userid, $username, $machash, $remember);
-	}
-	
-	private function hashPass($pass, $salt) {
-		return md5($pass.$salt);
 	}
 	
 	public function autoLogin($userid, $loginkey, $hash) {
@@ -91,7 +107,8 @@ class APIAuth extends APISub
 		$username = $res["Name"];
 		
 		//check if auto-login key exists for user
-		$res = $this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND LoginKey=?", array($userid, $loginkey));
+		$apikeyid = $this->up->apikeyid;
+		$res = $this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND LoginKey=? AND APIKeyID=?", array($userid, $loginkey, $apikeyid));
 		if ($res === false) return $false;
 		
 		$machash = $res["MACHash"];
@@ -109,7 +126,9 @@ class APIAuth extends APISub
 		}
 		
 		//check if control hash matches
-		$controlhash = md5($loginkey.$this->up->apikey.$machash.$loginname);
+		$statusts = $this->session["status"]["ts"];
+		
+		$controlhash = md5($loginkey.$this->up->apikey.$machash.$loginname.$statusts);
 		if ($controlhash != $hash) return $false;
 		
 		//continue with login process
@@ -123,16 +142,17 @@ class APIAuth extends APISub
 		{
 			$loginkey = $this->generateCode();
 			
-			if ($this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND MACHash=?", array($userid, $machash)))
+			$apikeyid = $this->up->apikeyid;
+			if ($this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND MACHash=? AND APIKeyID=?", array($userid, $machash, $apikeyid)))
 			{
-				$sql = "UPDATE UserAutoLogin SET LoginKey=?, TimestampLastLogin=? WHERE UserID=? AND MACHash=?";
+				$sql = "UPDATE UserAutoLogin SET LoginKey=?, TimestampLastLogin=? WHERE UserID=? AND MACHash=? AND APIKeyID=?";
 				$fields = array($loginkey, time(), $userid, $machash);
 			}
 			else
 			{
 				deleteAutoLogin($userid);
-				$sql = "INSERT INTO UserAutoLogin (UserID, LoginKey, MACHash, TimestampFirst, TimestampLastLogin) VALUES (?, ?, ?, ?, ?)";
-				$fields = array($userid, $loginkey, $machash, time(), time());
+				$sql = "INSERT INTO UserAutoLogin (UserID, APIKeyID, LoginKey, MACHash, TimestampFirst, TimestampLastLogin) VALUES (?, ?, ?, ?, ?, ?)";
+				$fields = array($userid, $apikeyid, $loginkey, $machash, time(), time());
 			}
 			$this->query($sql, $fields);
 		}
@@ -154,24 +174,17 @@ class APIAuth extends APISub
 		return $output;
 	}
 	
-	//function to generate a random code of specified length (default 32)
-	private function generateCode($length = 32) {
-		$code = "";
-		$possible = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789";
-		
-		for ($i=0;$i<$length;$i++) $code .= $possible[mt_rand(0, strlen($possible)-1)];
-		
-		return $code;
-	}
-	
+	//cancels all available auto-login keys for current user and API key
 	private function deleteAutoLogin($userid) {
-		if ($this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=?", $userid))
+		$apikeyid = $this->up->apikeyid;
+		if ($this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND APIKeyID=?", array($userid, $apikeyid)))
 		{
-			$sql = "DELETE FROM UserAutoLogin WHERE UserID=?";
-			$this->query($sql, $userid);
+			$sql = "DELETE FROM UserAutoLogin WHERE UserID=? AND APIKeyID=?";
+			$this->query($sql, array($userid, $apikeyid));
 		}
 	}
 	
+	//log the user out (if logged in)
 	public function logout() {
 		//if a user was logged in, make sure no auto-login keys are available for that user
 		if ($this->session[$this->loginid] > 0) deleteAutoLogin($this->session[$this->loginid]);
@@ -185,8 +198,127 @@ class APIAuth extends APISub
 		return true;
 	}
 	
+	//checks if a user already exists
+	public function exists($loginname) {
+		$res = $this->getRow("SELECT * FROM Users WHERE LoginName=? AND Active=?", array($loginname, 1));
+		return ($res === false) ? false: true;
+	}
+	
+	//get all available registration types except form
+	public function getRegTypes() {
+		$regtypes = array();
+		$rows = $this->getRows("SELECT * FROM SocialNetworks WHERE Active=? ORDER BY RegType", 1);
+		foreach ($rows as $row) $regtypes[] = $row["RegType"];
+		return $regtypes;
+	}
+	
+	//check if registration type is allowed
+	private function regTypeAllowed($regtype) {
+		$res = $this->getRow("SELECT * FROM SocialNetworks WHERE RegType=? AND Active=?", array($regtype, 1));
+		return ($res === false) ? false: true;
+	}
+	
+	//register a user
 	public function register($loginname, $email, $name, $pass, $regtype, $teldata = array(), $addrdata = array()) {
+		//initialized the failure messages
+		$false = array();
+		foreach ($this->txt as $key=>$val) $false[$key] = array("result" => false, "description" => $val);
 		
+		//check if registration type is allowed
+		if ($regtype != "form")
+		{
+			if ($this->regTypeAllowed($regtype) == false) return $false["noregtype"];
+		}
+		
+		//make sure loginname is email address if regtype = form and check if email address is valid
+		if ($regtype == "form")
+		{
+			if ($email == "") return $false["emailnotvalid"];
+			if (filter_var($email, FILTER_VALIDATE_EMAIL) == false) return $false["emailnotvalid"];
+			$loginname = $email;
+		}
+		elseif ($email != "")
+		{
+			if (filter_var($email, FILTER_VALIDATE_EMAIL) == false) return $false["emailnotvalid"];
+		}
+		
+		//validate the loginname if regtype != form
+		if ($regtype != "form")
+		{
+			$networkuserid = explode("_", $loginname);
+			if (count($networkuserid) < 2) return $false["couldnotlogin"];
+			if ($regtype != $networkuserid[0]) return $false["couldnotlogin"];
+			unset($networkuserid[0]);
+			$networkuserid = implode("_", array_values($networkuserid));
+		}
+		
+		//check if user already exists
+		if ($this->exists($loginname) == true) return $false["alreadyexists"];
+		
+		//real name is required
+		if ($name == "") return $false["noname"];
+		
+		//check if other user with same email address already exists
+		if ($email != "")
+		{
+			if ($this->getRow("SELECT * FROM Users WHERE Email=?", $email)) return $false["emailexists"];
+		}
+		
+		//validate password if regtype != form
+		if ($regtype != "form")
+		{
+			$statusts = $this->session["status"]["ts"];
+			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false["couldnotlogin"];
+		}
+		
+		//register the user!
+		if ($regtype == "form")
+		{
+			//hash the password
+			$salt = $this->generateCode();
+			$passhash = $this->hashPass($pass, $salt);
+			
+			$sql = "INSERT INTO Users (Name, Email, LoginName, Password, Salt, RegType, Active) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			$fields = array($name, $email, $loginname, $pass, $salt, $regtype, 1);
+		}
+		elseif ($email != "")
+		{
+			$sql = "INSERT INTO Users (Name, Email, LoginName, RegType, Active) VALUES (?, ?, ?, ?, ?)";
+			$fields = array($name, $email, $loginname, $regtype, 1);
+		}
+		else
+		{
+			$sql = "INSERT INTO Users (Name, LoginName, RegType, Active) VALUES (?, ?, ?, ?)";
+			$fields = array($name, $loginname, $regtype, 1);
+		}
+		if ($this->query($sql, $fields) == false) return $false["couldnotreg"];
+		
+		//success!
+		$userid = $this->insertid;
+		return array(
+			"result" => true,
+			"loginname" => $loginname,
+			"userid" => $userid
+		);
+	}
+	
+	//password hashing functions
+	private function hashPass($pass, $salt) {
+		return md5($pass.$salt);
+	}
+	
+	private function hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts) {
+		return substr(md5($regtype.$networkuserid.$statusts), $statusts % 21);
+	}
+	
+	//function to generate a random code of specified length (default 32)
+	private function generateCode($length = 32) {
+		$code = "";
+		$possible = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789";
+		
+		for ($i=0;$i<$length;$i++) $code .= $possible[mt_rand(0, strlen($possible)-1)];
+		
+		return $code;
 	}
 }
 ?>

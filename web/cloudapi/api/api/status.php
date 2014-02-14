@@ -6,11 +6,18 @@ class APIStatus extends APISub
 		$sessiontimeout = $this->up->sessiontimeout;
 		$sessiontimeoutnoaction = $this->up->sessiontimeoutnoaction;
 		$sessionid = $this->up->sessionid;
+		
+		$this->session["status"] = array();
+		
+		$timestamp = time();
+		$this->session["status"]["ts"] = $timestamp;
+		
 		return array(
 			"active" => true,
 			"sessiontimeout" => $sessiontimeout,
 			"sessiontimeoutnoaction" => $sessiontimeoutnoaction,
-			"sessionid" => $sessionid
+			"sessionid" => $sessionid,
+			"timestamp" => $timestamp
 		);
 	}
 }

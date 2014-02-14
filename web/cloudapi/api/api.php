@@ -25,6 +25,7 @@ class API
 	public $session = array();
 	
 	public $apikey = "";
+	public $apikeyid = 0;
 	public $apikeyactive = false;
 	public $apikeymsg = "";
 	
@@ -188,8 +189,13 @@ class API
 	
 	//function to reset the API internal session
 	public function resetSession() {
+		//preserve the status session vars
+		$status = (isset($this->session["status"])) ? $this->session["status"]: false;
+		
 		$this->session = array();
 		$this->session["sessionstart"] = time();
+		
+		if ($status !== false) $this->session["status"] = $status;
 	}
 	
 	//function wrapper
@@ -220,10 +226,19 @@ class API
 		$this->lastaction = time();
 		$this->session["lastaction"] = $this->lastaction;
 		
-		//load lists of login required functions and caching enabled functions
+		//load lists of login/status required functions and caching enabled functions
 		$loginreq = $this->subclasses[$class]->loginreq;
+		$needstatusrequest = $this->subclasses[$class]->needstatusrequest;
 		$enablecaching = $this->subclasses[$class]->enablecaching;
 		$resetcaching = $this->subclasses[$class]->resetcaching;
+		
+		//check if the status must have been requested for function
+		$muststatus = (array_search($method, $needstatusrequest) !== false) ? true: false;
+		if ($muststatus == true)
+		{
+			//check if logged in
+			if (!isset($this->session["status"])) return $this->throwError(7, $this->txt["nostatusrequest"]);
+		}
 		
 		//check if login is required for function
 		$mustlogin = (array_search($method, $loginreq) !== false) ? true: false;
@@ -290,6 +305,8 @@ class API
 		
 		//stop if key was not found
 		if ($res === false) return false;
+		
+		$this->apikeyid = $res["ID"];
 		
 		//set message if available
 		if ($res["Message"] !== NULL) $this->apikeymsg = $res["Message"];

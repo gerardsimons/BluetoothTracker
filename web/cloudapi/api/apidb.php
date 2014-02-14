@@ -22,8 +22,8 @@ class APIDBStructure
 			"Name" => "text",
 			"Email" => array("text", 0, 0, 1),
 			"LoginName" => "text",
-			"Password" => "text",
-			"Salt" => "text",
+			"Password" => array("text", 0, 0, 1),
+			"Salt" => array("text", 0, 0, 1),
 			"RegType" => "text",
 			"Active" => "int"
 		),
@@ -62,6 +62,7 @@ class APIDBStructure
 		),
 		"UserAutoLogin" => array(
 			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
+			"APIKeyID" => array("int", 0, 0, 0, array("APIKeys(ID)", "CASCADE", "CASCADE")),
 			"LoginKey" => "text",
 			"MACHash" => "text",
 			"TimestampFirst" => "int",
@@ -70,7 +71,7 @@ class APIDBStructure
 		"SocialNetworks" => array(
 			"ID" => array("int", 1, 1),
 			"Name" => "text",
-			"AppID" => array("text", 0, 0, 1),
+			"RegType" => "text",
 			"Active" => "int"
 		),
 		"LabelTypes" => array(

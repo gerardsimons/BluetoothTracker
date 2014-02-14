@@ -10,3 +10,5 @@ doesnotexist = does not exist.
 notenoughinput = Not enough input arguments.
 
 mustlogin = Must be logged in to access this function.
+
+nostatusrequest = Must request API status first.

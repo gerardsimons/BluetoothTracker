@@ -10,19 +10,39 @@ $_SESSION["contactmsg"] = "";
 
 <form action="contact.php" method="post" onsubmit="return checkAll();">
 <table border="0">
-<tr><td>Your email address:</td><td style="width:40px"></td><td><input type="email" name="email" id="email" value="<?php echo $_SESSION["contact"]["email"]; ?>" style="width:300px" onblur="checkEmail()" /></td><td style="width:10px"></td><td id="emailmsg" style="color:#f00"></td></tr>
-<tr><td>Subject:</td><td></td><td><input type="text" name="subject" id="subject" value="<?php echo $_SESSION["contact"]["subject"]; ?>" style="width:300px" onblur="checkSubject()" /></td><td style="width:10px"></td><td id="subjectmsg" style="color:#f00"></td></tr>
+<tr><td>Your email address:</td><td style="width:40px"></td><td><input type="email" name="email" id="email" value="<?php echo $_SESSION["contact"]["email"]; ?>" style="width:300px" onkeyup="if (beenEmail == true) doButtonCheck()" onblur="beenEmail=true;doButtonCheck()" /></td><td style="width:10px"></td><td id="emailmsg" style="color:#f00"></td></tr>
+<tr><td>Subject:</td><td></td><td><input type="text" name="subject" id="subject" value="<?php echo $_SESSION["contact"]["subject"]; ?>" style="width:300px" onkeyup="if (beenSubject == true) doButtonCheck()" onblur="beenSubject=true;doButtonCheck()" /></td><td style="width:10px"></td><td id="subjectmsg" style="color:#f00"></td></tr>
 </table><br />
 Message:<br />
-<textarea id="msg" name="msg" style="width:920px;height:200px" onblur="checkMsg()"><?php echo $_SESSION["contact"]["msg"]; ?></textarea><br />
+<textarea id="msg" name="msg" style="width:920px;height:200px" onkeyup="if (beenMsg == true) doButtonCheck()" onblur="beenMsg=true;doButtonCheck()"><?php echo $_SESSION["contact"]["msg"]; ?></textarea><br />
 <img src="<?php echo $mainurl ?>captcha.php" /><br />
 <table border="0" style="width:100%">
-<tr><td>Enter the charachters shown above: <input type="text" name="captcha" /></td><td style="text-align:right;padding-right:10px"><input type="submit" value="Send message" /></td></tr>
+<tr><td>Enter the charachters shown above: <input type="text" name="captcha" onkeyup="doButtonCheck()" id="captcha" /></td><td style="text-align:right;padding-right:10px"><input type="submit" id="submitbutton" disabled="disabled" value="Send message" /></td></tr>
 </table>
 </form>
 
 </div>
 <script type="text/javascript">
+var beenEmail = false;
+var beenSubject = false;
+var beenMsg = false;
+
+function doButtonCheck() {
+	var disable = false;
+	if (beenEmail == true) {
+		if (checkEmail() == false) disable = true;
+	}
+	if (beenSubject == true) {
+		if (checkSubject() == false) disable = true;
+	}
+	if (beenMsg == true) {
+		if (checkMsg() == false) disable = true;
+	}
+	if (disable == false && (beenEmail == false || beenSubject == false || beenMsg == false)) disable = true;
+	if ($("#captcha").val() == "") disable = true;
+	$("#submitbutton").prop("disabled", disable);
+}
+
 function checkAll() {
 	var email = checkEmail();
 	var subject = checkSubject();

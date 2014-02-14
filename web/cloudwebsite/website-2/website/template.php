@@ -17,7 +17,7 @@
         
         <script src="jquery.min.js" type="text/javascript"></script>
         <script type="text/javascript">
-			var menuHidden = <?php echo $menuhidden; ?>;
+			var menuHidden = true;
 			
 			var menuTop = 0;
 			function handleScroll() {
@@ -85,7 +85,7 @@
                 	<a href="<?php echo str_replace("index.php", "", $_SERVER['SCRIPT_NAME']); ?>"><div id="logonav"></div></a>
                     <div id="headernav">
                         <div style="float:right">// <a href="<?php echo $mainurl ?>contact">Contact</a></div>
-                        <a href="<?php echo $mainurl ?>label">Label</a> // <a href="<?php echo $mainurl ?>shield">Shield</a> // <a href="<?php echo $mainurl ?>app">App</a> // <a href="<?php echo $mainurl ?>app">Cloud</a>
+                        <a href="<?php echo $mainurl ?>label">Label</a> // <a href="<?php echo $mainurl ?>shield">Shield</a> // <a href="<?php echo $mainurl ?>asset">Asset Tracking</a> // <a href="<?php echo $mainurl ?>app">Cloud</a>
                     </div>
                 </div>
                 <div id="menuplaceholder"></div>
