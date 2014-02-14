@@ -49,12 +49,13 @@ public class CompassView extends View {
     private int strokeWidth = 200;
 
     private boolean drawDebugText = true;
+    private boolean drawColoredCompass = false;
+    private boolean drawPointer = true;
 
     private CompassDataSource[] dataSources;
 
     private static final int[] RED = new int[]{255, 0, 0};
     private static final int[] GREEN = new int[]{0, 255, 0};
-    private static final int[] gray = new int[]{105, 105, 105};
 
     private final int[] highlightColor = new int[]{45,235,255};
 
@@ -84,7 +85,6 @@ public class CompassView extends View {
     public CompassView(Context context, AttributeSet set) {
         super(context, set);
         initialize();
-
         initRandomColors();
     }
 
@@ -167,51 +167,18 @@ public class CompassView extends View {
         float fragmentSize = 360F / nrOfFragments;
 
         if (isCalibrated && pointer != null) {
-            drawFullyColoredCompass(canvas);
-            paint.setStyle(Style.STROKE);
-            float rotationRadians =  (float)Math.toRadians(rotation);
-
-//            Log.d(TAG,pointer.toString());
-
-            double x = Math.cos(Math.toRadians(pointer.getCenterAngle())
-                    + rotationRadians)
-                    * radius;
-            double y = Math.sin(Math.toRadians(pointer.getCenterAngle())
-                    + rotationRadians)
-                    * radius;
-
-            float value = pointer.getValue();
-
-            float ratio = (value - MAX_RSSI) / (MAX_RSSI - MIN_RSSI);
-
-//            Log.d(TAG,"ratio = " + ratio);
-
-            int[] color = interpolateColors(ratio,RED,GREEN);
-
-//            paint.setARGB(255,color[0],color[1],color[2]);
-            paint.setARGB(155,255,255,255);
-
-//            Log.d(TAG,pointer.toString());
-
-            canvas.drawArc(rectangle,
-                    (float) (pointer.getStartAngle() + rotation),
-                    (float) (pointer.getWidth()), false, paint);
-
-            paint.setTextSize(textSize);
-            paint.setStyle(Style.FILL);
-            paint.setColor(Color.BLACK);
-
-            int center = Math.round(textSize / 2F);
-
-            canvas.drawText(pointer.getValue() + "",
-                    (float) x + cX - center, (float) y + cY + center, paint);
-
+            if(drawColoredCompass) {
+                drawFullyColoredCompass(canvas);
+            }
+            if(drawPointer) {
+                drawPointer(canvas);
+            }
          } else { // The compass is not yet calibrated, draw the uncalibrated version
             float fragmentSizeRadians = (float) (2 * Math.PI / nrOfFragments);
 
             for (int i = 0; i < nrOfFragments; i++) {
-                double rotationRadians = rotation * Math.PI / 180D;
 
+                double rotationRadians = rotation * Math.PI / 180D;
                 double nextRot = ((i + 1)) * fragmentSizeRadians;
 
                 double x = Math.cos((i * fragmentSizeRadians + nextRot) / 2D
@@ -268,6 +235,48 @@ public class CompassView extends View {
 
             String azimuthString = Math.round(azimuth) + "";
             canvas.drawText(azimuthString, cX, cY, paint);
+        }
+    }
+
+    private void drawPointer(Canvas canvas) {
+        paint.setStyle(Style.STROKE);
+        float rotationRadians =  (float)Math.toRadians(rotation);
+
+        double x = Math.cos(Math.toRadians(pointer.getCenterAngle())
+                + rotationRadians)
+                * radius;
+        double y = Math.sin(Math.toRadians(pointer.getCenterAngle())
+                + rotationRadians)
+                * radius;
+
+        float value = pointer.getValue();
+
+        float ratio = (value - MIN_RSSI) / (MAX_RSSI - MIN_RSSI);
+        ratio = 1 - ratio;
+
+//        Log.d(TAG, "ratio = " + ratio);
+
+        int[] color = interpolateColors(ratio,RED,GREEN);
+
+        //Draw the colored pointer if
+        if(!drawColoredCompass) paint.setARGB(255,color[0],color[1],color[2]);
+        else paint.setARGB(155,255,255,255);
+
+//            Log.d(TAG,pointer.toString());
+
+        canvas.drawArc(rectangle,
+                (float) (pointer.getStartAngle() + rotation),
+                (float) (pointer.getWidth()), false, paint);
+
+        paint.setTextSize(textSize);
+        paint.setStyle(Style.FILL);
+        paint.setColor(Color.BLACK);
+
+        int center = Math.round(textSize / 2F);
+
+        if(drawDebugText) {
+            canvas.drawText(Math.round(pointer.getValue()) + "",
+                    (float) x + cX - center, (float) y + cY + center, paint);
         }
     }
 

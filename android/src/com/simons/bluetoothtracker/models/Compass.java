@@ -215,4 +215,10 @@ public class Compass {
         }
         return allMeasurements;
     }
+
+    public Fragment activateFragmentForAngle(float azimuth) {
+        Fragment fragment = fragmentForAngle(azimuth);
+        fragment.setActive(true);
+        return fragment;
+    }
 }
