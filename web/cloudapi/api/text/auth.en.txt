@@ -1,5 +1,5 @@
 noregtype = Registration type not allowed.
-alreadyexist = User already exists.
+alreadyexists = User already exists.
 emailnotvalid = Email address not valid.
 emailexists = Email address already exists.
 couldnotlogin = Could not login using social network, please contact whereAt.

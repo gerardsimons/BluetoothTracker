@@ -1,6 +1,6 @@
 <div class="wrapper lightblue whitetext">
 	<div class="container">
-    	<h1 id="title">Contact</h1>
+    	<h1 id="title" style="padding:50px">Contact</h1>
     </div>
 </div>
 

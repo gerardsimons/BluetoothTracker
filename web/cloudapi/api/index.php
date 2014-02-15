@@ -18,14 +18,17 @@ if (get_magic_quotes_gpc() == true)
 	foreach ($_COOKIE as $key=>$val) $_COOKIE[$key] = stripslashes($val);
 }
 
+
+$res = array();
+
 //initialize the API
 $apikey = isset($_GET["apikey"]) ? $_GET["apikey"]: "";
 $sessionid = isset($_GET["sessionid"]) ? $_GET["sessionid"]: false;
-if ($sessionid == false) $sessionid = isset($_COOKIE["PHPSESSID"]) ? $_COOKIE["PHPSESSID"]: false;
+if ($sessionid === false) $sessionid = isset($_COOKIE["PHPSESSID"]) ? $_COOKIE["PHPSESSID"]: false;
 $api = new API($apikey, $sessionid);
 
 //process request
-$output = false;
+$output = NULL;
 if (isset($_GET["nrfunctions"]))
 {
 	//if multiple functions are called
@@ -89,7 +92,22 @@ else
 }
 
 //if no output was generated, the request is invalid
-if ($output === false) $output = $api->throwError(6, "Invalid request.");
+if ($output === NULL) $output = $api->throwError(6, "Invalid request.");
+
+//change true/false to 1/0
+function checkLevel($items) {
+	if (is_array($items))
+	{
+		foreach ($items as $key=>$var) $items[$key] = checkLevel($var);
+	}
+	else
+	{
+		if ($items === true) $items = 1;
+		if ($items === false) $items = 0;
+	}
+	return $items;
+}
+$output = checkLevel($output);
 
 //output data
 $output = json_encode($output);

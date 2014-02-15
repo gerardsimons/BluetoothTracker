@@ -55,8 +55,8 @@ class API
 			else
 			{
 				//continue session from session ID provided
-				session_id($sessionid);
 				session_start();
+				session_id($sessionid);
 			}
 		}
 		$this->sessionid = session_id();
@@ -236,7 +236,7 @@ class API
 		$muststatus = (array_search($method, $needstatusrequest) !== false) ? true: false;
 		if ($muststatus == true)
 		{
-			//check if logged in
+			//check if status has been requested
 			if (!isset($this->session["status"])) return $this->throwError(7, $this->txt["nostatusrequest"]);
 		}
 		
@@ -262,10 +262,7 @@ class API
 			$output = $this->getCache($class, $method, $input);
 			if ($output !== NULL)
 			{
-				return array(
-					"error" => false,
-					"output" => $output
-				);
+				return $output;
 			}
 		}
 		
@@ -288,10 +285,7 @@ class API
 		if ($caching == true) $this->setCache($class, $method, $input, $output);
 		
 		//output the function results!
-		return array(
-			"error" => false,
-			"output" => $output
-		);
+		return $output;
 	}
 	
 	//check if API key is active and if active, load API key specific settings

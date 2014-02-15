@@ -32,6 +32,11 @@ class APIAuth extends APISub
 		$interval = $this->up->validatesessioninterval;
 		$lastcheck = (isset($this->session["lastvalidate"])) ? $this->session["lastvalidate"]: 0;
 		
+		if (!isset($this->session[$this->isloggedin]))
+		{
+			$this->resetLoginSessionVars();
+		}
+		
 		//only check if no validation has been performed for a time longer than validatesessioninterval, to reduce server load
 		if ($lastcheck < time() - $interval)
 		{
@@ -150,7 +155,7 @@ class APIAuth extends APISub
 			}
 			else
 			{
-				deleteAutoLogin($userid);
+				$this->deleteAutoLogin($userid);
 				$sql = "INSERT INTO UserAutoLogin (UserID, APIKeyID, LoginKey, MACHash, TimestampFirst, TimestampLastLogin) VALUES (?, ?, ?, ?, ?, ?)";
 				$fields = array($userid, $apikeyid, $loginkey, $machash, time(), time());
 			}
@@ -187,15 +192,19 @@ class APIAuth extends APISub
 	//log the user out (if logged in)
 	public function logout() {
 		//if a user was logged in, make sure no auto-login keys are available for that user
-		if ($this->session[$this->loginid] > 0) deleteAutoLogin($this->session[$this->loginid]);
+		if ($this->session[$this->loginid] > 0) $this->deleteAutoLogin($this->session[$this->loginid]);
 		
 		//reset the session login variables
 		$this->up->resetSession();
+		$this->resetLoginSessionVars();
+		
+		return true;
+	}
+	
+	private function resetLoginSessionVars() {
 		$this->session[$this->isloggedin] = false;
 		$this->session[$this->loginid] = 0;
 		$this->session[$this->logints] = false;
-		
-		return true;
 	}
 	
 	//checks if a user already exists

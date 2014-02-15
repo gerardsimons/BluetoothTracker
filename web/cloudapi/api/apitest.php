@@ -1,6 +1,128 @@
 <?php
 session_start();
 
+$tests = array(
+	//request status
+	array(
+		/*
+		"class.function" => array(
+			"input" => array(),
+			"output" => array(
+				array("/pathtovar=value1"),
+				array("=value2", "=value2")    --> value1 OR (value2 AND value3)
+			)
+		)
+		*/
+		array(
+			"function" => "status.status",
+			"output" => array(array("active=1"))
+		)
+	),
+	//test auth module
+	array(
+		array(
+			"function" => "auth.isloggedin",
+			"output" => array(
+				array("=1"),
+				array("=0")
+			)
+		),
+		array(
+			"function" => "auth.getuserid"
+		),
+		array(
+			"function" => "auth.logout",
+			"output" => array(array("=1"))
+		),
+		array(
+			"function" => "auth.getuserid",
+			"output" => array(array("=0"))
+		),
+		array(
+			"function" => "auth.exists",
+			"input" => array("asdf@asdf.com"),
+			"output" => array(array("=1"))
+		),
+		array(
+			"function" => "auth.getregtypes",
+			array()
+		),
+		array(
+			"function" => "auth.login",
+			"input" => array("bogus@bogus.com", "test", md5("mac"), "0"),
+			"output" => array(
+				array("result=0")
+			)
+		),
+		array(
+			"function" => "auth.login",
+			"input" => array("asdf@asdf.com", "wrongpassword", md5("mac"), "0"),
+			"output" => array(
+				array("result=0")
+			)
+		)
+	),
+	//test registration
+	array(
+		array(
+			"function" => "auth.register",
+			"input" => array("asdf2@asdf.com", "asdf2@asdf.com", "Test Poppetje", "w8woord", "regtypewhichdoesntexist"),
+			"output" => array(array("result=0"))
+		),
+		array(
+			"function" => "auth.register",
+			"input" => array("asdf2@asdf.com", "", "Test Poppetje", "w8woord", "form"),
+			"output" => array(array("result=0"))
+		),
+		array(
+			"function" => "auth.register",
+			"input" => array("asdf2@asdf.com", "asdf2@asdf", "Test Poppetje", "w8woord", "form"),
+			"output" => array(array("result=0"))
+		),
+		array(
+			"function" => "auth.register",
+			"input" => array("asdf@asdf.com", "asdf@asdf.com", "Test Poppetje", "w8woord", "form"),
+			"output" => array(array("result=0"))
+		),
+		array(
+			"function" => "auth.register",
+			"input" => array("asdf2@asdf.com", "asdf2@asdf.com", "", "w8woord", "form"),
+			"output" => array(array("result=0"))
+		)
+	),
+	//test auto-login function
+	array(
+		array(
+			"function" => "auth.logout"
+		),
+		array(
+			"function" => "auth.login",
+			"input" => array("asdf@asdf.com", "test", md5("mac"), "1"),
+			"output" => array(
+				array("result=1", "userid=1", "username=Test Homo")
+			)
+		)/*,
+		array(
+			"function" => "auth.autologin",
+			"input" => array("asdf@asdf.com", "test", md5("mac"), "1"),
+			"output" => array(
+				array("result=1", "userid=1", "username=Test Homo")
+			)
+		)*/
+	),
+	//login using test account
+	array(
+		array(
+			"function" => "auth.login",
+			"input" => array("asdf@asdf.com", "test", md5("mac"), "0"),
+			"output" => array(
+				array("result=1", "userid=1", "username=Test Homo")
+			)
+		)
+	)
+);
+$execute = array(0, 1, 2);
+
 $functions = array();
 $files = scandir("api");
 foreach ($files as $file)
@@ -57,6 +179,37 @@ var nrinput = <?php echo $nrinput; ?>;
 var apiurl = "<?php echo $apiurl; ?>";
 var apikey = "<?php echo $apikey; ?>";
 
+var tests = [<?php
+$jstests = array();
+foreach ($execute as $key)
+{
+	if (isset($tests[$key]))
+	{
+		$test = $tests[$key];
+		foreach ($test as $data)
+		{
+			$function = $data["function"];
+			$input = (isset($data["input"])) ? $data["input"]: array();
+			$output = (isset($data["output"])) ? $data["output"]: array();
+			
+			foreach ($input as $i=>$val) $input[$i] = addslashes($val);
+			foreach ($output as $i=>$val)
+			{
+				if (!is_array($val)) $output[$i] = array($val);
+				foreach ($val as $a=>$val2) $val[$a] = addslashes($val2);
+				$output[$i] = '["'.implode('", "', $val).'"]';
+			}
+			
+			$input = '["'.implode('", "', $input).'"]';
+			$output = "[".implode(', ', $output)."]";
+			
+			$jstests[] = "['$function', $input, $output]";
+		}
+	}
+}
+echo implode(", ", $jstests);
+?>];
+
 function handleSize() {
 	var height = $("#wrapper").height();
 	var h1 = 0.50 * height;
@@ -70,10 +223,7 @@ $(document).ready(function(e) {
 	$(window).resize(function(e) {
 		handleSize();
 	});
-	
-	makeRequest({
-		"function": "status.status"
-	});
+	startTests();
 });
 
 function showFunctions() {
@@ -151,7 +301,7 @@ function doRequest() {
 	makeRequest(data);
 }
 
-function makeRequest(data) {
+function makeRequest(data, callback) {
 	data["apikey"] = apikey;
 	var url = apiurl + $.param(data);
 	appendConsole("URL: "+url+"\n\n");
@@ -159,12 +309,104 @@ function makeRequest(data) {
 		cache: false,
 		dataType: "json",
 		error: function(j, t, e) {
-			appendConsole("Error ("+t+"): "+e);
+			appendConsole("Error ("+t+"): "+e+"\nResponse:\n\n"+j.responseText+"\n");
 		},
 		success: function(data, t, j) {
 			appendConsole(print_r(data, true));
+			if (callback && typeof(callback) === "function") {
+				callback(data);
+			}
 		}
 	});
+}
+
+var testnr = 0;
+function startTests() {
+	testnr = 0;
+	doTest();
+}
+
+function doTest() {
+	if (typeof tests[testnr] != "undefined") {
+		test = tests[testnr];
+		func = test[0];
+		input = test[1];
+		output = test[2];
+		
+		for (var a=0;a<input.length;a++) {
+			input[a] = encodeURIComponent(input[a]);
+		}
+		
+		data = {
+			"function": func,
+			"input": input.join("&")
+		};
+		
+		makeRequest(data, function(data) {
+			if (typeof data["error"] == "undefined") {
+				var result = false;
+				if (output.length == 0) {
+					result = true;
+				} else {
+					for (var i=0;i<output.length;i++) {
+						if (output[i].length == 0) {
+							result = true;
+							break;
+						} else if (output[i].length == 1) {
+							if (checkOutputVar(data, output[i][0]) == true) {
+								result = true;
+								break;
+							}
+						} else if (output[i].length > 1) {
+							var result2 = true;
+							for (var a=0;a<output[i].length;a++) {
+								if (checkOutputVar(data, output[i][a]) == false) {
+									result2 = false;
+									break;
+								}
+							}
+							if (result2 == true) {
+								result = true;
+								break;
+							}
+						}
+					}
+				}
+				if (result == true) {
+					appendConsole("Test ok!");
+					testnr++;
+					doTest();
+				} else {
+					appendConsole("Test fail!");
+					appendConsole(print_r(output, true));
+				}
+			}
+		});
+	}
+}
+
+function checkOutputVar(output, outputvalue) {
+	if (outputvalue.search("=") != -1) {
+		data = outputvalue.split("=");
+		variable = data[0];
+		value = data[1];
+		
+		if (variable == "") {
+			if (output == value) return true;
+		} else {
+			var currobj = output;
+			variable += "/";
+			while (variable.search("/") > -1) {
+				nextlevel = variable.substr(0, variable.search("/"));
+				if (typeof currobj[nextlevel] != "undefined") {
+					currobj = currobj[nextlevel];
+					variable = variable.substr(variable.search("/") + 1);
+				}
+			}
+			if (currobj == value) return true;
+		}
+	}
+	return false;
 }
 
 function appendConsole(str) {
@@ -211,7 +453,8 @@ function appendConsole(str) {
             <?php } ?>
         </div>
         <div style="position:absolute;right:100px;top:50px;">
-        	<input type="button" value="Call API" onclick="doRequest();" />
+        	<input type="button" value="Call API" onclick="doRequest();" /> | 
+        	<input type="button" value="Resart Unit Tests" onclick="startTests();" />
         </div>
     </div></div>
     <div style="width:100%;" id="div2"><div style="margin:0">
