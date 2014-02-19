@@ -89,23 +89,6 @@ public class Compass {
         return true;
     }
 
-    /**
-     * Determines which fragment is closest to the given azimuth. Each fragment's center
-     * is used as reference point
-     * @param azimuth the azimuth to compare with
-     * @return the fragment closest to the given azimuth
-     */
-//    public Fragment fragmentForAngle(float azimuth) {
-//        azimuth = 360F - azimuth;
-//        if (fragments != null && !fragments.isEmpty()) {
-////            int index = Math.round((270F - azimuth) / 360F) % 360;
-//            int index = (int) Math.round(azimuth / 360F * (fragments.size() - 1));
-////            Log.d(TAG,"Index = " + index);
-//            return fragments.get(index);
-//        } else
-//            return null;
-//    }
-
     public Fragment fragmentForAngle(float azimuth) {
         if (fragments != null && !fragments.isEmpty()) {
             azimuth = 360F - azimuth;

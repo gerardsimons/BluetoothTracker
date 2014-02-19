@@ -2,6 +2,7 @@ package com.simons.bluetoothtracker.controllers;
 
 import android.util.Log;
 
+import com.simons.bluetoothtracker.CompassSettings;
 import com.simons.bluetoothtracker.Utilities;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.Fragment;
@@ -46,15 +47,19 @@ public class CompassController {
 
     private boolean calibrationFinished = false;
 
-    public CompassController(int nrOfFragments, int calibrationLimit, int maxValuesSize, CompassView compassView) {
-        this.compass = new Compass(nrOfFragments, calibrationLimit, maxValuesSize);
+    public CompassController(CompassSettings settings, CompassView compassView) {
+        this.compass = new Compass(settings.nrOfFragments, settings.calibrationLimit, settings.maxValuesPerFragment);
 
         significantReadings = new ArrayList<RSSIMeasurement>();
 
-        this.compassView = compassView;
-        compassView.setDataSources(compass.getDataSources());
+        compassView.setDrawColoredCompass(settings.showColors);
+        compassView.setDrawPointer(settings.showPointer);
+        compassView.setDrawDebugText(settings.showDebugText);
 
-        compassView.setNumberOfFragments(nrOfFragments);
+        compassView.setDataSources(compass.getDataSources());
+        compassView.setNumberOfFragments(settings.nrOfFragments);
+
+        this.compassView = compassView;
     }
 
     public void deactivateAllFragments() {
@@ -342,5 +347,11 @@ public class CompassController {
 
     public void exportCompassData() {
 
+    }
+
+    public void setCompassViewSettings(CompassSettings compassViewSettings) {
+        compassView.setDrawDebugText(compassViewSettings.showDebugText);
+        compassView.setDrawPointer(compassViewSettings.showPointer);
+        compassView.setDrawColoredCompass(compassViewSettings.showColors);
     }
 }

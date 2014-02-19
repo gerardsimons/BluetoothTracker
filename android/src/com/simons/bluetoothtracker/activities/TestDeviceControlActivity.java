@@ -12,9 +12,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
+import com.simons.bluetoothtracker.CompassSettings;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
@@ -45,7 +48,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     public static final int MEASUREMENTS_RATE = 100;
 
     private static final String MEASUREMENT = "com.simons.bluetoothtracker.intent.action.rssi";
-
 
     private static final String RSSI_KEY = "rssi";
     private static final String AZIMUTH_KEY = "azimuth";
@@ -91,12 +93,11 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.device_control_test);
+        setContentView(R.layout.device_control);
 
         application = (BluetoothTrackerApplication) getApplication();
 
         loadCompass();
-
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
@@ -113,41 +114,33 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
     private void loadCompass() {
         if (application != null) {
-
-
             CompassView compassView = (CompassView) findViewById(R.id.compassView);
 
-//            int maxValuesSize = application.loadIntValue(BluetoothTrackerApplication.MAX_VALUES_SIZE_KEY);
-//            int nrOfFragments = application.loadIntValue(BluetoothTrackerApplication.FRAGMENTS_NUMBER_KEY);
-//            int calibrationLimit = application.loadIntValue(BluetoothTrackerApplication.CALIBRATION_LIMIT_KEY);
+            CompassSettings settings = application.loadCompassSettings();
 
-            //Compass settings
-            int maxValuesSize = 1;
-            int nrOfFragments = 10;
-            int calibrationLimit = 1;
-
-            compassController = new CompassController(nrOfFragments, calibrationLimit, maxValuesSize, compassView);
+            compassController = new CompassController(settings, compassView);
             compassController.setFilterAlpha(0F);
-//            compassController.addData(-1,355);
-//            compassController.addData(-1,5);
-//            compassController.addData(-10,15);
 
-//            compassController.addData(new int[]{-1,10,-10},new float[]{355,5,15});
+//          compassController.addData(-1,355);
+//          compassController.addData(-1,5);
+//          compassController.addData(-10,15);
 
-//            compassController.computePointer();
+//          compassController.addData(new int[]{-1,10,-10},new float[]{355,5,15});
+
+//          compassController.computePointer();
 
 
             //Test values for 5 fragments
-//            compassController.setRotation(90);
+//          compassController.setRotation(90);
 //
-//            //Fill the compass with equal values
+//          Fill the compass with equal values
 //
             if (true) {
-                float rotationDelta = 360F / nrOfFragments;
+                float rotationDelta = 360F / settings.nrOfFragments;
                 float rotation = rotationDelta / 2;
 
-                for (int i = 0; i < nrOfFragments; i++) {
-                    if (i > .8 * nrOfFragments)
+                for (int i = 0; i < settings.nrOfFragments; i++) {
+                    if (i > .8 * settings.nrOfFragments)
                         compassController.addData(-50, rotation);
                     else
                         compassController.addData(-100, rotation);
@@ -174,7 +167,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
         IntentFilter actionFilter = new IntentFilter();
         actionFilter.addAction(MEASUREMENT);
 
-
         registerReceiver(receiver, actionFilter);
         if (orientationSensor != null && enableSensors)
             orientationSensor.register(this, MEASUREMENTS_RATE);
@@ -195,6 +187,62 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
         return intentFilter;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.gatt_services, menu);
+        if (mConnected) {
+            menu.findItem(R.id.menu_connect).setVisible(false);
+            menu.findItem(R.id.menu_disconnect).setVisible(true);
+        } else {
+            menu.findItem(R.id.menu_connect).setVisible(true);
+            menu.findItem(R.id.menu_disconnect).setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        invalidateOptionsMenu();
+        switch (item.getItemId()) {
+            case R.id.menu_connect:
+                mConnected = true;
+                return true;
+            case R.id.menu_disconnect:
+                mConnected = false;
+                return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.menu_settings:
+                Intent intent = new Intent(this,SettingsActivity.class);
+                startActivityForResult(intent, SettingsActivity.SETTINGS_REQUEST_CODE);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SettingsActivity.SETTINGS_REQUEST_CODE) {
+            if(resultCode == RESULT_OK) { //Changes have been made to the compass settings
+                Log.i(TAG,"Changes to compass settings made.");
+                CompassView compassView = (CompassView) findViewById(R.id.compassView);
+                boolean needToResetCompass = data.getBooleanExtra(SettingsActivity.INT_VALUES_CHANGED_KEY,false);
+                if(needToResetCompass) {
+                    Log.i(TAG,"Need to reset compass.");
+                    loadCompass();
+                }
+                else {
+                    Log.i(TAG,"No need to reset compass.");
+                    compassController.setCompassViewSettings(application.loadCompassSettings());
+                }
+            }
+            if (resultCode == RESULT_CANCELED) { //No changes made
+                //Write your code if there's no result
+                Log.i(TAG,"No changes to compass settings made.");
+            }
+        }
     }
 
     @Override

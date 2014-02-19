@@ -88,6 +88,18 @@ public class CompassView extends View {
         initRandomColors();
     }
 
+    public void setDrawColoredCompass(boolean value) {
+        drawColoredCompass = value;
+    }
+
+    public void setDrawDebugText(boolean value) {
+        drawDebugText = value;
+    }
+
+    public void setDrawPointer(boolean value) {
+        drawPointer = value;
+    }
+
     /**
      * Initialize some basic objects used in the onDraw method
      */

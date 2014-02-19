@@ -18,6 +18,10 @@
           android:checkable="false"
           android:orderInCategory="1"
           android:showAsAction="ifRoom"/>
+    <item android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        android:orderInCategory="99"
+        android:showAsAction="ifRoom|withText"/>
     <item android:id="@+id/menu_scan"
           android:title="@string/menu_scan"
           android:orderInCategory="100"

@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
+import com.simons.bluetoothtracker.CompassSettings;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
@@ -70,6 +71,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     private BluetoothTrackerApplication application;
 
     //private CompassView compassView;
+    private CompassSettings compassSettings;
     private CompassController compassController;
 
     //    private GraphViewSeries motionSeries;
@@ -84,17 +86,12 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     private float azimuth = 0f;
 
-    //Low pass filter coefficient
-    private final float alpha = 0.99f;
-
     private DeviceMeasurmentsManager measurementsManager;
 
     private boolean mConnected = false;
 
     //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
     public static final int MEASUREMENTS_RATE = 100;
-
-
 
     private int refreshRate;
 
@@ -172,6 +169,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
         setContentView(R.layout.device_control);
 
         application = (BluetoothTrackerApplication) getApplication();
+        compassSettings = application.loadCompassSettings();
 
         refreshRate = application.loadIntValue(BluetoothTrackerApplication.BT_REFRESH_RATE_KEY);
 //        Log.d(TAG,"Found refresh rate value of " + refreshRate);
@@ -234,20 +232,13 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     private void loadCompass() {
         if (application != null) {
-
-
             CompassView compassView = (CompassView) findViewById(R.id.compassView);
-
-            int maxValuesSize = application.loadIntValue(BluetoothTrackerApplication.MAX_VALUES_SIZE_KEY);
-            int nrOfFragments = application.loadIntValue(BluetoothTrackerApplication.FRAGMENTS_NUMBER_KEY);
-            int calibrationLimit = application.loadIntValue(BluetoothTrackerApplication.CALIBRATION_LIMIT_KEY);
-
-            compassController = new CompassController(nrOfFragments, calibrationLimit, maxValuesSize, compassView);
+            CompassSettings compassSettings = application.loadCompassSettings();
+            compassController = new CompassController(compassSettings, compassView);
         }
     }
 
     private void updateUI() {
-
         if (measurementsManager != null) {
 
             String rssiValuesText = new String();
@@ -339,8 +330,10 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
                 onBackPressed();
                 mBluetoothLeService.disconnect();
                 return true;
-            case R.id.restart_bluetooth:
-                mBluetoothLeService.restartBluetooth();
+            case R.id.menu_settings:
+                Intent intent = new Intent(this,SettingsActivity.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -364,7 +357,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        //Nothing to do
     }
 
     private void exportData() {
