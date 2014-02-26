@@ -94,15 +94,65 @@
                 </string>
                 <string name="app_name" >Bluetooth Tracker
                 </string>
-                <string name="error_bluetooth_not_supported" >Bluetooth not supported.
-                </string>
                 <string name="menu_scan" >Scan
+                </string>
+                <string name="error_bluetooth_not_supported" >Bluetooth not supported.
                 </string>
                 <string name="menu_stop" >Stop
                 </string>
                 <string name="menu_settings" >Settings
                 </string>
             </file>
+            <file
+                name="menu_activity"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/layout/menu_activity.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="logo"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-hdpi/logo.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="designer_bag"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/designer_bag.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="umbrella"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/umbrella.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="key"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/key.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="bike"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/bike.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="briefcase"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/briefcase.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="compass"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/compass.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="map"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/map.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="cloud"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/cloud.png"
+                qualifiers="xhdpi"
+                type="drawable" />
         </source>
         <source path="/Users/gerardsimons/Git/BluetoothTracker/android/build/res/rs/debug" />
         <source path="/Users/gerardsimons/Git/BluetoothTracker/android/build/res/generated/debug" />

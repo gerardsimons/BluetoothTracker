@@ -35,12 +35,18 @@
         <activity
             android:name=".activities.TestDeviceControlActivity"
             android:label="test" >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+        <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
         </activity>
         <activity android:name=".activities.SettingsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".activities.MenuActivity" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <service
             android:name=".controllers.BluetoothLeService"
             android:enabled="true" />

@@ -16,12 +16,18 @@
         <activity android:name="com.simons.bluetoothtracker.activities.DeviceControlActivity" android:screenOrientation="portrait">
         </activity>
         <activity android:label="test" android:name="com.simons.bluetoothtracker.activities.TestDeviceControlActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-        </intent-filter>
+        <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
         </activity>
         <activity android:name="com.simons.bluetoothtracker.activities.SettingsActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.simons.bluetoothtracker.activities.MenuActivity" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <service android:enabled="true" android:name="com.simons.bluetoothtracker.controllers.BluetoothLeService"/>
     </application>
 
