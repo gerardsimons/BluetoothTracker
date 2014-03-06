@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.R;
+import com.simons.bluetoothtracker.models.ProductType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.List;
 public class MenuActivity extends Activity {
 
     private static final String TAG = "MenuActivity";
+    public static final String PRODUCT_TYPE_KEY = "productType";
 
     private boolean relayoutMenu = true;
 
@@ -85,14 +88,17 @@ public class MenuActivity extends Activity {
         rootView.setOnTouchListener(new View.OnTouchListener() {
             //Origin coordinates
             private float touchDownX,touchDownY;
+
             //Direction of drag; either up or down, up being positive, down being negative
             private int direction = -1;
+
             //last coordinates
             private float lastTouchY;
             private int moveDistanceThreshold = 5;
 
             //How often to update the position, 1 meaning every cycle
             private final int motionThrottle = 1;
+
             //Take track of the counts for the throttle purpose
             private int eventCount = 0;
 
@@ -153,7 +159,31 @@ public class MenuActivity extends Activity {
         compassButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MenuActivity.this,"Not yet implemented.",Toast.LENGTH_SHORT).show();
+                if(hotspotButton != null) {
+                   ProductType productType = null;
+                   switch(hotspotButton.getId()) {
+                       case R.id.keys_button:
+                           productType = ProductType.KEYS;
+                           break;
+                       case R.id.umbrella_button:
+                           productType = ProductType.UMBRELLA;
+                           break;
+                       case R.id.briefcase_button:
+                           productType = ProductType.BRIEFCASE;
+                           break;
+                       case R.id.bike_button:
+                           productType = ProductType.BIKE;
+                           break;
+                       case R.id.designer_bag_button:
+                           productType = ProductType.BAG;
+                           break;
+                   }
+                   if(productType != null) {
+                       Intent intent = new Intent(MenuActivity.this,DeviceScanActivity.class);
+                       intent.putExtra(PRODUCT_TYPE_KEY,productType);
+                       startActivity(intent);
+                   }
+                }
             }
         });
     }
@@ -228,10 +258,6 @@ public class MenuActivity extends Activity {
             }
         }
         return closestButton;
-    }
-
-    private void placeButtonAroundLogo(LinearLayout buttonWrapper, float angleRadians) {
-
     }
 
     private Button getButtonFromWrapper(LinearLayout buttonWrapper) {

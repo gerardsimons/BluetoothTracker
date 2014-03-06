@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/Users/gerardsimons/Git/BluetoothTracker/android/assets" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="/Users/gerardsimons/Git/BluetoothTracker/android/build-types/release/assets" />
+    </dataSet>
+
+</merger>

@@ -1,5 +1,5 @@
 <!-- From: file:/Users/gerardsimons/Git/BluetoothTracker/android/AndroidManifest.xml -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="5" android:versionName="1.21" package="com.simons.bluetoothtracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="4" android:versionName="1.2" package="com.simons.bluetoothtracker">
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>

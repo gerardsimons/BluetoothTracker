@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ import com.simons.bluetoothtracker.BluetoothTrackerApplication;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BleDevicesAdapter;
 import com.simons.bluetoothtracker.models.MyBluetoothDevice;
+import com.simons.bluetoothtracker.models.ProductType;
 
 import java.util.ArrayList;
 
@@ -53,6 +55,8 @@ public class DeviceScanActivity extends ListActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
+
+    private static final String TAG = "DeviceScanActivity";
 
     private BluetoothTrackerApplication application;
 
@@ -68,6 +72,13 @@ public class DeviceScanActivity extends ListActivity {
 
         mHandler = new Handler();
 
+        Intent intent = getIntent();
+        if(intent.hasExtra(MenuActivity.PRODUCT_TYPE_KEY))
+        {
+            ProductType type = (ProductType) intent.getSerializableExtra(MenuActivity.PRODUCT_TYPE_KEY);
+            Log.d(TAG,"Product type received " + type);
+        }
+
         application = (BluetoothTrackerApplication) getApplication();
 
         setContentView(R.layout.device_scan);
@@ -76,7 +87,7 @@ public class DeviceScanActivity extends ListActivity {
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
+//            finish();
         }
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to

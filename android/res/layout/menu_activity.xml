@@ -40,6 +40,7 @@
     <Button
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:id="@+id/briefcase_button"
         android:background="@drawable/briefcase"
         />
     </LinearLayout>
@@ -51,6 +52,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:background="@drawable/bike"
+            android:id="@+id/bike_button"
             />
     </LinearLayout>
     <LinearLayout
@@ -60,6 +62,7 @@
         <Button
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:id="@+id/designer_bag_button"
             android:background="@drawable/designer_bag"
             />
     </LinearLayout>
