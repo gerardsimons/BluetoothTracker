@@ -214,7 +214,7 @@
         <div class="wrapper footerbg">
             <div class="container">
                 <div id="footer">
-                    <div style="float:right;margin-right:20px;margin-top:5px;">
+                    <div style="float:right;margin-right:20px;margin-top:10px;">
                     	<a href="https://www.facebook.com/pages/whereAt/229252010581611" target="new"><img src="<?php echo $mainurl ?>images/fb.jpg" /></a>
                     	<a href="https://twitter.com/@whereAtcloud" target="new"><img src="<?php echo $mainurl ?>images/tw.jpg" /></a>
                     	<a href="https://www.linkedin.com/company/5028689" target="new"><img src="<?php echo $mainurl ?>images/li.jpg" /></a>
