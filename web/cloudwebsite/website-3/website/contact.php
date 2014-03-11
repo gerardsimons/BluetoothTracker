@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$contactemail = "ivan@whereatcloud.com";
+$contactemail = "info@whereatcloud.com";
 
 $email = $_POST["email"];
 $subject = $_POST["subject"];

@@ -5,3 +5,4 @@ emailexists = Email address already exists.
 couldnotlogin = Could not login using social network, please contact whereAt.
 couldnotreg = Could not register, please contact whereAt.
 noname = No name provided.
+regnotenabled = Registration not enabled.

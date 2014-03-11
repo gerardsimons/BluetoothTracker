@@ -10,6 +10,7 @@ class APIAuth extends APISub
 	//session variable names used for authentication
 	private $isloggedin = "authisloggedin";
 	private $loginid = "authloginid";
+	private $loginusertype = "authloginusertype";
 	private $logints = "authlogintimestamp";
 	
 	//checks if a user is logged in
@@ -43,8 +44,14 @@ class APIAuth extends APISub
 			if ($this->session[$this->isloggedin] == true)
 			{
 				$userid = $this->session[$this->loginid];
-				$res = $this->getRow("SELECT * FROM Users WHERE ID=? AND Active=?", array($userid, 1));
-				if ($res === false) $this->logout();
+				$usertype = $this->session[$this->loginusertype];
+				$res = $this->getRow("SELECT * FROM Users WHERE ID=? AND Active=? AND UserType=?", array($userid, 1, $usertype));
+				if ($res === false)
+					$this->logout();
+				else
+				{
+					if ($this->checkUserType($usertype) == false) $this->logout();
+				}
 			}
 			else
 				$this->logout();
@@ -56,11 +63,15 @@ class APIAuth extends APISub
 		$false = array("result" => false);
 		
 		//check if user exists and is active
-		$res = $this->getRow("SELECT * FROM Users WHERE LoginName=? AND Active=?", array($loginname, 1));
+		$res = $this->getUserbyLoginName($loginname);
 		if ($res === false) return $false;
 		
 		$userid = $res["ID"];
 		$username = $res["Name"];
+		$usertype = $res["UserType"];
+		
+		//check if user type exists, is enabled and is accepted for current API key
+		if ($this->checkUserType($usertype) == false) return $false;
 		
 		//check password based on registration type
 		$regtype = $res["RegType"];
@@ -69,7 +80,7 @@ class APIAuth extends APISub
 			//match password
 			$passhash = $res["Password"];
 			$salt = $res["Salt"];
-			if ($passhash != $this->hashPass($pass, $salt)) return $false;
+			if ($passhash != $this->up->shared->hashPass($pass, $salt)) return $false;
 		}
 		else
 		{
@@ -87,12 +98,12 @@ class APIAuth extends APISub
 			$networkuserid = implode("_", array_values($networkuserid)); //to allow for _ in the network user ID
 			
 			//get and compare the hashes
-			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false;
+			if ($pass != $this->up->shared->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false;
 		}
 		
 		//generate and save new salt and password hash
 		$newsalt = $this->generateCode();
-		$newpasshash = $this->hashPass($pass, $newsalt);
+		$newpasshash = $this->up->shared->hashPass($pass, $newsalt);
 		
 		$this->query("UPDATE Users SET Password=?, Salt=? WHERE UserID=?", array($newpasshash, $newsalt, $userid));
 		
@@ -110,6 +121,10 @@ class APIAuth extends APISub
 		
 		$loginname = $res["LoginName"];
 		$username = $res["Name"];
+		$usertype = $res["UserType"];
+		
+		//check if user type exists, is enabled and is accepted for current API key
+		if ($this->checkUserType($usertype) == false) return $false;
 		
 		//check if auto-login key exists for user
 		$apikeyid = $this->up->apikeyid;
@@ -179,6 +194,51 @@ class APIAuth extends APISub
 		return $output;
 	}
 	
+	//gets list of available user types (names) for API key, returns true if all
+	private function getUserTypes() {
+		$accepted = trim(strtolower($this->up->acceptedusertypes));
+		
+		//everything accepted?
+		if ($accepted == "all") return true;
+		
+		return explode(",", $accepted);
+	}
+	
+	//get list of available user type ids for API key, returns true if all
+	private function getUserTypeIDs() {
+		$usertypes = $this->getUserTypes();
+		
+		//everything accepted?
+		if ($usertypes === true) return true;
+		
+		$sql = "SELECT * FROM UserTypes WHERE Active=? AND LCASE(Name) IN (".implode(',', array_fill(0, count($usertypes), '?')).")";
+		$fields = array(1);
+		foreach ($usertypes as $usertype) $fields[] = $usertype;
+		
+		$res = $this->getRows($sql, $fields);
+		if (!$res) return array();
+		
+		$usertypeids = array();
+		foreach ($res as $row) $usertypeids[] = $row["ID"];
+		
+		return $usertypeids;
+	}
+	
+	//checks if the user type is enabled and allowed for current API key
+	private function checkUserType($usertypeid) {
+		$res = $this->getRow("SELECT * FROM UserTypes WHERE ID=? AND Active=?", array($usertypeid, 1));
+		if (!$res) return false;
+		$usertype = strtolower($res["Name"]);
+		
+		$acceptedusertypes = $this->getUserTypes();
+		if ($acceptedusertypes !== true)
+		{
+			if (array_search($usertype, $acceptedusertypes) === false) return false;
+		}
+		
+		return true;
+	}
+	
 	//cancels all available auto-login keys for current user and API key
 	private function deleteAutoLogin($userid) {
 		$apikeyid = $this->up->apikeyid;
@@ -205,11 +265,27 @@ class APIAuth extends APISub
 		$this->session[$this->isloggedin] = false;
 		$this->session[$this->loginid] = 0;
 		$this->session[$this->logints] = false;
+		$this->session[$this->loginusertype] = 0;
+	}
+	
+	//get user ID for loginname and user type
+	public function getUserbyLoginName($loginname) {
+		$usertypes = $this->getUserTypeIDs();
+		if ($usertypes === true)
+			$res = $this->getRow("SELECT * FROM Users WHERE LoginName=? AND Active=?", array($loginname, 1));
+		else
+		{
+			$sql = "SELECT * FROM Users WHERE LoginName=? AND Active=? AND UserType IN (".implode(',', array_fill(0, count($usertypes), '?')).")";
+			$fields = array($loginname, 1);
+			foreach ($usertypes as $usertype) $fields[] = $usertype;
+			$res = $this->getRow($sql, $fields);
+		}
+		return $res;
 	}
 	
 	//checks if a user already exists
 	public function exists($loginname) {
-		$res = $this->getRow("SELECT * FROM Users WHERE LoginName=? AND Active=?", array($loginname, 1));
+		$res = $this->getUserbyLoginName($loginname);
 		return ($res === false) ? false: true;
 	}
 	
@@ -228,10 +304,23 @@ class APIAuth extends APISub
 	}
 	
 	//register a user
-	public function register($loginname, $email, $name, $pass, $regtype, $teldata = array(), $addrdata = array()) {
+	public function register($loginname, $email, $name, $pass, $regtype, $teldata = "", $addrdata = "") {
 		//initialized the failure messages
 		$false = array();
 		foreach ($this->txt as $key=>$val) $false[$key] = array("result" => false, "description" => $val);
+		
+		//check if registration is enabled
+		if ($this->up->canregister == false) return $false["regnotenabled"];
+		
+		//get default user type for API key
+		$defaulttype = $this->up->defaultusertype;
+		if ($defaulttype == "") return $false["couldnotreg"];
+		
+		//check if user type exists
+		$res = $this->getRow("SELECT * FROM UserTypes WHERE LCASE(Name)=? AND Active=?", array(strtolower($defaulttype), 1));
+		if (!$res) return $false["couldnotreg"];
+		$usertypeid = $res["ID"];
+		if ($this->checkUserType($usertypeid) == false) return $false["couldnotreg"];
 		
 		//check if registration type is allowed
 		if ($regtype != "form")
@@ -270,14 +359,14 @@ class APIAuth extends APISub
 		//check if other user with same email address already exists
 		if ($email != "")
 		{
-			if ($this->getRow("SELECT * FROM Users WHERE Email=?", $email)) return $false["emailexists"];
+			if ($this->getRow("SELECT * FROM Users WHERE Email=? AND UserType=?", array($email, $usertype))) return $false["emailexists"];
 		}
 		
 		//validate password if regtype != form
 		if ($regtype != "form")
 		{
 			$statusts = $this->session["status"]["ts"];
-			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false["couldnotlogin"];
+			if ($pass != $this->up->shared->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false["couldnotlogin"];
 		}
 		
 		//register the user!
@@ -285,39 +374,33 @@ class APIAuth extends APISub
 		{
 			//hash the password
 			$salt = $this->generateCode();
-			$passhash = $this->hashPass($pass, $salt);
+			$passhash = $this->up->shared->hashPass($pass, $salt);
 			
-			$sql = "INSERT INTO Users (Name, Email, LoginName, Password, Salt, RegType, Active) VALUES (?, ?, ?, ?, ?, ?, ?)";
-			$fields = array($name, $email, $loginname, $pass, $salt, $regtype, 1);
+			$sql = "INSERT INTO Users (Name, Email, LoginName, Password, Salt, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			$fields = array($name, $email, $loginname, $pass, $salt, $usertype, $regtype, 1);
 		}
 		elseif ($email != "")
 		{
-			$sql = "INSERT INTO Users (Name, Email, LoginName, RegType, Active) VALUES (?, ?, ?, ?, ?)";
-			$fields = array($name, $email, $loginname, $regtype, 1);
+			$sql = "INSERT INTO Users (Name, Email, LoginName, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?, ?)";
+			$fields = array($name, $email, $loginname, $usertype, $regtype, 1);
 		}
 		else
 		{
-			$sql = "INSERT INTO Users (Name, LoginName, RegType, Active) VALUES (?, ?, ?, ?)";
-			$fields = array($name, $loginname, $regtype, 1);
+			$sql = "INSERT INTO Users (Name, LoginName, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?)";
+			$fields = array($name, $loginname, $usertype, $regtype, 1);
 		}
 		if ($this->query($sql, $fields) == false) return $false["couldnotreg"];
 		
 		//success!
 		$userid = $this->insertid;
+		
+		//do stuff with the telephone numbers and the addresses
+		
 		return array(
 			"result" => true,
 			"loginname" => $loginname,
 			"userid" => $userid
 		);
-	}
-	
-	//password hashing functions
-	private function hashPass($pass, $salt) {
-		return md5($pass.$salt);
-	}
-	
-	private function hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts) {
-		return substr(md5($regtype.$networkuserid.$statusts), $statusts % 21);
 	}
 	
 	//function to generate a random code of specified length (default 32)

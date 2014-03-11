@@ -17,6 +17,17 @@ class APIDBStructure
 			"Message" => array("text", 0, 0, 1),
 			"Settings" => array("text", 0, 0, 1)
 		),
+		"LabelTypes" => array(
+			"ID" => array("int", 1, 1),
+			"Name" => "text",
+			"Active" => "int"
+		),
+		"UserTypes" => array(
+			"ID" => array("int", 1, 1),
+			"Name" => "text",
+			"Active" => "int",
+			"LabelTypes" => "text"
+		),
 		"Users" => array(
 			"ID" => array("int", 1, 1),
 			"Name" => "text",
@@ -24,6 +35,7 @@ class APIDBStructure
 			"LoginName" => "text",
 			"Password" => array("text", 0, 0, 1),
 			"Salt" => array("text", 0, 0, 1),
+			"UserType" => array("int", 0, 1, 0, array("UserTypes(ID)", "CASCADE", "RESTRICT")),
 			"RegType" => "text",
 			"Active" => "int"
 		),
@@ -54,11 +66,16 @@ class APIDBStructure
 			"NewEmail" => "text",
 			"Timestamp" => "int"
 		),
-		"UserLabelLostNotifications" => array(
+		/*"UserLabelLostNotifications" => array(
 			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
 			"Email" => "int",
 			"Text" => "int",
 			"Push" => "int"
+		),*/
+		"UserSettings" => array(
+			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
+			"Var" => "text",
+			"Value" => "text"
 		),
 		"UserAutoLogin" => array(
 			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
@@ -68,15 +85,19 @@ class APIDBStructure
 			"TimestampFirst" => "int",
 			"TimestampLastLogin" => "int"
 		),
+		"Notifications" => array(
+			"ID" => array("int", 1, 1),
+			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
+			"Type" => "text",
+			"Message" => "text",
+			"Data" => array("text", 0, 0, 1),
+			"Timestamp" => "int",
+			"Seen" => "int"
+		),
 		"SocialNetworks" => array(
 			"ID" => array("int", 1, 1),
 			"Name" => "text",
 			"RegType" => "text",
-			"Active" => "int"
-		),
-		"LabelTypes" => array(
-			"ID" => array("int", 1, 1),
-			"Name" => "text",
 			"Active" => "int"
 		),
 		"LabelIcons" => array(
@@ -99,11 +120,16 @@ class APIDBStructure
 			"IconID" => array("int", 0, 0, 1, array("LabelIcons(ID)", "CASCADE", "RESTRICT")),
 			"PictureID" => array("int", 0, 0, 1, array("LabelPictures(ID)", "CASCADE", "SET NULL")),
 			"Active" => "int",
-			"Lost" => "int",
-			"Public" => "int"
+			"Public" => "int",
+			"Lat" => array("double", 0, 0, 1),
+			"Lon" => array("double", 0, 0, 1),
+			"Accuracy" => array("double", 0, 0, 1),
+			"TimestampLocation" => array("int", 0, 0, 1),
+			"LocationActive" => array("int", 0, 0, 1)
 		),
-		"LabelNotifications" => array(
+		/*"LabelNotifications" => array(
 			"LabelID" => array("int", 0, 1, 0, array("Labels(ID)", "CASCADE", "CASCADE")),
+			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
 			"EmailRange" => "int",
 			"TextRange" => "int",
 			"PushRange" => "int",
@@ -111,6 +137,12 @@ class APIDBStructure
 			"TextMaxDist" => "int",
 			"PushMaxDist" => "int",
 			"MaxDist" => "int"
+		),*/
+		"LabelSettings" => array(
+			"LabelID" => array("int", 0, 1, 0, array("Labels(ID)", "CASCADE", "CASCADE")),
+			"OwnerID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
+			"Var" => "text",
+			"Value" => "text"
 		),
 		"LabelMetaData" => array(
 			"ID" => array("int", 1, 1),
@@ -124,14 +156,23 @@ class APIDBStructure
 			"MetaKey" => "text",
 			"Value" => "blob"
 		),
+		"LabelLost" => array(
+			"ID" => array("int", 1, 1),
+			"LabelID" => array("int", 0, 1, 1, array("Labels(ID)", "CASCADE", "SET NULL")),
+			"UserID" => array("int", 0, 1, 1, array("Users(ID)", "CASCADE", "SET NULL")),
+			"FoundByUserID" => array("int", 0, 1, 1, array("Users(ID)", "CASCADE", "SET NULL")),
+			"TimestampLost" => "int",
+			"TimestampFound" => array("int", 0, 0, 1),
+			"MakePublic" => "int"
+		),
 		"LabelSharing" => array(
 			"ID" => array("int", 1, 1),
 			"LabelID" => array("int", 0, 1, 0, array("Labels(ID)", "CASCADE", "CASCADE")),
 			"UserID" => array("int", 0, 1, 0, array("Users(ID)", "CASCADE", "CASCADE")),
 			"Name" => array("text", 0, 0, 1),
 			"Timestamp" => "int",
-			"AlwaysVisible" => "int",
-			"Timeout" => array("int", 0, 0, 1)
+			"Timeout" => array("int", 0, 0, 1),
+			"EndWhenFound" => "int"
 		),
 		"LabelTransferRequest" => array(
 			"LabelID" => array("int", 0, 1, 0, array("Labels(ID)", "CASCADE", "CASCADE")),

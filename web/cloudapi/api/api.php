@@ -3,6 +3,7 @@
 error_reporting(E_ALL);
 require_once("settings.php");
 require_once("apisub.php");
+require_once("shared.php");
 
 //this class creates the framework for all sub parts of the API which are located in the api.<class>.php files
 //all functionality is enabled and loaded when an instant of this class is created
@@ -35,6 +36,7 @@ class API
 	private $subclasses = array();
 	private $reqsubclasses = array("auth");
 	private $subclassfolder = "api";
+	public $shared;
 	
 	public $txt = array();
 	public $lang = "en";
@@ -124,6 +126,10 @@ class API
 			}
 		}
 		if ($this->apiactive == false) return;
+		
+		//add shared functions
+		$this->shared = new APIShared($this);
+		$this->shared->text = $this->loadText("shared", $this->lang);
 		
 		//load default key settings
 		foreach (APISettings::$defaultsettings as $var=>$val) $this->$var = $val;
@@ -267,7 +273,11 @@ class API
 		}
 		
 		//execute the function
-		$output = call_user_func_array(array($this->subclasses[$class], $method), $input);
+		try {
+			$output = call_user_func_array(array($this->subclasses[$class], $method), $input);
+		} catch (Exception $e) {
+			return $this->throwError(5, $this->txt["error"]);
+		}
 		
 		//we're done if an error was returned
 		if (is_array($output))
@@ -313,7 +323,7 @@ class API
 		{
 			if ($res["Settings"] !== NULL)
 			{
-				$settings = explode(",", $res["Settings"]);
+				$settings = explode(";", $res["Settings"]);
 				foreach ($settings as $setting)
 				{
 					$setting = explode("=", trim($setting));
@@ -331,9 +341,14 @@ class API
 							switch ($defaulttype) {
 								case "boolean":
 									if ($type == "boolean") $pass = true;
-									if (is_numeric($type))
+									if (is_numeric($val))
 									{
 										$val = ($val == 1) ? true: false;
+										$pass = true;
+									}
+									if ($val === "true" || $val === "false")
+									{
+										$val = ($val === "true") ? true: false;
 										$pass = true;
 									}
 									break;

@@ -1,6 +1,11 @@
 <div class="wrapper lightblue whitetext">
 	<div class="container">
-    	<h1 id="title" style="padding:50px">Contact</h1>
+    	<h1 id="title" style="padding:50px;display:inline-block;">Contact</h1>
+        <div style="float:right;margin:39px;">
+        	whereAt<br />
+            Molengraafsingel 12<br />
+            2629 JD, Delft, The Netherlands
+        </div>
     </div>
 </div>
 
