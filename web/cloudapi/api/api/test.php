@@ -16,5 +16,9 @@ class APITest extends APISub
 		}
 		return true;
 	}
+	
+	public function formatMAC($mac) {
+		return $this->up->shared->formatMAC($mac);
+	}
 }
 ?>

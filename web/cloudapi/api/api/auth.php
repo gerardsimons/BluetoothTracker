@@ -108,7 +108,7 @@ class APIAuth extends APISub
 		$this->query("UPDATE Users SET Password=?, Salt=? WHERE UserID=?", array($newpasshash, $newsalt, $userid));
 		
 		//continue with login process
-		return $this->processLogin($userid, $username, $machash, $remember);
+		return $this->processLogin($userid, $username, $machash, $usertype, $remember);
 	}
 	
 	public function autoLogin($userid, $loginkey, $hash) {
@@ -152,11 +152,11 @@ class APIAuth extends APISub
 		if ($controlhash != $hash) return $false;
 		
 		//continue with login process
-		return $this->processLogin($userid, $username, $machash, true);
+		return $this->processLogin($userid, $username, $machash, $usertype, true);
 	}
 	
 	//the continuation of the login process, handles the last parts
-	private function processLogin($userid, $username, $machash, $remember = true) {
+	private function processLogin($userid, $username, $machash, $usertype, $remember = false) {
 		//generate new auto-login key
 		if ($remember == true)
 		{
@@ -182,6 +182,7 @@ class APIAuth extends APISub
 		$this->session[$this->isloggedin] = true;
 		$this->session[$this->loginid] = $userid;
 		$this->session[$this->logints] = time();
+		$this->session[$this->loginusertype] = $usertype;
 		
 		//return data
 		$output = array(

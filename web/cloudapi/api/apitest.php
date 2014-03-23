@@ -119,9 +119,42 @@ $tests = array(
 				array("result=1", "userid=1", "username=Test Homo")
 			)
 		)
+	),
+	//test MAC formatting
+	array(
+		array(
+			"function" => "test.formatmac",
+			"input" => array("0xf801514d1f96"),
+			"output" => array(array("=f8:01:51:4d:1f:96"))
+		),
+		array(
+			"function" => "test.formatmac",
+			"input" => array("f801514d1f96"),
+			"output" => array(array("=f8:01:51:4d:1f:96"))
+		),
+		array(
+			"function" => "test.formatmac",
+			"input" => array("f8:01:51:4d:1f:96"),
+			"output" => array(array("=f8:01:51:4d:1f:96"))
+		),
+		array(
+			"function" => "test.formatmac",
+			"input" => array("f8-01-51-4d-1f-96"),
+			"output" => array(array("=f8:01:51:4d:1f:96"))
+		),
+		array(
+			"function" => "test.formatmac",
+			"input" => array("f801.514d.1f96"),
+			"output" => array(array("=f8:01:51:4d:1f:96"))
+		),
+		array(
+			"function" => "test.formatmac",
+			"input" => array("f801.514d.1f96a"),
+			"output" => array(array("=0"))
+		)
 	)
 );
-$execute = array(0, 1, 2);
+$execute = array(0, 4, 5);
 
 $functions = array();
 $files = scandir("api");
