@@ -15,6 +15,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_RSSIS = "rssis";
     public static final String COLUMN_AZIMUTHS = "azimuths";
     public static final String COLUMN_TIMESTAMPS = "timestamps";
+    public static final String COLUMN_FRAGMENTS = "fragments";
     public static final String COLUMN_USER = "user";
     public static final String COLUMN_REMARKS = "remarks";
 
@@ -27,6 +28,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + " integer primary key autoincrement, " + COLUMN_RSSIS
             + " text not null, " + COLUMN_AZIMUTHS
             + " text not null, " + COLUMN_TIMESTAMPS
+            + " text not null, " + COLUMN_FRAGMENTS
             + " text not null, " + COLUMN_USER
             + " text not null, " + COLUMN_REMARKS
             + " text not null);";

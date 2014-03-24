@@ -29,7 +29,7 @@
             <!--</intent-filter>-->
         </activity>
         <activity
-            android:name=".activities.DeviceControlActivity"
+            android:name=".activities.CompassActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity

@@ -50,8 +50,8 @@ import java.util.List;
  * device. The Activity communicates with {@code BluetoothLeService}, which in
  * turn interacts with the Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity {
-    private final static String TAG = DeviceControlActivity.class.getSimpleName();
+public class CompassActivity extends Activity {
+    private final static String TAG = CompassActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -122,7 +122,7 @@ public class DeviceControlActivity extends Activity {
                 measurementsManager = new DeviceMeasurmentsManager();
                 invalidateOptionsMenu();
                 Log.i(TAG, "Connected to GATT server.");
-                Toast.makeText(DeviceControlActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CompassActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
                 if (compassController != null) {
                     compassController.clearData();
                 }
@@ -131,7 +131,7 @@ public class DeviceControlActivity extends Activity {
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
                 Log.i(TAG, "Disconnected from GATT server.");
-                Toast.makeText(DeviceControlActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CompassActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
             } else if (BluetoothLeService.ACTION_RSSI_VALUE_READ.equals(action)) {
                 int newRSSI = intent.getExtras().getInt(BluetoothLeService.RSSI_VALUE_KEY);
                 if (isValidRSSI(newRSSI)) {
