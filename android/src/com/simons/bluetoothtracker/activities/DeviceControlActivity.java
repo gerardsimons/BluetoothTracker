@@ -23,10 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -40,8 +36,9 @@ import com.simons.bluetoothtracker.CompassSettings;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
+import com.simons.bluetoothtracker.controllers.CompassOrientationSensor;
 import com.simons.bluetoothtracker.controllers.DeviceMeasurmentsManager;
-import com.simons.bluetoothtracker.controllers.OrientationSensor;
+import com.simons.bluetoothtracker.interfaces.CompassOrientationSensorListener;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.views.CompassView;
 
@@ -53,7 +50,7 @@ import java.util.List;
  * device. The Activity communicates with {@code BluetoothLeService}, which in
  * turn interacts with the Bluetooth LE API.
  */
-public class DeviceControlActivity extends Activity implements SensorEventListener {
+public class DeviceControlActivity extends Activity {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
@@ -74,15 +71,9 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
     private CompassSettings compassSettings;
     private CompassController compassController;
 
-    //    private GraphViewSeries motionSeries;
-    //    private GraphViewSeries thresholdSeries;
-    //    private LineGraphView graphView;
-
     private BluetoothLeService mBluetoothLeService;
 
-    private SensorManager mSensorManager;
-
-    private OrientationSensor orientationSensor;
+    private CompassOrientationSensor orientationSensor;
 
     private float azimuth = 0f;
 
@@ -198,17 +189,27 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
 
         measurementsManager = new DeviceMeasurmentsManager();
 
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            // Success! There's a magnetometer.
-            //	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            //	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            orientationSensor = new OrientationSensor(mSensorManager, this);
-        } else {
-            // Failure! No magnetometer.
-            Log.e(TAG, "The device has no accelerometer.");
-            finish();
-        }
+        orientationSensor = new CompassOrientationSensor(this);
+        orientationSensor.setListener(new CompassOrientationSensorListener() {
+            @Override
+            public void onNewValueReceived(float newAzimuth) {
+//                Log.d(TAG,"New azimuth received = " + newAzimuth);
+                azimuth = newAzimuth;
+                compassController.setRotation(azimuth);
+            }
+        });
+
+//        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+//        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+//            // Success! There's a magnetometer.
+//            //	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//            //	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+//            orientationSensor = new OrientationSensor(mSensorManager, this);
+//        } else {
+//            // Failure! No magnetometer.
+//            Log.e(TAG, "The device has no accelerometer.");
+//            finish();
+//        }
 
         //Create graph
         //	LinearLayout graphContainer = (LinearLayout) findViewById(R.id.motionGraphContainer);
@@ -284,7 +285,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
         super.onResume();
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         if (orientationSensor != null)
-            orientationSensor.register(this, MEASUREMENTS_RATE);
+            orientationSensor.start();
     }
 
     @Override
@@ -292,7 +293,7 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
         super.onPause();
         mBluetoothLeService.stopReading();
         unregisterReceiver(mGattUpdateReceiver);
-        orientationSensor.unregister();
+        orientationSensor.stop();
     }
 
     @Override
@@ -355,11 +356,6 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
         return intentFilter;
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        //Nothing to do
-    }
-
     private void exportData() {
         compassController.exportCompassData();
     }
@@ -372,12 +368,13 @@ public class DeviceControlActivity extends Activity implements SensorEventListen
         return degrees;
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (measurementsManager != null && orientationSensor != null && compassController != null) {
-            azimuth = toDegrees(orientationSensor.getM_azimuth_radians());
-            //Log.d(TAG, "azimuth = " + azimuth);
-            compassController.setRotation(azimuth);
-        }
-    }
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//        if (measurementsManager != null && orientationSensor != null && compassController != null) {
+////            azimuth = (float) Math.toDegrees(orientationSensor.getM_azimuth_radians());
+//            azimuth = orientationSensor.getAzimuth();
+//            Log.d(TAG, "azimuth = " + azimuth);
+//            compassController.setRotation(azimuth);
+//        }
+//    }
 }

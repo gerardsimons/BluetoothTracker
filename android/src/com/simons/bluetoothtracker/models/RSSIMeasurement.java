@@ -3,7 +3,7 @@ package com.simons.bluetoothtracker.models;
 public class RSSIMeasurement {
 
     //The measured RSSI
-    private int rssi;
+    private float rssi;
 
     //The azimuth of the measurment
     private float azimuth;
@@ -11,13 +11,31 @@ public class RSSIMeasurement {
     // According to System.nanoTime
     private long timeStamp;
 
-    public RSSIMeasurement(int rssi, float azimuth) {
+    //A weight, default to 1, makes average weighted
+    private int weight = 1;
+
+    public RSSIMeasurement(float rssi, float azimuth) {
         this.rssi = rssi;
         this.azimuth = azimuth;
         this.timeStamp = System.nanoTime();
     }
 
-    public int getRSSI() {
+    //Constructor without an angle, useful for propagated values
+    public RSSIMeasurement(float rssi) {
+        this.rssi = rssi;
+        this.azimuth = -1;
+        this.timeStamp = System.nanoTime();
+    }
+
+    //Constructor with weighted value
+    public RSSIMeasurement(float rssi, int weight) {
+        this.rssi = rssi;
+        this.weight = weight;
+        this.azimuth = -1;
+        this.timeStamp = System.nanoTime();
+    }
+
+    public float getRSSI() {
         return rssi;
     }
 
@@ -29,5 +47,9 @@ public class RSSIMeasurement {
 
     public String toString() {
         return rssi + "";
+    }
+
+    public int getWeight() {
+        return weight;
     }
 }

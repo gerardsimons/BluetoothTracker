@@ -6,6 +6,7 @@ import com.simons.bluetoothtracker.CompassSettings;
 import com.simons.bluetoothtracker.Utilities;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.Fragment;
+import com.simons.bluetoothtracker.models.Pointer;
 import com.simons.bluetoothtracker.models.RSSIMeasurement;
 import com.simons.bluetoothtracker.views.CompassView;
 
@@ -42,6 +43,13 @@ public class CompassController {
     private List<RSSIMeasurement> significantReadings;
     private boolean lastMeasurementWasInPointer = false;
 
+    private CompassSettings compassSettings;
+
+    //How far should measurements be propagated? on a 0-180 interval, the fragment containing the
+    //measurement will always update regardless of this value.
+    private float propagationDistance = 90F;
+
+
 //	private int checkCalibrationThrottle = 50;
 //	private int round = 0;
 
@@ -49,7 +57,7 @@ public class CompassController {
 
     public CompassController(CompassSettings settings, CompassView compassView) {
         this.compass = new Compass(settings.nrOfFragments, settings.calibrationLimit, settings.maxValuesPerFragment);
-
+        this.compassSettings = settings;
         significantReadings = new ArrayList<RSSIMeasurement>();
 
         compassView.setDrawColoredCompass(settings.showColors);
@@ -77,7 +85,7 @@ public class CompassController {
     }
 
     public void addData(int rssi, float azimuth) {
-        azimuth = Compass.NormalizeAngle(azimuth);
+//        azimuth = Compass.NormalizeAngle(azimuth);
         RSSIMeasurement rssiMeasurement = new RSSIMeasurement(rssi,azimuth);
 
         deactivateAllFragments();
@@ -85,9 +93,11 @@ public class CompassController {
         Fragment activeFragment = compass.activateFragmentForAngle(azimuth);
 
 //        Log.d(TAG, "Adding data to compass (rssi,value) = (" + rssi + "," + azimuth + ")");
-        activeFragment.addValues(rssiMeasurement);
+
+
 
         if (!calibrationFinished) {
+            activeFragment.addValues(rssiMeasurement);
             if (compass.isCalibrated()) {
                 calibrationFinished = true;
 
@@ -95,38 +105,58 @@ public class CompassController {
 
                 List<RSSIMeasurement> allMeasurements = compass.getAllMeasurements();
 
-                pointer = computePointer(allMeasurements);
-
                 compassView.setDataSources(compass.getDataSources());
-                compassView.setPointer(pointer);
+
+                if(compassSettings.showPointer) {
+                    pointer = computePointer(allMeasurements);
+                    compassView.setPointer(pointer);
+                }
                 compassView.setCalibrated();
 
                 Log.i(TAG,"Calibration complete.");
             }
-        } else {
+        } else if(compassSettings.showPointer){
+            activeFragment.addValues(rssiMeasurement);
             updatePointer(rssiMeasurement);
+        } else if(compassSettings.showColors) {
+            propagateValues(activeFragment,rssi, azimuth);
         }
         compassView.invalidate();
     }
 
-    private void propogateValues(Fragment fragment) {
+    /**
+     * Update (calibrated) fragments according to latest values.
+     * @param receivingFragment The fragment that contains the measurement
+     * @param RSSI the latest read RSSI value
+     * @param azimuth the latest received compass bearings azimuth
+     */
+    private void propagateValues(Fragment receivingFragment, int RSSI, float azimuth) {
             //Also update other fragments
-//        Fragment activeFragment = compass.getActiveFragment();
-//        List<Fragment> allFragments = compass.getFragments();
-//        for(Fragment f : allFragments) {
-//            if(!f.equals(fragment)) {
-//                double distance = f.distanceTo(fragment.getCenterAngle());
-//                double weight = 1 - distance / 90D;
-//                double value = f.getLastRssiValue();
-//                Log.d(TAG,"Fragment ID = " + f.getId());
-//                Log.d(TAG,"Last RSSI Value = " + value);
-//                Log.d(TAG,"Distance = " + distance);
-//                Log.d(TAG,"Weight = " + weight);
-//
-//
-//                f.addValues(f.getLastRssiValue() + delta,f.getAverageAngle());
-//            }
-//        }
+        Log.d(TAG,"#####        PROPAGATING VALUES          #####");
+        Log.d(TAG,"Azimuth = " + azimuth);
+        List<Fragment> allFragments = compass.getFragments();
+        for(Fragment f : allFragments) {
+            float distance = compass.distanceTo(f.getCenterAngle(), azimuth);
+            float weight = 1 - distance / propagationDistance;
+            weight = Math.max(weight, 0);
+            float value = f.getValue();
+            float delta = RSSI - f.getValue();
+
+            Log.d(TAG, "Fragment ID = " + f.getId());
+            Log.d(TAG, "Center angle = " + f.getCenterAngle());
+            Log.d(TAG, "Last RSSI Value = " + value);
+            Log.d(TAG, "Delta = " + delta);
+            Log.d(TAG, "Distance = " + distance);
+            Log.d(TAG, "Weight = " + weight);
+
+            if (weight > 0) {
+                f.addValues(new RSSIMeasurement((value + weight * delta)));
+            } else if (f.equals(receivingFragment)) { //Always update the fragment that was active
+                f.addValues(new RSSIMeasurement((value + delta)));
+            } else {
+                Log.d(TAG, "Fragment has weight 0 for this RSSI measurement.");
+            }
+        }
 //        compass.printRSSIValues();
 //        compass.printAngles();
     }
@@ -192,7 +222,6 @@ public class CompassController {
      */
     public Pointer computePointer(List<RSSIMeasurement> rssiMeasurements) {
         if (rssiMeasurements != null) {
-
                 Log.d(TAG, "Computing pointer.");
                 long startTime = System.nanoTime();
 
@@ -245,7 +274,7 @@ public class CompassController {
                 //Compute weighted average unit vector and weighted standard deviation
                 for(int i = 0 ; i < rssiMeasurements.size() ; i++) {
                     double azimuth = Math.toRadians(rssiMeasurements.get(i).getAzimuth());
-                    int rssi = rssiMeasurements.get(i).getRSSI();
+                    float rssi = rssiMeasurements.get(i).getRSSI();
                     double weight = weights[i];
 
                     float delta = rssi - averageRSSI;
@@ -279,7 +308,7 @@ public class CompassController {
                 Log.d(TAG,"Average Angle (radians) = " + avgAngleRadians);
                 float averageAngle = (float) Math.toDegrees(avgAngleRadians);
                 Log.d(TAG,"Average Angle (degrees) = " + averageAngle);
-                averageAngle = Compass.NormalizeAngle(averageAngle);
+//                averageAngle = Compass.NormalizeAngle(averageAngle);
                 Log.d(TAG,"Average Angle (degrees & normalized) = " + averageAngle);
                 Log.d(TAG,"Variance RSSI = " + varianceRSSI );
                 Log.d(TAG,"Pointer Width = " + pointerWidth );
@@ -314,6 +343,7 @@ public class CompassController {
     }
 
     public void setRotation(float azimuth) {
+//        azimuth = -azimuth;
         deactivateAllFragments();
         //I think below is wrong for the azimuth
         azimuth = Compass.NormalizeAngle(azimuth);

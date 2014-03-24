@@ -1,5 +1,7 @@
 package com.simons.bluetoothtracker.models;
 
+import android.util.Log;
+
 import com.simons.bluetoothtracker.Utilities;
 
 import java.util.ArrayList;
@@ -46,11 +48,11 @@ public class Fragment implements CompassDataSource {
      * @return double the value, double is used to ensure sufficient accuracy
      * allowing for multiple types of calculations.
      */
-    public double getValue() {
+    public float getValue() {
         if(isCalibrated()) {
             return averageRSSI();
         }
-        else return Double.NaN;
+        else return Float.NaN;
     }
 
     @Override
@@ -109,21 +111,27 @@ public class Fragment implements CompassDataSource {
         return s;
     }
 
-    private double averageRSSI() {
+    private float averageRSSI() {
+//        Log.d(TAG,"Average RSSI of fragment #" + id);
         if (!rssiMeasurements.isEmpty()) {
             int sum = 0;
+            int weightSum = 0;
             for (RSSIMeasurement measurement : rssiMeasurements) {
-                sum += measurement.getRSSI();
+//                Log.d(TAG,"R (w,a,r) = (" + measurement.getWeight() + "," + measurement.getAzimuth() + "," + measurement.getRSSI() + ")");
+                int weight = measurement.getWeight();
+                sum += weight * measurement.getRSSI();
+                weightSum += measurement.getWeight();
             }
-            return sum / (double) rssiMeasurements.size();
+//            Log.d(TAG,"\n");
+            return sum / (float) weightSum;
         } else
-            return Double.NaN;
+            return Float.NaN;
     }
 
     public void addValues(RSSIMeasurement rssiMeasurement) {
         rssiMeasurements.add(rssiMeasurement);
 
-//        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssi + ", " + angle);
+        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssiMeasurement.getRSSI() + ", " + rssiMeasurement.getAzimuth());
 //        Log.d(TAG, "Values size : " + rssiValues.size());
 
         if(rssiMeasurements.size() > maxSizeValues) {
@@ -168,8 +176,8 @@ public class Fragment implements CompassDataSource {
         return id;
     }
 
-    public double getAverageAngle() {
-        double avgAngle = 0D;
+    public float getAverageAngle() {
+        float avgAngle = 0F;
         if (Double.isNaN(averageAngle)) {
             for (RSSIMeasurement rssiMeasurement : rssiMeasurements) {
                 avgAngle += rssiMeasurement.getAzimuth();

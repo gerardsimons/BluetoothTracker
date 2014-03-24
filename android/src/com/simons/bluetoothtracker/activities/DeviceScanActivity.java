@@ -23,7 +23,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -64,7 +63,7 @@ public class DeviceScanActivity extends ListActivity {
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 15000;
 
-    private SharedPreferences preferences;
+//    private SharedPreferences preferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -279,13 +278,13 @@ public class DeviceScanActivity extends ListActivity {
 
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mLeDevicesAdapter.addDevice(new MyBluetoothDevice(device, rssi));
-                    mLeDevicesAdapter.notifyDataSetChanged();
-                }
-            });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLeDevicesAdapter.addDevice(new MyBluetoothDevice(device, rssi));
+                mLeDevicesAdapter.notifyDataSetChanged();
+            }
+        });
         }
     };
 

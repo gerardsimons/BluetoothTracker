@@ -117,6 +117,10 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
             CompassView compassView = (CompassView) findViewById(R.id.compassView);
 
             CompassSettings settings = application.loadCompassSettings();
+            settings.showPointer = false;
+            settings.showColors = true;
+            settings.showDebugText = true;
+            settings.calibrationLimit = 2;
 
             compassController = new CompassController(settings, compassView);
             compassController.setFilterAlpha(0F);
@@ -140,17 +144,22 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 float rotation = rotationDelta / 2;
 
                 for (int i = 0; i < settings.nrOfFragments; i++) {
-                    if (i > .8 * settings.nrOfFragments)
-                        compassController.addData(-50, rotation);
-                    else
-                        compassController.addData(-100, rotation);
+//                    if (i > .8 * settings.nrOfFragments)
+//                        compassController.addData(-50, rotation);
+//                    else
+//                    {
+//                        int rssi = (int) Math.round(Math.random() * -30 - 70);
+//                        compassController.addData(rssi, rotation);
+//                    }
+                    compassController.addData(-20,rotation);
+                    compassController.addData(-40,rotation);
                     rotation += rotationDelta;
                 }
                 azimuth = rotationDelta / 2F;
                 compassController.setRotation(0);
             }
-            azimuth = 198;
-            compassController.setRotation(198);
+            azimuth = 36;
+            compassController.setRotation(azimuth);
 //            for(int i = 0 ; i < 5 ; i++) {
 //                compassController.addData(-30,azimuth);
 //            }
@@ -158,7 +167,6 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //            compassController.addData(0,0);
         }
     }
-
 
     @Override
     protected void onResume() {

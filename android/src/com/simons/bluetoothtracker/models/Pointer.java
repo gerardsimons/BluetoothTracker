@@ -1,9 +1,6 @@
-package com.simons.bluetoothtracker.controllers;
+package com.simons.bluetoothtracker.models;
 
 import android.util.Log;
-
-import com.simons.bluetoothtracker.models.Compass;
-import com.simons.bluetoothtracker.models.RSSIMeasurement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +19,19 @@ public class Pointer {
     private int width = DEFAULT_WIDTH;
     private float value;
 
-    private List<RSSIMeasurement> containedMeasurments;
+    private List<RSSIMeasurement> containedMeasurements;
 
     public Pointer(float centerAngle, float value, int width) {
-        this.centerAngle = 360F - Compass.NormalizeAngle(centerAngle);
+        this.centerAngle = centerAngle;
         this.value = value;
         this.width = width;
-        containedMeasurments = new ArrayList<RSSIMeasurement>();
+        containedMeasurements = new ArrayList<RSSIMeasurement>();
     }
     
     public Pointer(float centerAngle, float value) {
         this.value = value;
-        this.centerAngle = 360F - Compass.NormalizeAngle(centerAngle);
-        containedMeasurments = new ArrayList<RSSIMeasurement>();
+        this.centerAngle = centerAngle;
+        containedMeasurements = new ArrayList<RSSIMeasurement>();
     }
 
     public float getCenterAngle() {
@@ -55,16 +52,12 @@ public class Pointer {
         return startAngle;
     }
 
-    public void setCenterAngle(float centerAngle) {
-        this.centerAngle = centerAngle;
-    }
-
     public String toString() {
        return "Start angle = " + getStartAngle() + "\n" + " centerAngle = " + centerAngle + "\nwidth = " + width + "\nvalue = " + value;
     }
 
     public void addMeasurement(RSSIMeasurement rssiMeasurement) {
-        containedMeasurments.add(rssiMeasurement);
+        containedMeasurements.add(rssiMeasurement);
     }
 
     public boolean contains(float azimuth) {
@@ -75,9 +68,9 @@ public class Pointer {
 
     public void computeValue() {
         value = 0;
-        for(RSSIMeasurement rssiMeasurement : containedMeasurments) {
+        for(RSSIMeasurement rssiMeasurement : containedMeasurements) {
             value += rssiMeasurement.getRSSI();
         }
-        value /= containedMeasurments.size();
+        value /= containedMeasurements.size();
     }
 }

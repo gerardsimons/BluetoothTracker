@@ -10,7 +10,7 @@ public interface CompassDataSource {
      * Returns the primary value this data source should supply to the compassview
      * @return
      */
-    public double getValue();
+    public float getValue();
 
     /**
      * ID of the data source (should be unique)

@@ -7,10 +7,11 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
-import com.simons.bluetoothtracker.controllers.Pointer;
 import com.simons.bluetoothtracker.models.CompassDataSource;
+import com.simons.bluetoothtracker.models.Pointer;
 
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -178,11 +179,11 @@ public class CompassView extends View {
 
         float fragmentSize = 360F / nrOfFragments;
 
-        if (isCalibrated && pointer != null) {
+        if (isCalibrated) {
             if(drawColoredCompass) {
-                drawFullyColoredCompass(canvas);
+                drawColoredCompass(canvas);
             }
-            if(drawPointer) {
+            if(drawPointer && pointer != null) {
                 drawPointer(canvas);
             }
          } else { // The compass is not yet calibrated, draw the uncalibrated version
@@ -206,7 +207,7 @@ public class CompassView extends View {
                 int calibrationLimit = dataSource.getCalibrationLimit();
                 boolean highlighted = dataSource.highlighted();
 
-                int[] color = interpolateColors((valuesMeasured / (double)calibrationLimit),
+                int[] color = interpolateColors((i / (float)nrOfFragments),
                         new int[]{100, 100, 100}, new int[]{255, 255, 255});
 
                 paint.setStyle(Style.STROKE);
@@ -222,11 +223,11 @@ public class CompassView extends View {
                         fragmentSize * 1.05F, false, paint);
 
 
-                    paint.setTextSize(textSize);
-                    paint.setStyle(Style.FILL);
-                    paint.setColor(Color.BLACK);
+                paint.setTextSize(textSize);
+                paint.setStyle(Style.FILL);
+                paint.setColor(Color.BLACK);
 
-                    int center = Math.round(textSize / 2F);
+                int center = Math.round(textSize / 2F);
 
                 String contextText = "" + valuesMeasured;
                 if(drawDebugText)
@@ -292,7 +293,7 @@ public class CompassView extends View {
         }
     }
 
-    private void drawFullyColoredCompass(Canvas canvas) {
+    private void drawColoredCompass(Canvas canvas) {
         float fragmentSize = 360F / nrOfFragments;
         calculateColors();
         for (int i = 0; i < nrOfFragments; i++) {
@@ -367,7 +368,7 @@ public class CompassView extends View {
      *                clockwise because it should point up, not to the right!
      */
     public void setRotation(float azimuth) {
-        rotation = (azimuth - 90) % 360;
+        rotation = (360 - azimuth + 270) % 360;
         this.azimuth = azimuth;
         invalidate();
     }
@@ -378,10 +379,10 @@ public class CompassView extends View {
     private void calculateColors() {
         if (dataSources != null && isCalibrated) {
             //First determine the min and max values.
-            double maxRSSI = Integer.MIN_VALUE;
-            double minRSSI = Integer.MAX_VALUE;
+            float maxRSSI = Integer.MIN_VALUE;
+            float minRSSI = Integer.MAX_VALUE;
             for (CompassDataSource dataSource : dataSources) {
-                double value = dataSource.getValue();
+                float value = dataSource.getValue();
                 if (value > maxRSSI) {
                     maxRSSI = value;
                 }
@@ -390,12 +391,13 @@ public class CompassView extends View {
                 }
             }
 
-            double delta = maxRSSI - minRSSI;
+            float delta = maxRSSI - minRSSI;
+            Log.d(TAG,"Delta = " + delta);
 
             // The second pass does the linear interpolation
             fragmentColors = new int[dataSources.length][3];
             for (int i = 0; i < dataSources.length ; i++) {
-                double ratio = (dataSources[i].getValue() - minRSSI) / delta;
+                float ratio = (dataSources[i].getValue() - minRSSI) / delta;
 //                Log.d(TAG,"Ratio = " + ratio);
                 fragmentColors[i] = interpolateColors(ratio, GREEN, RED);
             }
@@ -411,13 +413,15 @@ public class CompassView extends View {
      * @param colorTwo the other color parameter to interpolate from
      * @return the linearly interpolated color
      */
-    public int[] interpolateColors(double ratio, int[] colorOne, int[] colorTwo) {
+    public int[] interpolateColors(float ratio, int[] colorOne, int[] colorTwo) {
+        if(Float.isNaN(ratio) || ratio < 0 || ratio > 1F) {
+            ratio = 1F;
+        }
         if (colorOne.length == colorTwo.length) {
             int[] interpolatedColors = new int[colorOne.length];
             for (int i = 0; i < colorOne.length; i++) {
-                // Log.d(TAG, "channel #" + i);
-                // Log.d(TAG, "min=" + min);
-                // Log.d(TAG, "max=" + max);
+
+//                Log.d(TAG,"Ratio = " + ratio);
 
                 int newChannelValue = (int) Math.round((1 - ratio)
                         * colorTwo[i] + ratio * colorOne[i]);

@@ -91,12 +91,16 @@ public class Compass {
 
     public Fragment fragmentForAngle(float azimuth) {
         if (fragments != null && !fragments.isEmpty()) {
-            azimuth = 360F - azimuth;
+//            azimuth = azimuth;
+//            int i = Math.round(azimuth / 360F * fragments.size());
+//            return fragments.get(i);
+            Log.d(TAG,"### Fragment for Angle ###");
+            Log.d(TAG,"azimuth = " + azimuth);
             double bestDistance = Double.MAX_VALUE;
             Fragment closestFragment = null;
             for(Fragment fragment : fragments) {
-                double distance = Compass.distanceTo(fragment.getCenterAngle(), azimuth);
-//                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
+                double distance = Math.abs(Compass.distanceTo(fragment.getCenterAngle(), azimuth));
+                Log.d(TAG,"Distance fragment #" + fragment.getId() + " has distance " + distance);
                 if(distance < bestDistance) {
                     closestFragment = fragment;
                     bestDistance = distance;
@@ -161,7 +165,7 @@ public class Compass {
         if(angle < 0) {
             angle += 360F;
         }
-        return 360F - angle % 360F;
+        return angle % 360F;
     }
 
     /**
@@ -178,17 +182,17 @@ public class Compass {
     }
 
     /**
-     * Exports this compass's values and measurements as a CSV file
+     * Exports this compass's values and measurements to SQLite
      */
     public void export() {
         
     }
 
     public static float distanceTo(float angle, float otherAngle) {
-        double rawDistance = Math.abs(angle - otherAngle);
-        double distance = Math.min(rawDistance, 360D - rawDistance);
-
-        return (float)Math.abs(distance);
+        float d = Math.abs(angle - otherAngle) % 360;
+        float r = d > 180 ? 360 - d : d;
+        Log.d(TAG,"Distance from " + angle + " to " + otherAngle + " = " + r);
+        return r;
     }
 
     public List<RSSIMeasurement> getAllMeasurements() {
