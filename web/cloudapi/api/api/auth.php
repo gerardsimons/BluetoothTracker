@@ -28,6 +28,15 @@ class APIAuth extends APISub
 			return 0;
 	}
 	
+	//get the user type of the user logged in
+	public function getUserType() {
+		$this->validateSession();
+		if ($this->isLoggedIn() == true)
+			return $this->session[$this->loginusertype];
+		else
+			return 0;
+	}
+	
 	//validate the session (check if the user still exists and is active)
 	private function validateSession() {
 		$interval = $this->up->validatesessioninterval;
@@ -80,7 +89,7 @@ class APIAuth extends APISub
 			//match password
 			$passhash = $res["Password"];
 			$salt = $res["Salt"];
-			if ($passhash != $this->up->shared->hashPass($pass, $salt)) return $false;
+			if ($passhash != $this->hashPass($pass, $salt)) return $false;
 		}
 		else
 		{
@@ -98,12 +107,12 @@ class APIAuth extends APISub
 			$networkuserid = implode("_", array_values($networkuserid)); //to allow for _ in the network user ID
 			
 			//get and compare the hashes
-			if ($pass != $this->up->shared->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false;
+			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false;
 		}
 		
 		//generate and save new salt and password hash
 		$newsalt = $this->generateCode();
-		$newpasshash = $this->up->shared->hashPass($pass, $newsalt);
+		$newpasshash = $this->hashPass($pass, $newsalt);
 		
 		$this->query("UPDATE Users SET Password=?, Salt=? WHERE UserID=?", array($newpasshash, $newsalt, $userid));
 		
@@ -262,6 +271,7 @@ class APIAuth extends APISub
 		return true;
 	}
 	
+	//resets the login session variables
 	private function resetLoginSessionVars() {
 		$this->session[$this->isloggedin] = false;
 		$this->session[$this->loginid] = 0;
@@ -367,7 +377,7 @@ class APIAuth extends APISub
 		if ($regtype != "form")
 		{
 			$statusts = $this->session["status"]["ts"];
-			if ($pass != $this->up->shared->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false["couldnotlogin"];
+			if ($pass != $this->hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts)) return $false["couldnotlogin"];
 		}
 		
 		//register the user!
@@ -375,7 +385,7 @@ class APIAuth extends APISub
 		{
 			//hash the password
 			$salt = $this->generateCode();
-			$passhash = $this->up->shared->hashPass($pass, $salt);
+			$passhash = $this->hashPass($pass, $salt);
 			
 			$sql = "INSERT INTO Users (Name, Email, LoginName, Password, Salt, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 			$fields = array($name, $email, $loginname, $pass, $salt, $usertype, $regtype, 1);
@@ -412,6 +422,14 @@ class APIAuth extends APISub
 		for ($i=0;$i<$length;$i++) $code .= $possible[mt_rand(0, strlen($possible)-1)];
 		
 		return $code;
+	}
+	
+	//password hashing functions
+	public function hashPass($pass, $salt) {
+		return md5($pass.$salt);
+	}
+	public function hashPassSocialNetworkLogin($regtype, $networkuserid, $statusts) {
+		return substr(md5($regtype.$networkuserid.$statusts), $statusts % 21);
 	}
 }
 ?>

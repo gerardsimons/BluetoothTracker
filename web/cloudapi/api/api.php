@@ -3,7 +3,6 @@
 error_reporting(E_ALL);
 require_once("settings.php");
 require_once("apisub.php");
-require_once("shared.php");
 
 //this class creates the framework for all sub parts of the API which are located in the api.<class>.php files
 //all functionality is enabled and loaded when an instant of this class is created
@@ -33,10 +32,8 @@ class API
 	public $apiactive = false;
 	public $apimsg = "Not enabled by settings file.";
 	
-	private $subclasses = array();
 	private $reqsubclasses = array("auth");
 	private $subclassfolder = "api";
-	public $shared;
 	
 	public $txt = array();
 	public $lang = "en";
@@ -109,8 +106,8 @@ class API
 					$subname = $file[0];
 					$classname = "api$subname";
 					include($this->subclassfolder."/".$filename);
-					$this->subclasses[$subname] = new $classname($this);
-					$this->subclasses[$subname]->txt = $this->loadText($subname, $this->lang);
+					$this->$subname = new $classname($this);
+					$this->$subname->txt = $this->loadText($subname, $this->lang);
 				}
 			}
 		}
@@ -118,7 +115,7 @@ class API
 		//check if required subparts are available
 		foreach ($this->reqsubclasses as $reqsubclass)
 		{
-			if (!isset($this->subclasses[$reqsubclass]))
+			if (!isset($this->$reqsubclass))
 			{
 				$this->apiactive = false;
 				$this->apimsg = $this->txt["apibroken"];
@@ -126,10 +123,6 @@ class API
 			}
 		}
 		if ($this->apiactive == false) return;
-		
-		//add shared functions
-		$this->shared = new APIShared($this);
-		$this->shared->text = $this->loadText("shared", $this->lang);
 		
 		//load default key settings
 		foreach (APISettings::$defaultsettings as $var=>$val) $this->$var = $val;
@@ -218,13 +211,13 @@ class API
 		if ($this->apikeyactive == false) return $this->throwError(1, $this->txt["apikeynotactive"]."$msg");
 		
 		//check if subpart exists
-		if (!isset($this->subclasses[$class])) return $this->throwError(3, $this->txt["class"]." $class ".$this->txt["doesnotexist"]);
+		if (!isset($this->$class)) return $this->throwError(3, $this->txt["class"]." $class ".$this->txt["doesnotexist"]);
 		
 		//check if function exists
-		if (!method_exists($this->subclasses[$class], $method)) return $this->throwError(3, $this->txt["function"]." $class.$method ".$this->txt["doesnotexist"]);
+		if (!method_exists($this->$class, $method)) return $this->throwError(3, $this->txt["function"]." $class.$method ".$this->txt["doesnotexist"]);
 		
 		//check if enough input arguments are supplied
-		$methodcheck = new ReflectionMethod($this->subclasses[$class], $method);
+		$methodcheck = new ReflectionMethod($this->$class, $method);
 		$nrargs = $methodcheck->getNumberOfRequiredParameters();
 		if (count($input) < $nrargs) return $this->throwError(4, $this->txt["notenoughinput"]);
 		
@@ -233,10 +226,10 @@ class API
 		$this->session["lastaction"] = $this->lastaction;
 		
 		//load lists of login/status required functions and caching enabled functions
-		$loginreq = $this->subclasses[$class]->loginreq;
-		$needstatusrequest = $this->subclasses[$class]->needstatusrequest;
-		$enablecaching = $this->subclasses[$class]->enablecaching;
-		$resetcaching = $this->subclasses[$class]->resetcaching;
+		$loginreq = $this->$class->loginreq;
+		$needstatusrequest = $this->$class->needstatusrequest;
+		$enablecaching = $this->$class->enablecaching;
+		$resetcaching = $this->$class->resetcaching;
 		
 		//check if the status must have been requested for function
 		$muststatus = (array_search($method, $needstatusrequest) !== false) ? true: false;
@@ -274,7 +267,7 @@ class API
 		
 		//execute the function
 		try {
-			$output = call_user_func_array(array($this->subclasses[$class], $method), $input);
+			$output = call_user_func_array(array($this->$class, $method), $input);
 		} catch (Exception $e) {
 			return $this->throwError(5, $this->txt["error"]);
 		}
@@ -373,7 +366,7 @@ class API
 	
 	//check if logged in
 	private function loggedIn() {
-		return $this->subclasses["auth"]->isLoggedIn();
+		return $this->auth->isLoggedIn();
 	}
 	
 	//gives the correct error throwing format

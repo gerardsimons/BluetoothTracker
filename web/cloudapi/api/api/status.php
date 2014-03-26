@@ -2,6 +2,7 @@
 @include_once("../apisub.php"); //to enable code hinting
 class APIStatus extends APISub
 {
+	//get API status and initialize some variables required later on during authentication
 	public function status() {
 		$sessiontimeout = $this->up->sessiontimeout;
 		$sessiontimeoutnoaction = $this->up->sessiontimeoutnoaction;
