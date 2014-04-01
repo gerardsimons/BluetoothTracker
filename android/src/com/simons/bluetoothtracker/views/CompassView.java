@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.simons.bluetoothtracker.models.CompassDataSource;
@@ -392,7 +391,7 @@ public class CompassView extends View {
             }
 
             float delta = maxRSSI - minRSSI;
-            Log.d(TAG,"Delta = " + delta);
+//            Log.d(TAG,"Delta = " + delta);
 
             // The second pass does the linear interpolation
             fragmentColors = new int[dataSources.length][3];
@@ -431,6 +430,15 @@ public class CompassView extends View {
             return interpolatedColors;
         } else
             return null;
+    }
+
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+        this.setMeasuredDimension(parentWidth, parentHeight);
     }
 
     /**

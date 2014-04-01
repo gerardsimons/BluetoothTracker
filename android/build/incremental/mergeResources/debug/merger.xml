@@ -94,9 +94,9 @@
                 </string>
                 <string name="app_name" >Bluetooth Tracker
                 </string>
-                <string name="error_bluetooth_not_supported" >Bluetooth not supported.
-                </string>
                 <string name="menu_scan" >Scan
+                </string>
+                <string name="error_bluetooth_not_supported" >Bluetooth not supported.
                 </string>
                 <string name="menu_stop" >Stop
                 </string>
@@ -153,6 +153,11 @@
                 path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xhdpi/cloud.png"
                 qualifiers="xhdpi"
                 type="drawable" />
+            <file
+                name="device_scan_test"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/layout/device_scan_test.xml"
+                qualifiers=""
+                type="layout" />
         </source>
         <source path="/Users/gerardsimons/Git/BluetoothTracker/android/build/res/rs/debug" />
         <source path="/Users/gerardsimons/Git/BluetoothTracker/android/build/res/generated/debug" />

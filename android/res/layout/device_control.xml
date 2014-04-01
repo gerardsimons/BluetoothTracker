@@ -62,51 +62,29 @@
         <TextView
             android:id="@+id/rssi_values"
             android:layout_width="match_parent"
-            android:layout_height="25dp"
+            android:layout_height="wrap_content"
             android:textSize="18sp" />
     </LinearLayout>
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal" >
-        <TextView
+        android:visibility="visible"
+        android:id="@+id/exportToolBar"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delta t:"
-            android:textSize="18sp" />
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/timeDeltaValues"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:textSize="18sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="horizontal" >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delta RSSI:"
-            android:textSize="18sp" />
-        <Space
-            android:layout_width="5dp"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/deltaRssiValues"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:textSize="18sp" />
-    </LinearLayout>
+            android:id="@+id/exportButton"
+            android:text="Export"/>
+        </LinearLayout>[
     <com.simons.bluetoothtracker.views.CompassView
+        android:visibility="visible"
         android:id="@+id/compassView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
     </com.simons.bluetoothtracker.views.CompassView>
+    <com.simons.bluetoothtracker.views.DeviceStrengthIndicator
+        android:id="@+id/device_thumbnail"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp" />
 </LinearLayout>

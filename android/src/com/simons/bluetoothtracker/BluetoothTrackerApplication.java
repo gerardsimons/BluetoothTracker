@@ -4,8 +4,6 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.testflightapp.lib.TestFlight;
-
 public class BluetoothTrackerApplication extends Application {
 
     public static final String CALIBRATION_LIMIT_KEY = "CALIBRATION_LIMIT";
@@ -31,15 +29,14 @@ public class BluetoothTrackerApplication extends Application {
 
     private static final String TAG = "BluetoothtrackerApplication";
 
-    private static final String FLIGHT_APP_TOKEN = "9f44d40a-d87d-4385-90df-8ae60ab8e02a";
+    //Enables additional functionality and shows corresponding UI
+    private boolean developerMode = true;
 
     private SharedPreferences preferences;
 
     public void onCreate() {
         super.onCreate();
         preferences = getSharedPreferences("com.simons.bluetoothtracker", 0);
-
-        TestFlight.takeOff(this, FLIGHT_APP_TOKEN);
     }
 
     public void storeIntValue(String key, int value) {
@@ -93,6 +90,10 @@ public class BluetoothTrackerApplication extends Application {
         int pointerWidth = loadIntValue(POINTER_WIDTH_KEY);
 
         return new CompassSettings(showColors,showPointer,showDebugText,nrOfFragments,calibrationLimit,maxValues,pointerWidth);
+    }
+
+    public boolean getDeveloperMode() {
+        return developerMode;
     }
 
     public void storeCalibrationLimit(int calibrationLimit) {

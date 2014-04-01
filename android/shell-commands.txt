@@ -6,3 +6,12 @@ am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ei rssi -10
 
 //Use this to broadcast an action and a new azimuth direction (-10 as an example)
 am broadcast -a com.simons.bluetoothtracker.intent.action.rssi --ef azimuth 20
+
+//Copy the db file to sdcard to avoid permission issues (phone should be rooted!)
+adb shell
+su
+cp /data/data/com.simons.bluetoothtracker/databases/measurements.db /sdcard/
+
+//Pull it from the SD card to the Mac/PC
+adb pull /sdcard/measurements.db
+

@@ -1,7 +1,5 @@
 package com.simons.bluetoothtracker.controllers;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +9,11 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.simons.bluetoothtracker.R;
+import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.MyBluetoothDevice;
+import com.simons.bluetoothtracker.views.DeviceStrengthIndicator;
+
+import java.util.ArrayList;
 
 public class BleDevicesAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
@@ -24,23 +26,22 @@ public class BleDevicesAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
-    public MyBluetoothDevice getExistingDevice(MyBluetoothDevice device) {
+    public MyBluetoothDevice getExistingDevice(String address) {
         for (MyBluetoothDevice myBTDevice : leDevices) {
-            if (myBTDevice.equals(device))
+            if (myBTDevice.getAddress().equals(address))
                 return myBTDevice;
         }
         return null;
     }
 
-    public void addDevice(MyBluetoothDevice device) {
-        MyBluetoothDevice existingDevice = getExistingDevice(device);
+    public void addDevice(String name, String address, int rssi) {
+        MyBluetoothDevice existingDevice = getExistingDevice(address);
         if (existingDevice == null) {
-            leDevices.add(device);
+
+            leDevices.add(new MyBluetoothDevice(name,address,rssi));
         } else {
-            existingDevice.addRSSI(device.getLatestRSSI());
-            Log.d(TAG, existingDevice.toString());
+            existingDevice.setLatestRSSI(rssi);
         }
-        // rssiMap.put(device, rssi);
     }
 
     public MyBluetoothDevice getDevice(int position) {
@@ -75,7 +76,8 @@ public class BleDevicesAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-            viewHolder.deviceRssi = (TextView) view.findViewById(R.id.device_rssi);
+            viewHolder.deviceRssi = (DeviceStrengthIndicator) view.findViewById(R.id.device_rssi);
+            viewHolder.deviceRssi.setImage(R.drawable.bike);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -87,8 +89,18 @@ public class BleDevicesAdapter extends BaseAdapter {
             viewHolder.deviceName.setText(deviceName);
         else
             viewHolder.deviceName.setText("Unknown Device");
+
         viewHolder.deviceAddress.setText(device.getAddress());
-        viewHolder.deviceRssi.setText("" + device.getLatestRSSI() + " dBm");
+
+        Integer latestRSSI = device.getLatestRSSI();
+        float strengthValue = 0F;
+        if(latestRSSI != null)
+            strengthValue = Compass.getRatioStrength(latestRSSI);
+
+        Log.d(TAG,"Latest RSSI = " + latestRSSI);
+        Log.d(TAG, "Strength value = " + strengthValue);
+
+        viewHolder.deviceRssi.setStrengthValue(strengthValue);
 
         return view;
     }
@@ -96,6 +108,6 @@ public class BleDevicesAdapter extends BaseAdapter {
     private static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
-        TextView deviceRssi;
+        DeviceStrengthIndicator deviceRssi;
     }
 }

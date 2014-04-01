@@ -2,8 +2,10 @@ package com.simons.bluetoothtracker.activities;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
@@ -14,6 +16,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
@@ -22,22 +27,29 @@ import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
 import com.simons.bluetoothtracker.controllers.OrientationSensor;
+import com.simons.bluetoothtracker.interfaces.CompassCalibrationListener;
+import com.simons.bluetoothtracker.sqlite.Measurements;
+import com.simons.bluetoothtracker.sqlite.MeasurementsDataSource;
 import com.simons.bluetoothtracker.views.CompassView;
+import com.simons.bluetoothtracker.views.DeviceStrengthIndicator;
 
 import java.util.Random;
 
-public class TestDeviceControlActivity extends Activity implements SensorEventListener {
+public class TestCompassActivity extends Activity implements SensorEventListener {
     private final static String TAG = "TestDeviceControlActivity";
 
+    //Parent application
     private BluetoothTrackerApplication application;
+    private boolean developerMode;
+
+    //SQLite controller
+    private MeasurementsDataSource measurementsDataSource;
 
     //private CompassView compassView;
     private CompassController compassController;
 
     private boolean enableSensors = false;
-
     private SensorManager mSensorManager;
-
     private OrientationSensor orientationSensor;
 
     private float azimuth = 0f;
@@ -53,20 +65,23 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     private static final String AZIMUTH_KEY = "azimuth";
     private static final String AZIMUTH_DELTA_KEY = "azimuth_delta";
 
+    //The device strenght indicator view
+    private DeviceStrengthIndicator deviceIndicator;
+
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context ctx, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle.containsKey(RSSI_KEY)) {
                 int rssi = intent.getIntExtra(RSSI_KEY, 999);
-                Toast.makeText(TestDeviceControlActivity.this, "Received RSSI = " + rssi, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestCompassActivity.this, "Received RSSI = " + rssi, Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "Received RSSI = " + rssi);
 
                 compassController.addData(rssi, azimuth);
             }
             if (bundle.containsKey(AZIMUTH_KEY)) {
                 float newAzimuth = intent.getFloatExtra(AZIMUTH_KEY, -1);
-                Toast.makeText(TestDeviceControlActivity.this, "Received Azimuth = " + newAzimuth, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestCompassActivity.this, "Received Azimuth = " + newAzimuth, Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "Received Azimuth = " + newAzimuth);
 
                 Random r = new Random();
@@ -77,7 +92,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
             }
             if (bundle.containsKey(AZIMUTH_DELTA_KEY)) {
                 float azimuthDelta = intent.getFloatExtra(AZIMUTH_DELTA_KEY, -1);
-                Toast.makeText(TestDeviceControlActivity.this, "Received Azimuth Delta = " + azimuthDelta, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TestCompassActivity.this, "Received Azimuth Delta = " + azimuthDelta, Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "Received Azimuth Delta = " + azimuthDelta);
 
                 Random r = new Random();
@@ -93,9 +108,18 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.device_control);
+        setContentView(R.layout.device_control_test);
 
         application = (BluetoothTrackerApplication) getApplication();
+        developerMode = application.getDeveloperMode();
+        if (developerMode) {
+            measurementsDataSource = new MeasurementsDataSource(this);
+            measurementsDataSource.open();
+        }
+
+        deviceIndicator = (DeviceStrengthIndicator) findViewById(R.id.device_thumbnail);
+        deviceIndicator.setImage(R.drawable.bike);
+        deviceIndicator.setStrengthValue(.5F);
 
         loadCompass();
 
@@ -109,6 +133,44 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
             // Failure! No magnetometer.
             Log.e(TAG, "The device has no accelerometer.");
             finish();
+        }
+
+        Button exportButton = (Button) findViewById(R.id.exportButton);
+        if (exportButton != null) {
+            exportButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Show export toolbar
+                    exportCompass();
+                }
+            });
+        }
+    }
+
+    private void exportCompass() {
+        if (measurementsDataSource != null && developerMode) {
+            Log.i(TAG, "Exporting...");
+
+            final Measurements measurements = compassController.exportCompassData();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final EditText text = new EditText(this);
+
+            //Ask for the username
+            builder.setTitle("Export").setMessage("Username?").setView(text);
+            builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface di, int i) {
+                    final String name = text.getText().toString();
+                    measurements.setUserName(name);
+                    measurementsDataSource.insertMeasurements(measurements);
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface di, int i) {
+                    //Export was canceled
+                }
+            });
+            builder.create().show();
         }
     }
 
@@ -124,6 +186,13 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
             compassController = new CompassController(settings, compassView);
             compassController.setFilterAlpha(0F);
+            compassController.setCompassCalibrationListener(new CompassCalibrationListener() {
+                @Override
+                public void onCalibrationFinished() {
+                    View exportToolbar = findViewById(R.id.exportToolBar);
+                    if (exportToolbar != null) exportToolbar.setVisibility(View.VISIBLE);
+                }
+            });
 
 //          compassController.addData(-1,355);
 //          compassController.addData(-1,5);
@@ -151,8 +220,8 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 //                        int rssi = (int) Math.round(Math.random() * -30 - 70);
 //                        compassController.addData(rssi, rotation);
 //                    }
-                    compassController.addData(-20,rotation);
-                    compassController.addData(-40,rotation);
+                    compassController.addData(-20, rotation);
+                    compassController.addData(-40, rotation);
                     rotation += rotationDelta;
                 }
                 azimuth = rotationDelta / 2F;
@@ -224,7 +293,7 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
                 onBackPressed();
                 return true;
             case R.id.menu_settings:
-                Intent intent = new Intent(this,SettingsActivity.class);
+                Intent intent = new Intent(this, SettingsActivity.class);
                 startActivityForResult(intent, SettingsActivity.SETTINGS_REQUEST_CODE);
                 return true;
         }
@@ -233,36 +302,35 @@ public class TestDeviceControlActivity extends Activity implements SensorEventLi
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SettingsActivity.SETTINGS_REQUEST_CODE) {
-            if(resultCode == RESULT_OK) { //Changes have been made to the compass settings
-                Log.i(TAG,"Changes to compass settings made.");
+            if (resultCode == RESULT_OK) { //Changes have been made to the compass settings
+                Log.i(TAG, "Changes to compass settings made.");
                 CompassView compassView = (CompassView) findViewById(R.id.compassView);
-                boolean needToResetCompass = data.getBooleanExtra(SettingsActivity.INT_VALUES_CHANGED_KEY,false);
-                if(needToResetCompass) {
-                    Log.i(TAG,"Need to reset compass.");
+                boolean needToResetCompass = data.getBooleanExtra(SettingsActivity.INT_VALUES_CHANGED_KEY, false);
+                if (needToResetCompass) {
+                    Log.i(TAG, "Need to reset compass.");
                     loadCompass();
-                }
-                else {
-                    Log.i(TAG,"No need to reset compass.");
+                } else {
+                    Log.i(TAG, "No need to reset compass.");
                     compassController.setCompassViewSettings(application.loadCompassSettings());
                 }
             }
             if (resultCode == RESULT_CANCELED) { //No changes made
                 //Write your code if there's no result
-                Log.i(TAG,"No changes to compass settings made.");
+                Log.i(TAG, "No changes to compass settings made.");
             }
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        Log.i(TAG,"Accuracy sensors has changed to : " + accuracy);
+        Log.i(TAG, "Accuracy sensors has changed to : " + accuracy);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (orientationSensor != null && compassController != null) {
 
-            azimuth = (float)Math.toDegrees(orientationSensor.getM_azimuth_radians());
+            azimuth = (float) Math.toDegrees(orientationSensor.getM_azimuth_radians());
             //Flip the orientation
 //            azimuth = 360F - azimuth;
             //Log.d(TAG, "azimuth = " + azimuth);

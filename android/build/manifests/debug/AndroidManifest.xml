@@ -1,25 +1,32 @@
 <!-- From: file:/Users/gerardsimons/Git/BluetoothTracker/android/AndroidManifest.xml -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="5" android:versionName="1.21" package="com.simons.bluetoothtracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="6" android:versionName="1.22" package="com.simons.bluetoothtracker">
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:name="com.simons.bluetoothtracker.BluetoothTrackerApplication" android:theme="@android:style/Theme.Holo.Light">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <application android:allowBackup="true" android:debuggable="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:name="com.simons.bluetoothtracker.BluetoothTrackerApplication" android:theme="@android:style/Theme.Holo.Light">
         <activity android:label="@string/app_name" android:name="com.simons.bluetoothtracker.activities.DeviceScanActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:label="test device scan" android:name="com.simons.bluetoothtracker.activities.TestDeviceScanActivity">
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN" />-->
                 <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
         </activity>
-        <activity android:name="com.simons.bluetoothtracker.activities.DeviceControlActivity" android:screenOrientation="portrait">
+        <activity android:name="com.simons.bluetoothtracker.activities.CompassActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:label="test" android:name="com.simons.bluetoothtracker.activities.TestDeviceControlActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-        </intent-filter>
+        <activity android:label="test" android:name="com.simons.bluetoothtracker.activities.TestCompassActivity">
+        <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
         </activity>
         <activity android:name="com.simons.bluetoothtracker.activities.SettingsActivity" android:screenOrientation="portrait"/>
         <activity android:name="com.simons.bluetoothtracker.activities.MenuActivity" android:screenOrientation="portrait">

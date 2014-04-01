@@ -28,6 +28,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,9 +40,12 @@ import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
 import com.simons.bluetoothtracker.controllers.CompassOrientationSensor;
-import com.simons.bluetoothtracker.controllers.DeviceMeasurmentsManager;
+import com.simons.bluetoothtracker.controllers.DeviceMeasurementsManager;
+import com.simons.bluetoothtracker.interfaces.CompassCalibrationListener;
 import com.simons.bluetoothtracker.interfaces.CompassOrientationSensorListener;
 import com.simons.bluetoothtracker.models.Compass;
+import com.simons.bluetoothtracker.sqlite.Measurements;
+import com.simons.bluetoothtracker.sqlite.MeasurementsDataSource;
 import com.simons.bluetoothtracker.views.CompassView;
 
 import java.util.List;
@@ -51,7 +57,7 @@ import java.util.List;
  * turn interacts with the Bluetooth LE API.
  */
 public class CompassActivity extends Activity {
-    private final static String TAG = CompassActivity.class.getSimpleName();
+    private final static String TAG = "CompassActivity";
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
@@ -60,10 +66,13 @@ public class CompassActivity extends Activity {
 
     private String mDeviceName;
     private String mDeviceAddress;
+    //Defaults to false, enables additional development options
+    private boolean developmentMode;
 
     private TextView rssiValuesTextView;
-    private TextView timeDeltasTextView;
-    private TextView rssiDeltasTextView;
+    //We are not using below anymore
+//    private TextView timeDeltasTextView;
+//    private TextView rssiDeltasTextView;
 
     private BluetoothTrackerApplication application;
 
@@ -75,11 +84,14 @@ public class CompassActivity extends Activity {
 
     private CompassOrientationSensor orientationSensor;
 
+    private MeasurementsDataSource measurementsDataSource;
+
     private float azimuth = 0f;
 
-    private DeviceMeasurmentsManager measurementsManager;
+    private DeviceMeasurementsManager measurementsManager;
 
     private boolean mConnected = false;
+    private boolean paused = false;
 
     //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
     public static final int MEASUREMENTS_RATE = 100;
@@ -119,7 +131,7 @@ public class CompassActivity extends Activity {
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 mConnected = true;
                 updateConnectionState(R.string.connected);
-                measurementsManager = new DeviceMeasurmentsManager();
+                measurementsManager = new DeviceMeasurementsManager();
                 invalidateOptionsMenu();
                 Log.i(TAG, "Connected to GATT server.");
                 Toast.makeText(CompassActivity.this, "Connected to GATT server", Toast.LENGTH_SHORT).show();
@@ -134,7 +146,7 @@ public class CompassActivity extends Activity {
                 Toast.makeText(CompassActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
             } else if (BluetoothLeService.ACTION_RSSI_VALUE_READ.equals(action)) {
                 int newRSSI = intent.getExtras().getInt(BluetoothLeService.RSSI_VALUE_KEY);
-                if (isValidRSSI(newRSSI)) {
+                if (isValidRSSI(newRSSI) && !paused) {
                     updateMeasurements(newRSSI);
                 }
             }
@@ -169,14 +181,22 @@ public class CompassActivity extends Activity {
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
+        developmentMode = application.getDeveloperMode();
+
+        //Some additional setup when in development mode
+        if(developmentMode) {
+            measurementsDataSource = new MeasurementsDataSource(this);
+            measurementsDataSource.open();
+        }
+
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
 
         mConnectionState = (TextView) findViewById(R.id.connection_state);
 
         rssiValuesTextView = (TextView) findViewById(R.id.rssi_values);
-        timeDeltasTextView = (TextView) findViewById(R.id.timeDeltaValues);
-        rssiDeltasTextView = (TextView) findViewById(R.id.deltaRssiValues);
+//        timeDeltasTextView = (TextView) findViewById(R.id.timeDeltaValues);
+//        rssiDeltasTextView = (TextView) findViewById(R.id.deltaRssiValues);
 
         //testCompass(compassView, 8);
 
@@ -187,7 +207,7 @@ public class CompassActivity extends Activity {
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
-        measurementsManager = new DeviceMeasurmentsManager();
+        measurementsManager = new DeviceMeasurementsManager();
 
         orientationSensor = new CompassOrientationSensor(this);
         orientationSensor.setListener(new CompassOrientationSensorListener() {
@@ -198,37 +218,6 @@ public class CompassActivity extends Activity {
                 compassController.setRotation(azimuth);
             }
         });
-
-//        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-//            // Success! There's a magnetometer.
-//            //	    motionSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//            //	    magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-//            orientationSensor = new OrientationSensor(mSensorManager, this);
-//        } else {
-//            // Failure! No magnetometer.
-//            Log.e(TAG, "The device has no accelerometer.");
-//            finish();
-//        }
-
-        //Create graph
-        //	LinearLayout graphContainer = (LinearLayout) findViewById(R.id.motionGraphContainer);
-        //
-        //	motionSeries = new GraphViewSeries(new GraphViewData[] {});
-        //	thresholdSeries = new GraphViewSeries(new GraphViewData[] {});
-        //
-        //	graphView = new LineGraphView(this, "Motion Values");
-        //	graphView.setDrawBackground(true);
-        //	graphView.setManualYAxisBounds(10, 0);
-        //	//graphView.setScalable(true);
-        //	graphView.setScrollable(true);
-        //	graphView.setViewPort(0, 100);
-        //	graphView.setVerticalLabels(null);
-        //
-        //	graphView.addSeries(motionSeries);
-        //	graphView.addSeries(thresholdSeries);
-        //
-        //	graphContainer.addView(graphView);
     }
 
     private void loadCompass() {
@@ -236,7 +225,60 @@ public class CompassActivity extends Activity {
             CompassView compassView = (CompassView) findViewById(R.id.compassView);
             CompassSettings compassSettings = application.loadCompassSettings();
             compassController = new CompassController(compassSettings, compassView);
+            compassController.setCompassCalibrationListener(new CompassCalibrationListener() {
+                @Override
+                public void onCalibrationFinished() {
+                    //Pause compass controller
+                    CompassActivity.this.paused = true;
+                    //Show export possibilities if development mode is on
+                    if(developmentMode) {
+                        LinearLayout exportToolbar = (LinearLayout) findViewById(R.id.exportToolBar);
+                        exportToolbar.setVisibility(View.VISIBLE);
+
+                        //Inform user about what he/she should do
+                        Toast.makeText(CompassActivity.this,"Point compass towards label and press export to save.",Toast.LENGTH_LONG).show();
+
+                        Button exportButton = (Button) findViewById(R.id.exportButton);
+                        exportButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                exportCompass();
+                            }
+                        });
+                    }
+                }
+            });
         }
+    }
+
+    private void exportCompass() {
+        Log.i(TAG,"Exporting...");
+
+        final Measurements measurements = compassController.exportCompassData();
+        measurements.setTrueAzimuth((int) azimuth);
+
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        final EditText text = new EditText(this);
+//
+//        //Ask for the username
+//        builder.setTitle("Export").setMessage("What is your name?").setView(text);
+//        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface di, int i) {
+//                final String name = text.getText().toString();
+//                measurements.setUserName(name);
+//
+//            }
+//        });
+//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface di, int i) {
+//                //Export was canceled
+//            }
+//        });
+//        builder.create().show();
+
+        measurementsDataSource.insertMeasurements(measurements);
+
+
     }
 
     private void updateUI() {
@@ -266,8 +308,8 @@ public class CompassActivity extends Activity {
             }
 
             rssiValuesTextView.setText(rssiValuesText);
-            timeDeltasTextView.setText(timeDeltasText);
-            rssiDeltasTextView.setText(rssiDeltasText);
+//            timeDeltasTextView.setText(timeDeltasText);
+//            rssiDeltasTextView.setText(rssiDeltasText);
 
             //motionGraphSeries.resetData(new GraphViewData[] {});
             //Append motion values to graph, x is the time delta, y
@@ -354,18 +396,6 @@ public class CompassActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
         return intentFilter;
-    }
-
-    private void exportData() {
-        compassController.exportCompassData();
-    }
-
-    private float toDegrees(float rads) {
-        float degrees = (float) (rads * (180F / Math.PI));
-        if (degrees < 0) {
-            degrees = 360 + degrees;
-        }
-        return degrees;
     }
 
 //    @Override

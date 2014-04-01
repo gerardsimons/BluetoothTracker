@@ -5,9 +5,9 @@ import java.util.List;
 
 import android.util.Log;
 
-public class DeviceMeasurmentsManager {
+public class DeviceMeasurementsManager {
 
-    private static final String TAG = DeviceMeasurmentsManager.class.getSimpleName();
+    private static final String TAG = DeviceMeasurementsManager.class.getSimpleName();
     public static final float MOTION_THRESHOLD = 5F;
 
     //Last time of a measurement
@@ -26,7 +26,7 @@ public class DeviceMeasurmentsManager {
 
     float[] previousMotionValues;
 
-    public DeviceMeasurmentsManager() {
+    public DeviceMeasurementsManager() {
         rssiDeltas = new ArrayList<Float>();
         rssiValues = new ArrayList<Integer>();
         timeDeltas = new ArrayList<Float>();
@@ -151,7 +151,7 @@ public class DeviceMeasurmentsManager {
     }
 
     public static float Average(List<Float> values) {
-        return DeviceMeasurmentsManager.Average(values, 0, values.size() - 1);
+        return DeviceMeasurementsManager.Average(values, 0, values.size() - 1);
     }
 
     public static float Average(List<Float> values, int start, int end) {

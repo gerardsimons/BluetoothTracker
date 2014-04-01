@@ -1,8 +1,6 @@
 package com.simons.bluetoothtracker.models;
 
-import android.util.Log;
-
-import com.simons.bluetoothtracker.Utilities;
+import com.simons.bluetoothtracker.utilities.FormatterHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +105,7 @@ public class Fragment implements CompassDataSource {
             s = "Uncalibrated ";
         s += "fragment with representative value = " + getValue()
                 + " Values= ";
-        s += Utilities.listToString(rssiMeasurements) + "\n";
+        s += FormatterHelper.listToString(rssiMeasurements) + "\n";
         return s;
     }
 
@@ -131,7 +129,7 @@ public class Fragment implements CompassDataSource {
     public void addValues(RSSIMeasurement rssiMeasurement) {
         rssiMeasurements.add(rssiMeasurement);
 
-        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssiMeasurement.getRSSI() + ", " + rssiMeasurement.getAzimuth());
+//        Log.d(TAG, "Fragment adding values (rssi,angle): " + rssiMeasurement.getRSSI() + ", " + rssiMeasurement.getAzimuth());
 //        Log.d(TAG, "Values size : " + rssiValues.size());
 
         if(rssiMeasurements.size() > maxSizeValues) {

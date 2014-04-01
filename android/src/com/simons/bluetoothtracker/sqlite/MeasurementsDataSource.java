@@ -8,16 +8,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class MeasurementsDataSource {
 
     // Database fields
     private SQLiteDatabase database;
     private MySQLiteHelper dbHelper;
-    private String[] allColumns = { MySQLiteHelper.COLUMN_ID,
-            MySQLiteHelper.COLUMN_AZIMUTHS,
-            MySQLiteHelper.COLUMN_RSSIS,
-            MySQLiteHelper.COLUMN_TIMESTAMPS};
+
+    private static final String TAG = "MeasurementsDataSource";
 
     public MeasurementsDataSource(Context context) {
         dbHelper = new MySQLiteHelper(context);
@@ -28,17 +27,21 @@ public class MeasurementsDataSource {
     }
 
     public void close() {
+        Log.i(TAG,"Close measurements database");
         dbHelper.close();
     }
 
-    public boolean createMeasurement(int[] azimuths, int[] rssis, long[] timestamps, String user, String remarks) {
+    public boolean insertMeasurements(Measurements measurements) {
         ContentValues values = new ContentValues();
 
-        values.put(MySQLiteHelper.COLUMN_AZIMUTHS, integersToString(azimuths));
-        values.put(MySQLiteHelper.COLUMN_RSSIS,integersToString(rssis));
-        values.put(MySQLiteHelper.COLUMN_TIMESTAMPS,longsToString(timestamps));
-        values.put(MySQLiteHelper.COLUMN_USER,user);
-        values.put(MySQLiteHelper.COLUMN_REMARKS,remarks);
+        values.put(MySQLiteHelper.COLUMN_AZIMUTHS, integersToString(measurements.getAzimuths()));
+        values.put(MySQLiteHelper.COLUMN_RSSIS,integersToString(measurements.getRssis()));
+        values.put(MySQLiteHelper.COLUMN_TIMESTAMPS,longsToString(measurements.getTimeStamps()));
+        values.put(MySQLiteHelper.COLUMN_USER,measurements.getUserName());
+        values.put(MySQLiteHelper.COLUMN_REMARKS,measurements.getRemarks());
+        values.put(MySQLiteHelper.COLUMN_FRAGMENTS,measurements.getFragments());
+        values.put(MySQLiteHelper.COLUMN_CALIBRATION_LIMIT,measurements.getCalibrationLimit());
+        values.put(MySQLiteHelper.COLUMN_TRUE_AZIMUTH,measurements.getTrueAzimuth());
 
         long insertId = database.insert(MySQLiteHelper.TABLE_MEASUREMENTS, null,values);
         return insertId != -1; //-1 is returned when insertion fails.
@@ -47,7 +50,7 @@ public class MeasurementsDataSource {
     public String integersToString(int[] values) {
         String explodedString = "";
         for(int i = 0 ; i < values.length ; i++) {
-            explodedString += i;
+            explodedString += values[i];
             if(i != values.length - 1) {
                 explodedString += ", ";
             }
@@ -58,42 +61,11 @@ public class MeasurementsDataSource {
     public String longsToString(long[] values) {
         String explodedString = "";
         for(int i = 0 ; i < values.length ; i++) {
-            explodedString += i;
+            explodedString += values[i];
             if(i != values.length - 1) {
                 explodedString += ", ";
             }
         }
         return explodedString;
     }
-
-//    public void deleteComment(Comment comment) {
-//        long id = comment.getId();
-//        System.out.println("Comment deleted with id: " + id);
-//        database.delete(MySQLiteHelper.TABLE_COMMENTS, MySQLiteHelper.COLUMN_ID
-//                + " = " + id, null);
-//    }
-//
-//    public List<Comment> getAllComments() {
-//        List<Comment> comments = new ArrayList<Comment>();
-//
-//        Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
-//                allColumns, null, null, null, null, null);
-//
-//        cursor.moveToFirst();
-//        while (!cursor.isAfterLast()) {
-//            Comment comment = cursorToComment(cursor);
-//            comments.add(comment);
-//            cursor.moveToNext();
-//        }
-//        // make sure to close the cursor
-//        cursor.close();
-//        return comments;
-//    }
-
-//    private Comment cursorToComment(Cursor cursor) {
-//        Comment comment = new Comment();
-//        comment.setId(cursor.getLong(0));
-//        comment.setComment(cursor.getString(1));
-//        return comment;
-//    }
 }

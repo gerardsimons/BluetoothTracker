@@ -21,21 +21,21 @@
         android:paddingBottom="4dp"
         android:paddingRight="10dp"
         android:paddingLeft="10dp">
-    <TextView
-            android:id="@+id/device_rssi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"/>
-
+    <com.simons.bluetoothtracker.views.DeviceStrengthIndicator
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:id="@+id/device_rssi"/>
     <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/device_rssi">
+            android:layout_alignParentLeft="true">
         <TextView
                 android:id="@+id/device_name"
                 android:layout_width="match_parent"
+                android:text="Device name Placeholder"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textStyle="bold"/>
