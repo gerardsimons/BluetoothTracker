@@ -8,6 +8,7 @@ import android.util.Log;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,6 +67,22 @@ public class Connection {
 
         //Check the status of the API
         getStatus();
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public void setLoginKey(String loginKey) {
+        this.loginKey = loginKey;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     private String md5Hash(String str) {
@@ -128,11 +145,11 @@ public class Connection {
             Log.v(TAG, "Unsupported URL Encoding.");
         }
     }
-
     //Performs the HTTP request to the API
-    private void doRequest(final OwnHandler handler, String function, String... input) {
+    public void doRequest(final OwnHandler handler, String function, String... input) {
         //Construct the request URL
         String url = getRequestUrl(function, input);
+        Log.v(TAG, "URL: " + url);
         if (url != null) {
             //Log.v(TAG, "URL: " + url);
             //Perform the request
@@ -140,11 +157,16 @@ public class Connection {
                 @Override
                 public void onSuccess(int statusCode, org.apache.http.Header[] headers, String responseBody) {
                     try {
-                        //Handle the output with the given Handler is response is JSON
-                        handler.handle(new JSONObject(responseBody));
+                        //Handle the output with the given handler if response is JSON array
+                        handler.handle(new JSONArray(responseBody));
                     } catch (JSONException e) {
-                        //If response is not JSON handle the responseBody String
-                        handler.handle(responseBody);
+                        try {
+                            //Handle the output with the given Handler is response is JSON
+                            handler.handle(new JSONObject(responseBody));
+                        } catch (JSONException e2) {
+                            //If response is not JSON handle the responseBody String
+                            handler.handle(responseBody);
+                        }
                     }
                 }
             });
@@ -154,11 +176,9 @@ public class Connection {
     }
 
     public interface OwnHandler {
-        public void handle(String s);
-        protected void handle(JSONObject j) {
-
-        }
+        public void handle(Object o);
     }
+
 
     public abstract class Handler {
         public void handle(JSONObject json) {
@@ -183,6 +203,8 @@ public class Connection {
         public void execute(JSONObject json) throws JSONException {
             sessionId = json.getString("sessionid");
             serverTimestamp = json.getString("timestamp");
+
+            Log.v(TAG, "API status: " + json.toString());
         }
     }
 
@@ -289,6 +311,18 @@ public class Connection {
         doRequest(new AuthLoginHandler(), "auth.login", input);
     }
 
+    public void authLogin(OwnHandler handler, String email, String pass, boolean... remember) {
+        String[] input = {email, pass, macHash, "false"};
+        if (remember.length > 0) {
+            if (remember[0]) {
+                input[3] = "true";
+            }
+        }
+
+        doRequest(handler, "auth.login", input);
+    }
+
+
     public void authLogout() {
         doRequest(new AuthLogoutHandler(), "auth.logout");
     }
@@ -310,4 +344,5 @@ public class Connection {
     public void authGetRegTypes() {
         doRequest(new AuthGetRegTypesHandler(), "auth.getregtype");
     }
+
 }

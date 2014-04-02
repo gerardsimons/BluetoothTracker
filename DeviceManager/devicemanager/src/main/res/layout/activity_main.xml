@@ -3,11 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <fragment
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragmentContainer"></LinearLayout>
+
+    <!--<fragment
         class="com.devriesdev.devicemanager.LoginFragment"
-        android:id="@+id/loginFragmentContainer"
+        android:id="@+id/fragmentContainer"
         android:layout_weight="1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout="@layout/fragment_login" />
+        tools:layout="@layout/fragment_login" />-->
 </RelativeLayout>

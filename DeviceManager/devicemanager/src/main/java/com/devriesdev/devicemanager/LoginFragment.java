@@ -4,14 +4,13 @@ package com.devriesdev.devicemanager;
 
 //import com.loopj.android.http.JsonHttpResponseHandler;
 
-import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -22,9 +21,13 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
 import com.devriesdev.connection.Connection;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 //import android.widget.TextView;
 
 public class LoginFragment extends Fragment {
+    private static final String TAG = "LoginFragment";
 
     private Context context;
     private static SharedPreferences sharedPrefs;
@@ -50,6 +53,8 @@ public class LoginFragment extends Fragment {
     static CheckBox checkStay;
     static Button bLogin;
 
+    private com.devriesdev.utils.Dialog dialog;
+
     public LoginFragment() {
     }
 
@@ -68,6 +73,8 @@ public class LoginFragment extends Fragment {
         connection = ((MainActivity) context).getConnection();
 
         //connection = new Connection(context);
+
+        dialog = new com.devriesdev.utils.Dialog(context);
 
 
         editEmail = (EditText) v.findViewById(R.id.editEmail);
@@ -89,18 +96,36 @@ public class LoginFragment extends Fragment {
         bLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sEmail = editEmail.getText().toString();
-                sPass = editPass.getText().toString();
-                login();
-                connection.authLogin(sEmail, sPass);
+                try {
+                    sEmail = editEmail.getText().toString();
+                    sPass = editPass.getText().toString();
+                    connection.doRequest(new Connection.OwnHandler() {
+                        @Override
+                        public void handle(Object o) {
+                            loginRequest(sEmail, sPass);
+                        }
+                    }, "status.status");
+                } catch (NullPointerException e) {
+                    Log.v(TAG, "No input given");
+
+                }
             }
         });
 
         bTestLoggedIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connection.authIsLoggedIn();
-                connection.authGetUserId();
+                connection.authIsLoggedIn(new Connection.OwnHandler() {
+                    @Override
+                    public void handle(Object o) {
+                        if (((String)o).equals("1")) {
+                            dialog.show("Logged in!");
+                        } else {
+                            dialog.show("Not logged in!");
+                        }
+                    }
+                });
+                //connection.authGetUserId();
             }
         });
 
@@ -116,9 +141,15 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.v("Connection", "Klik!");
-                connection.authLogin("asdf@asdf.com", "test");
+                connection.doRequest(new Connection.OwnHandler() {
+                    @Override
+                    public void handle(Object o) {
+                        loginRequest("asdf@asdf.com", "test");
+                    }
+                }, "status.status");
             }
         });
+
 //--------------------------------------------------------------------------------------------------
 
         /*Bundle extras = getIntent().getExtras();
@@ -127,6 +158,67 @@ public class LoginFragment extends Fragment {
                 //LAAT FF ZIEN DAH HET FOUT IS GEGAAN JONGUH!
             }
         }*/
+    }
+
+    public void loginRequest(String email, String pass) {
+        connection.authLogin(new Connection.OwnHandler() {
+            @Override
+            public void handle(Object o) {
+                if (o instanceof String) {
+                    String[] s = ((String)o).split("\n");
+                    int i = 0;
+                    while (s[i].contains("<br />")) {i++;}
+                    if (i < s.length) {
+                        try {
+                            //Handle the output with the given Handler is response is JSON
+                            o = new JSONObject(s[i]);
+                        } catch (JSONException e) {
+                            //
+                        }
+                    }
+                }
+                if (o instanceof JSONObject) {
+                    try {
+                        JSONObject json = (JSONObject) o;
+                        Log.v(TAG, "Got JSONObject!: \n" + json.toString());
+                        if (json.getInt("result") == 1) {
+                            connection.setSessionId(json.getString("sessionid"));
+                            connection.setLoginKey(json.getString("loginkey"));
+                            connection.setUserId(json.getString("userid"));
+                            connection.setUserName(json.getString("username"));
+
+                            Log.v(TAG, "Logged in; starting list fragment!");
+                            dialog.show("Succesfully logged in!");
+
+                            startListFragment();
+                        } else {
+                            dialog.show("Invalid username/password provided!");
+                        }
+                    } catch (JSONException e) {
+                        dialog.show("Oops... Something went wrong");
+                    }
+                } else {
+                    Log.v(TAG, "Something went wrong: authIsLoggedIn did not return JSONObject");
+                    Log.v(TAG, o.toString());
+                    dialog.show("Oops... Something went wrong");
+                }
+            }
+        }, email, pass);
+    }
+
+    private void startListFragment() {
+        // Create new fragment and transaction
+        Fragment newFragment = new ListFragment();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        transaction.replace(R.id.fragmentContainer, newFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 
     @Override
