@@ -175,7 +175,7 @@ class APIAuth extends APISub
 			if ($this->getRow("SELECT * FROM UserAutoLogin WHERE UserID=? AND MACHash=? AND APIKeyID=?", array($userid, $machash, $apikeyid)))
 			{
 				$sql = "UPDATE UserAutoLogin SET LoginKey=?, TimestampLastLogin=? WHERE UserID=? AND MACHash=? AND APIKeyID=?";
-				$fields = array($loginkey, time(), $userid, $machash);
+				$fields = array($loginkey, time(), $userid, $machash, $apikeyid);
 			}
 			else
 			{
