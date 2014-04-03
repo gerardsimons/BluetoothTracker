@@ -1,8 +1,8 @@
 <?php
 //turn off error reporting and load settings
-error_reporting(E_ALL);
-require_once("settings.php");
-require_once("apisub.php");
+//error_reporting(E_ALL);
+require_once(dirname(__FILE__)."/settings.php");
+require_once(dirname(__FILE__)."/apisub.php");
 
 //this class creates the framework for all sub parts of the API which are located in the api.<class>.php files
 //all functionality is enabled and loaded when an instant of this class is created
@@ -94,7 +94,7 @@ class API
 		if ($this->apiactive == false) return;
 		
 		//load all API subparts
-		$files = scandir("./".$this->subclassfolder);
+		$files = scandir(dirname(__FILE__)."/".$this->subclassfolder);
 		foreach ($files as $file)
 		{
 			$filename = $file;
@@ -105,7 +105,7 @@ class API
 				{
 					$subname = $file[0];
 					$classname = "api$subname";
-					include($this->subclassfolder."/".$filename);
+					include(dirname(__FILE__)."/".$this->subclassfolder."/".$filename);
 					$this->$subname = new $classname($this);
 					$this->$subname->txt = $this->loadText($subname, $this->lang);
 				}
@@ -144,7 +144,7 @@ class API
 	
 	//function load text translations
 	public function loadText($module, $lang) {
-		$filepath = "./text/$module.$lang.txt";
+		$filepath = dirname(__FILE__)."/text/$module.$lang.txt";
 		if (file_exists($filepath))
 		{
 			$lines = file($filepath);

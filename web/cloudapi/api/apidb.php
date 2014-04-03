@@ -2,7 +2,7 @@
 //this file contains the class which generates the table structure for the API
 //usually called by prepare.php
 
-require_once("settings.php");
+require_once(dirname(__FILE__)."/settings.php");
 class APIDBStructure
 {
 	private static $dbstructure = array(

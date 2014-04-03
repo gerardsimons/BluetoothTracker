@@ -114,7 +114,7 @@ class APIAuth extends APISub
 		$newsalt = $this->generateCode();
 		$newpasshash = $this->hashPass($pass, $newsalt);
 		
-		$this->query("UPDATE Users SET Password=?, Salt=? WHERE UserID=?", array($newpasshash, $newsalt, $userid));
+		$this->query("UPDATE Users SET Password=?, Salt=? WHERE ID=?", array($newpasshash, $newsalt, $userid));
 		
 		//continue with login process
 		return $this->processLogin($userid, $username, $machash, $usertype, $remember);
@@ -370,7 +370,7 @@ class APIAuth extends APISub
 		//check if other user with same email address already exists
 		if ($email != "")
 		{
-			if ($this->getRow("SELECT * FROM Users WHERE Email=? AND UserType=?", array($email, $usertype))) return $false["emailexists"];
+			if ($this->getRow("SELECT * FROM Users WHERE Email=? AND UserType=?", array($email, $usertypeid))) return $false["emailexists"];
 		}
 		
 		//validate password if regtype != form
@@ -388,17 +388,17 @@ class APIAuth extends APISub
 			$passhash = $this->hashPass($pass, $salt);
 			
 			$sql = "INSERT INTO Users (Name, Email, LoginName, Password, Salt, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-			$fields = array($name, $email, $loginname, $pass, $salt, $usertype, $regtype, 1);
+			$fields = array($name, $email, $loginname, $passhash, $salt, $usertypeid, $regtype, 1);
 		}
 		elseif ($email != "")
 		{
 			$sql = "INSERT INTO Users (Name, Email, LoginName, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?, ?)";
-			$fields = array($name, $email, $loginname, $usertype, $regtype, 1);
+			$fields = array($name, $email, $loginname, $usertypeid, $regtype, 1);
 		}
 		else
 		{
 			$sql = "INSERT INTO Users (Name, LoginName, UserType, RegType, Active) VALUES (?, ?, ?, ?, ?)";
-			$fields = array($name, $loginname, $usertype, $regtype, 1);
+			$fields = array($name, $loginname, $usertypeid, $regtype, 1);
 		}
 		if ($this->query($sql, $fields) == false) return $false["couldnotreg"];
 		
