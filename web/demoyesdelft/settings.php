@@ -1,16 +1,14 @@
 <?php
 session_start();
 
-$pathtoapi = "../api.whereatcloud.com/";
+$pathtoapi = "../../api.whereatcloud.com/";
 
 $dbhost = "localhost";
 $dbuser = "isilvestrov_cld";
 $dbpass = "F647b2Po";
 $dbname = "isilvestrov_cld";
 
-$adminpass = "whereAtAdmin";
-
-$changepassurl = "http://admin.whereatcloud.com/changepass.php";
+$adminpass = "whereAtDemoYesDelft";
 
 try {
 	$connstr = "mysql:host=".$dbhost.";dbname=".$dbname.";charset=utf8";
@@ -24,7 +22,7 @@ $insertid = 0;
 $dberror = "";
 
 require_once($pathtoapi."api.php");
-$apikey = "2RDJJqVAMKJgkzTWYiKWmQSM";
+$apikey = "jrZ5H2mdbf8LXB41Uj47ccad";
 $api = new API($apikey, session_id());
 $res = $api->call("auth", "isloggedin", array());
 if ($res != true)
@@ -35,7 +33,7 @@ if ($res != true)
 		echo "API error occured: ".$res["errorMessage"]." (".$res["errorType"].")";
 		exit();
 	}
-	$res = $api->call("auth", "login", array("asdf@asdf.com", "test", "", false));
+	$res = $api->call("auth", "login", array("yesdelftdemo@whereatcloud.com", "yesDelftDemo", "", false));
 	if ($res["result"] != true)
 	{
 		echo "Could not log in to API!";
