@@ -1,23 +1,5 @@
 <?php
 require_once("settings.php");
-
-if ($_SESSION["loggedin"] != true)
-{
-	if (isset($_POST["pass"]))
-	{
-		if ($_POST["pass"] == $adminpass) $_SESSION["loggedin"] = true;
-	}
-	if ($_SESSION["loggedin"] != true)
-	{ ?>
-<div style="text-align:center">
-    <form action="." method="post">
-    	<input type="password" name="pass" /> <input type="submit" value="Login" />
-    </form>
-</div>
-    <?php
-		exit();
-	}
-}
 ?>
 
 <style type="text/css">
@@ -99,18 +81,89 @@ var centery = 50;
 var mapw = 0;
 var maph = 0;
 
-var tmethod = <?php echo (isset($_GET["t"]) && is_numeric($_GET["t"])) ? $_GET["t"]: 1; ?>;
-
-var uniteditmode = <?php echo (isset($_GET["uniteditmode"])) ? "true": "false"; ?>;
 var units = {<?php
+$xs = array();
+$ys = array();
 $units = array();
+$labeldisdata = array();
 $res = getRows("SELECT * FROM YesDemo_Units", array());
-foreach ($res as $row) $units[] = $row["ID"].": [".$row["CoordX"].", ".$row["CoordY"]."]";
+foreach ($res as $row)
+{
+	$units[] = $row["ID"].": [".$row["CoordX"].", ".$row["CoordY"]."]";
+	$labeldisdata[] = $row["ID"].": {1: [0, 0]}";
+	$xs[] = $row["CoordX"];
+	$ys[] = $row["CoordY"];
+}
 echo implode(", ", $units);
 ?>};
 
-var labels = {};
+var labels = {1: [0, 0, 0]};
 var fromts = 0;
+
+var labeldisdata = {<?php echo implode(", ", $labeldisdata); ?>};
+
+var th = 0;
+function AnimateLabels() {
+	var xstart = <?php echo array_sum($xs) / count($xs); ?>;
+	var ystart = <?php echo array_sum($ys) / count($ys); ?>;
+	var r = 1;
+	
+	var x = xstart + r * Math.cos(th);
+	var y = ystart + r * Math.sin(th);
+	
+	labels[1][0] = x;
+	labels[1][1] = y;
+	
+	th += Math.PI / 180;
+	
+	DrawLabels();
+	
+	CalcDistance();
+	
+	setTimeout(AnimateLabels, 100);
+}
+
+function CalcDistance() {
+	var noisewidth = 0.0;
+	for (var i in labeldisdata) {
+		var xunit = units[i][0];
+		var yunit = units[i][1];
+		for (var a in labeldisdata[i]) {
+			var xlabel = labels[a][0];
+			var ylabel = labels[a][1];
+			
+			var d = Math.sqrt(Math.pow(xunit - xlabel, 2) + Math.pow(yunit - ylabel, 2));
+			
+			d = d * ((1 - noisewidth) + Math.random() * (2 * noisewidth));
+			
+			labeldisdata[i][a][0] = d;
+			
+			var frac = 2 / d;
+			var ddB = 10 * (Math.log(frac) / Math.LN10);
+			labeldisdata[i][a][1] = ddB - 30;
+		}
+	}
+	//console.log(labeldisdata[1][1][1], labeldisdata[2][1][1], labeldisdata[3][1][1], labeldisdata[4][1][1]);
+}
+
+var tid = 0;
+function ReportSignal() {
+	var url = "reportsignal.php?apikey=jrZ5H2mdbf8LXB41Uj47ccad&unitid=";
+	
+	for (var i in labeldisdata) {
+		var uurl = url + i;
+		for (var a in labeldisdata[i]) {
+			var signal = labeldisdata[i][a][1];
+			uurl += "&labelids[]="+a+"&signals[]="+signal;
+		}
+		$.ajax(uurl, {
+			success: function() {
+				clearTimeout(tid);
+				tid = setTimeout(ReportSignal, 1000);
+			}
+		});
+	}
+}
 
 $(document).ready(function(e) {
 	$("#map").draggable({
@@ -136,10 +189,10 @@ $(document).ready(function(e) {
 		zoom = zoom * (1 + .1 * e.deltaY);
 		SetMapSize();
 	});
-	setTimeout(SetMapSize(), 500);
+	setTimeout(SetMapSize, 500);
 	DrawUnits();
-	DrawLabels();
-	UpdateLabels();
+	AnimateLabels();
+	setTimeout(ReportSignal, 500);
 });
 
 function SetMapSize() {
@@ -181,29 +234,6 @@ function DrawUnits() {
 		var top = 100 - coordy;
 		$("#map").append("<div style='left:"+left+"%;top:"+top+"%;' class='itemwrapper whereatunit' id='unit"+id+"'><div class='unitdot'></div>"+id+"</div>");
 	}
-	if (uniteditmode == true) {
-		$(".whereatunit").draggable({
-			containment: "parent",
-			stop: function(e, ui) {
-				var left = ui.position.left
-				var top = ui.position.top;
-				
-				var mapw = $("#map").width();
-				var maph = $("#map").height();
-				
-				var coordx = (left / mapw) * 100;
-				var coordy = ((maph - top) / mapw) * 100;
-				
-				var id = $(this).attr("id").substr(4);
-				
-				ReportPos(id, coordx, coordy);
-			}
-		});
-	}
-}
-
-function ReportPos(unitid, coordx, coordy) {
-	$.ajax("action.php?action=setcoordunit&id="+unitid+"&coordx="+coordx+"&coordy="+coordy);
 }
 
 function DrawLabels() {
@@ -222,12 +252,5 @@ function DrawLabels() {
 		
 		$("#map").append("<div style='left:"+left+"%;top:"+top+"%;' class='itemwrapper whereatlabel'><div class='accuracywrapper' style='left:"+accl+"px;top:"+accl+"px;width:"+accw+"px;height:"+accw+"px'><div class='accuracy'></div></div><div class='labeldot'></div><div class='itemtext'>"+id+"</div></div>");
 	}
-}
-
-function UpdateLabels() {
-	$.getScript("updatelabels.php?fromts="+fromts+"&tmethod="+tmethod, function() {
-		DrawLabels();
-		setTimeout(UpdateLabels, 1000);
-	});
 }
 </script>

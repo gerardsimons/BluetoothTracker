@@ -17,14 +17,12 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Tracking
 		ID int AUTO_INCREMENT,
 		UnitID int,
 		LabelID int,
-		Timestamp int,
+		Timestamp double,
 		SignalStrength double,
 		PRIMARY KEY (ID)
 		)", array());
 
-echo $dberror;
-
-query("CREATE TABLE IF NOT EXISTS YesDemo_Position
+/*query("CREATE TABLE IF NOT EXISTS YesDemo_Position
 		(
 		ID int AUTO_INCREMENT,
 		LabelID int,
@@ -32,5 +30,5 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Position
 		CoordX double,
 		CoordY double,
 		PRIMARY KEY (ID)
-		)", array());
+		)", array());*/
 ?>

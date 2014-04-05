@@ -2,9 +2,11 @@
 require_once("settings.php");
 
 $unitid = $_GET["unitid"];
-$apikey = $_GET["apikey"];
+$gapikey = $_GET["apikey"];
 $labelids = $_GET["labelids"];
 $signals = $_GET["signals"];
+
+if ($gapikey != $apikey) exit();
 
 if (!getRow("SELECT * FROM YesDemo_Units WHERE ID=?", array($unitid))) exit();
 
@@ -30,12 +32,14 @@ if (!isset($res["error"]))
 	}
 }
 
+$ts = microtime(true);
+
 foreach ($labels as $labelid)
 {
 	if (isset($data[$labelid]))
 	{
 		$signal = $data[$labelid];
-		query("INSERT INTO YesDemo_Tracking (UnitID, LabelID, Timestamp, SignalStrength) VALUES (?, ?, ?, ?)", array($unitid, $labelid, time(), $signal));
+		query("INSERT INTO YesDemo_Tracking (UnitID, LabelID, Timestamp, SignalStrength) VALUES (?, ?, ?, ?)", array($unitid, $labelid, $ts, $signal));
 	}
 }
 ?>
