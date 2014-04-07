@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BleDevicesAdapter;
+import com.simons.bluetoothtracker.models.ProductType;
 
 public class TestDeviceScanActivity extends ListActivity {
 
@@ -29,7 +30,7 @@ public class TestDeviceScanActivity extends ListActivity {
             rssi = (int)((float)i / devices * -130F);
             rssi -= 30;
 
-            mLeDevicesAdapter.addDevice("rssi = " + rssi, "address " + i,rssi);
+            mLeDevicesAdapter.addDevice("rssi = " + rssi, "address " + i,rssi, ProductType.KEYS);
         }
     }
 

@@ -6,16 +6,19 @@ public class MyBluetoothDevice {
     private String name = "<NO NAME>";
     private String address = "<NO ADDRESS>";
     private Integer latestRSSI = null;
+    private ProductType productType;
 
-    public MyBluetoothDevice(String name, String address) {
+    public MyBluetoothDevice(String name, String address, ProductType productType) {
         this.name = name;
         this.address = address;
+        this.productType = productType;
     }
 
-    public MyBluetoothDevice(String name, String address, int latestRSSI) {
+    public MyBluetoothDevice(String name, String address, int latestRSSI, ProductType productType) {
         this.address = address;
         this.name = name;
         this.latestRSSI = latestRSSI;
+        this.productType = productType;
     }
 
     public String getAddress() {
@@ -39,6 +42,8 @@ public class MyBluetoothDevice {
     public Integer getLatestRSSI() {
         return latestRSSI;
     }
+
+    public ProductType getProductType() { return productType; }
 
     public String toString() {
         String toString = "MyBlueToothDevice\nName: " + getName() + "\nAddress:" + getAddress() + "\nRSSI Value: " + latestRSSI;

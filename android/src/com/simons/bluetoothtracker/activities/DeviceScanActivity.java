@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,7 +37,6 @@ import com.simons.bluetoothtracker.BluetoothTrackerApplication;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BleDevicesAdapter;
 import com.simons.bluetoothtracker.models.MyBluetoothDevice;
-import com.simons.bluetoothtracker.models.ProductType;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -65,11 +65,6 @@ public class DeviceScanActivity extends ListActivity {
         mHandler = new Handler();
 
         Intent intent = getIntent();
-        if(intent.hasExtra(MenuActivity.PRODUCT_TYPE_KEY))
-        {
-            ProductType type = (ProductType) intent.getSerializableExtra(MenuActivity.PRODUCT_TYPE_KEY);
-//            Log.d(TAG,"Product type received " + type);
-        }
 
         application = (BluetoothTrackerApplication) getApplication();
 
@@ -207,8 +202,13 @@ public class DeviceScanActivity extends ListActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mLeDevicesAdapter.addDevice(device.getName(),device.getAddress(),rssi);
-                mLeDevicesAdapter.notifyDataSetChanged();
+                if(application.macAddressIsAuthorized(device.getAddress())) {
+                    mLeDevicesAdapter.addDevice(device.getName(),device.getAddress(),rssi,application.productTypeForMacAddress(device.getAddress()));
+                    mLeDevicesAdapter.notifyDataSetChanged();
+                    Log.d(TAG,device.getName() + " has discovery authorization.");
+                } else {
+                    Log.d(TAG,device.getName() + " has NO discovery authorization!");
+                }
             }
         });
         }

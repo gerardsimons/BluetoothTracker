@@ -35,7 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.CompassSettings;
+import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
@@ -93,10 +93,7 @@ public class CompassActivity extends Activity {
     private boolean mConnected = false;
     private boolean paused = false;
 
-    //The rate in milliseconds we want to measure, this is used to keep all types of measurments roughly synchronized (RSSI, motion,...)
-    public static final int MEASUREMENTS_RATE = 100;
-
-    private int refreshRate;
+    private int refreshRate = 100;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -174,7 +171,7 @@ public class CompassActivity extends Activity {
         application = (BluetoothTrackerApplication) getApplication();
         compassSettings = application.loadCompassSettings();
 
-        refreshRate = application.loadIntValue(BluetoothTrackerApplication.BT_REFRESH_RATE_KEY);
+
 //        Log.d(TAG,"Found refresh rate value of " + refreshRate);
 
         final Intent intent = getIntent();

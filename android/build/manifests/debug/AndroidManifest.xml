@@ -7,12 +7,22 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <application android:allowBackup="true" android:debuggable="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:name="com.simons.bluetoothtracker.BluetoothTrackerApplication" android:theme="@android:style/Theme.Holo.Light">
+        <activity android:label="main activity" android:name="com.simons.bluetoothtracker.activities.MainActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
+        <activity android:label="list activity" android:name="com.simons.bluetoothtracker.activities.ListActivity">
+        </activity>
         <activity android:label="@string/app_name" android:name="com.simons.bluetoothtracker.activities.DeviceScanActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity android:label="test device scan" android:name="com.simons.bluetoothtracker.activities.TestDeviceScanActivity">
             <!--<intent-filter>-->
@@ -30,10 +40,10 @@
         </activity>
         <activity android:name="com.simons.bluetoothtracker.activities.SettingsActivity" android:screenOrientation="portrait"/>
         <activity android:name="com.simons.bluetoothtracker.activities.MenuActivity" android:screenOrientation="portrait">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
         <service android:enabled="true" android:name="com.simons.bluetoothtracker.controllers.BluetoothLeService"/>
     </application>

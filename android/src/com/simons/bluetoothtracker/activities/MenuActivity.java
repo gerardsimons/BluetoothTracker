@@ -57,6 +57,13 @@ public class MenuActivity extends Activity {
         runningAnimations = new ArrayList<Animator>();
 
         logoView = (ImageView) findViewById(R.id.logo);
+        logoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MenuActivity.this,DeviceScanActivity.class);
+                startActivity(intent);
+            }
+        });
 
         rootView = (RelativeLayout) findViewById(R.id.menuRootView);
         //Find the buttons
@@ -128,7 +135,7 @@ public class MenuActivity extends Activity {
                             lastTouchY = motionEvent.getY();
                             direction = 1;
                         } else {
-                            Log.d(TAG,"No direction.");
+//                            Log.d(TAG,"No direction.");
                             return true;
                         }
                         float distance = (float) Math.sqrt(Math.pow(motionEvent.getX() - touchDownX, 2) + Math.pow(motionEvent.getY() - touchDownY, 2));
@@ -197,8 +204,8 @@ public class MenuActivity extends Activity {
         logoCenterX = Math.round(rootView.getWidth() / 2F + rootView.getX());
         logoCenterY = Math.round(rootView.getHeight() / 2F + rootView.getY());
 
-        Log.d(TAG, "centerX = " + logoCenterX);
-        Log.d(TAG, "centerY = " + logoCenterY);
+//        Log.d(TAG, "centerX = " + logoCenterX);
+//        Log.d(TAG, "centerY = " + logoCenterY);
 
         float angleRadians = 0F;
         float angleDelta = (float) (Math.PI * 2 / buttons.size());
@@ -211,7 +218,7 @@ public class MenuActivity extends Activity {
         for (int i = 0; i < buttons.size(); i++) {
             final LinearLayout buttonWrapper = rotatingButtons.get(i);
 
-            Log.d(TAG, "angle (in Radians) = " + angleRadians);
+//            Log.d(TAG, "angle (in Radians) = " + angleRadians);
 
             //Set the position according to the circle around the logo
             buttonWrapper.setX(logoCenterX + distanceToCenter - buttonSize / 2);
@@ -312,7 +319,7 @@ public class MenuActivity extends Activity {
 //                Log.d(TAG, "fromAngle = " + fromAngle);
 //                Log.d(TAG, "toAngle = " + toAngle);
 
-                //Epic somersaults, if you'd like
+                //Epic somersaults, if this strikes your fancy
                 int somerSaults = 0;
 
                 ObjectAnimator wrapperRotation = ObjectAnimator.ofFloat(buttonWrapper, "rotation", toAngle);

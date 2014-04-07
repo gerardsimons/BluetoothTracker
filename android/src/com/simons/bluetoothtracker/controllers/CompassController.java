@@ -2,7 +2,7 @@ package com.simons.bluetoothtracker.controllers;
 
 import android.util.Log;
 
-import com.simons.bluetoothtracker.CompassSettings;
+import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.interfaces.CompassCalibrationListener;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.Fragment;

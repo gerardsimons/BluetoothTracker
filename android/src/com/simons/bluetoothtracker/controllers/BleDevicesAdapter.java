@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.simons.bluetoothtracker.BluetoothTrackerApplication;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.models.Compass;
 import com.simons.bluetoothtracker.models.MyBluetoothDevice;
+import com.simons.bluetoothtracker.models.ProductType;
 import com.simons.bluetoothtracker.views.DeviceStrengthIndicator;
 
 import java.util.ArrayList;
@@ -34,11 +36,10 @@ public class BleDevicesAdapter extends BaseAdapter {
         return null;
     }
 
-    public void addDevice(String name, String address, int rssi) {
+    public void addDevice(String name, String address, int rssi, ProductType productType) {
         MyBluetoothDevice existingDevice = getExistingDevice(address);
         if (existingDevice == null) {
-
-            leDevices.add(new MyBluetoothDevice(name,address,rssi));
+            leDevices.add(new MyBluetoothDevice(name,address,rssi,productType));
         } else {
             existingDevice.setLatestRSSI(rssi);
         }
@@ -77,7 +78,7 @@ public class BleDevicesAdapter extends BaseAdapter {
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
             viewHolder.deviceRssi = (DeviceStrengthIndicator) view.findViewById(R.id.device_rssi);
-            viewHolder.deviceRssi.setImage(R.drawable.bike);
+
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -91,6 +92,12 @@ public class BleDevicesAdapter extends BaseAdapter {
             viewHolder.deviceName.setText("Unknown Device");
 
         viewHolder.deviceAddress.setText(device.getAddress());
+
+        //Get the drawable belonging to the product type
+        int drawableId = BluetoothTrackerApplication.IdForProductType(device.getProductType());
+        if(drawableId != -1)
+            viewHolder.deviceRssi.setImage(drawableId);
+
 
         Integer latestRSSI = device.getLatestRSSI();
         float strengthValue = 0F;

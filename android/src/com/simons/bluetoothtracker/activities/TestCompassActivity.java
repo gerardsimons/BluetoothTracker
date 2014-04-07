@@ -22,7 +22,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.CompassSettings;
+import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;

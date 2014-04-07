@@ -14,8 +14,10 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.CompassSettings;
+import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.R;
+
+import java.security.InvalidKeyException;
 
 /**
  * Created by gerardsimons on 12/02/14.
@@ -85,7 +87,12 @@ public class SettingsActivity extends Activity implements View.OnClickListener, 
         alert.setTitle(key);
         alert.setMessage("New Value");
 
-        int value = application.loadIntValue(key);
+        int value = 0;
+        try {
+            value = application.loadIntValue(key);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
 
         // Set an EditText view to get user input
         final EditText input = new EditText(SettingsActivity.this);
