@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <application>
+        <service android:name=".........src.com.simons.bluetoothtracker.services.BluetoothLeDiscoveryService"
+            android:exported="true"
+            android:enabled="true" >
+        </service>
+    </application>
+
+</manifest>

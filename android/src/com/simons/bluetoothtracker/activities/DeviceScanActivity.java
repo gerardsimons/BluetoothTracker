@@ -18,14 +18,18 @@ package com.simons.bluetoothtracker.activities;
 
 import android.app.Activity;
 import android.app.ListActivity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,38 +41,77 @@ import com.simons.bluetoothtracker.BluetoothTrackerApplication;
 import com.simons.bluetoothtracker.R;
 import com.simons.bluetoothtracker.controllers.BleDevicesAdapter;
 import com.simons.bluetoothtracker.models.MyBluetoothDevice;
+import com.simons.bluetoothtracker.services.BluetoothLeDiscoveryService;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
  */
 public class DeviceScanActivity extends ListActivity {
-    //private LeDeviceListAdapter mLeDeviceListAdapter;
-    private BleDevicesAdapter mLeDevicesAdapter;
-    private BluetoothAdapter mBluetoothAdapter;
-    private boolean mScanning;
-    private Handler mHandler;
 
     private static final String TAG = "DeviceScanActivity";
 
+    private BleDevicesAdapter mLeDevicesAdapter;
     private BluetoothTrackerApplication application;
 
     private static final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 15000;
 
-//    private SharedPreferences preferences;
+    private boolean mScanning = true;
+
+    private BluetoothLeDiscoveryService discoveryService;
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.hasExtra(BluetoothLeDiscoveryService.DEVICE_THRESHOLD)) {
+
+                //Get the values from the intent
+                String name = intent.getStringExtra(BluetoothLeDiscoveryService.DEVICE_NAME);
+                String address = intent.getStringExtra(BluetoothLeDiscoveryService.DEVICE_ADDRESS);
+                int rssi = intent.getIntExtra(BluetoothLeDiscoveryService.DEVICE_RSSI, -1);
+                boolean threshold = intent.getBooleanExtra(BluetoothLeDiscoveryService.DEVICE_THRESHOLD,false);
+
+                if(application.macAddressIsAuthorized(address)) {
+                    mLeDevicesAdapter.addDevice(name,address,rssi,application.productTypeForMacAddress(address));
+                    mLeDevicesAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            Log.d(TAG,"Connected to discovery service.");
+            discoveryService = ((BluetoothLeDiscoveryService.LocalBinder) service).getService();
+            if (!discoveryService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                mScanning = true;
+                finish();
+            }
+            else discoveryService.startScanning();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(TAG,"Disconnected from discovery service.");
+            discoveryService = null;
+            mScanning = false;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mHandler = new Handler();
-
-        Intent intent = getIntent();
+        Log.d(TAG,"DeviceScanActivity created.");
 
         application = (BluetoothTrackerApplication) getApplication();
 
         setContentView(R.layout.device_scan);
+
+        Intent serviceIntent = new Intent(this,BluetoothLeDiscoveryService.class);
+        bindService(serviceIntent,mServiceConnection,BIND_AUTO_CREATE);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -76,18 +119,28 @@ public class DeviceScanActivity extends ListActivity {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
 
-        // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
-        // BluetoothAdapter through BluetoothManager.
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+    public void createNotification() {
 
-        // Checks if Bluetooth is supported on the device.
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
+        Log.d(TAG,"Creating notification.");
+        // Prepare intent which is triggered if the
+        // notification is selected
+        Intent intent = new Intent(this, DeviceScanActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        // Build notification
+        // Actions are just fake
+        Notification noti = new Notification.Builder(this)
+                .setContentTitle("New mail from " + "test@gmail.com")
+                .setContentText("Subject").setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(pIntent)
+                .addAction(R.drawable.ic_launcher, "And more", pIntent).build();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        // hide the notification after its selected
+        noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        notificationManager.notify(0, noti);
     }
 
     @Override
@@ -110,10 +163,10 @@ public class DeviceScanActivity extends ListActivity {
         switch (item.getItemId()) {
             case R.id.menu_scan:
                 mLeDevicesAdapter.clear();
-                scanLeDevice(true);
+                discoveryService.startScanning();
                 break;
             case R.id.menu_stop:
-                scanLeDevice(false);
+                discoveryService.stopScanning();
                 break;
             case R.id.menu_settings:
                 Intent intent = new Intent(this,SettingsActivity.class);
@@ -127,19 +180,12 @@ public class DeviceScanActivity extends ListActivity {
     protected void onResume() {
         super.onResume();
 
-        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-        if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-        }
+        registerReceiver(receiver,new IntentFilter(BluetoothLeDiscoveryService.ACTION_NAME));
 
         // Initializes list view adapter.
         mLeDevicesAdapter = new BleDevicesAdapter(this);
         setListAdapter(mLeDevicesAdapter);
-        scanLeDevice(true);
+
     }
 
     @Override
@@ -155,8 +201,11 @@ public class DeviceScanActivity extends ListActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        scanLeDevice(false);
+
+        createNotification();
         mLeDevicesAdapter.clear();
+
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -168,49 +217,11 @@ public class DeviceScanActivity extends ListActivity {
         intent.putExtra(CompassActivity.EXTRAS_DEVICE_NAME, device.getName());
         intent.putExtra(CompassActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
         if (mScanning) {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
             mScanning = false;
         }
+        discoveryService.stopScanning();
         startActivity(intent);
     }
 
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    invalidateOptionsMenu();
-                }
-            }, SCAN_PERIOD);
 
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        } else {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        }
-        invalidateOptionsMenu();
-    }
-
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(application.macAddressIsAuthorized(device.getAddress())) {
-                    mLeDevicesAdapter.addDevice(device.getName(),device.getAddress(),rssi,application.productTypeForMacAddress(device.getAddress()));
-                    mLeDevicesAdapter.notifyDataSetChanged();
-                    Log.d(TAG,device.getName() + " has discovery authorization.");
-                } else {
-                    Log.d(TAG,device.getName() + " has NO discovery authorization!");
-                }
-            }
-        });
-        }
-    };
 }

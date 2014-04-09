@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
 import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.R;
-import com.simons.bluetoothtracker.controllers.BluetoothLeService;
+import com.simons.bluetoothtracker.services.BluetoothLeConnectionService;
 import com.simons.bluetoothtracker.controllers.CompassController;
 import com.simons.bluetoothtracker.controllers.OrientationSensor;
 import com.simons.bluetoothtracker.interfaces.CompassCalibrationListener;
@@ -260,9 +260,9 @@ public class TestCompassActivity extends Activity implements SensorEventListener
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_RSSI_VALUE_READ);
         return intentFilter;
     }
 

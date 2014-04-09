@@ -1,5 +1,5 @@
 <!-- From: file:/Users/gerardsimons/Git/BluetoothTracker/android/AndroidManifest.xml -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="6" android:versionName="1.22" package="com.simons.bluetoothtracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="7" android:versionName="1.23" package="com.simons.bluetoothtracker">
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
@@ -45,6 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:enabled="true" android:name="com.simons.bluetoothtracker.controllers.BluetoothLeService"/>
+        <service android:enabled="true" android:name="com.simons.bluetoothtracker.services.BluetoothLeConnectionService"/>
+        <service android:enabled="true" android:name="com.simons.bluetoothtracker.services.BluetoothLeDiscoveryService"/>
     </application>
 </manifest>

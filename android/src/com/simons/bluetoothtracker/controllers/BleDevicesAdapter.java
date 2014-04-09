@@ -1,7 +1,6 @@
 package com.simons.bluetoothtracker.controllers;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,7 +86,7 @@ public class BleDevicesAdapter extends BaseAdapter {
         MyBluetoothDevice device = leDevices.get(i);
         final String deviceName = device.getName();
         if (deviceName != null && deviceName.length() > 0)
-            viewHolder.deviceName.setText(deviceName);
+            viewHolder.deviceName.setText(device.getName());
         else
             viewHolder.deviceName.setText("Unknown Device");
 
@@ -103,9 +102,6 @@ public class BleDevicesAdapter extends BaseAdapter {
         float strengthValue = 0F;
         if(latestRSSI != null)
             strengthValue = Compass.getRatioStrength(latestRSSI);
-
-        Log.d(TAG,"Latest RSSI = " + latestRSSI);
-        Log.d(TAG, "Strength value = " + strengthValue);
 
         viewHolder.deviceRssi.setStrengthValue(strengthValue);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.simons.bluetoothtracker.controllers;
+package com.simons.bluetoothtracker.services;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -33,8 +33,8 @@ import android.util.Log;
  * Service for managing connection and data communication with a GATT server
  * hosted on a given Bluetooth LE device.
  */
-public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+public class BluetoothLeConnectionService extends Service {
+    private final static String TAG = BluetoothLeConnectionService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -84,7 +84,6 @@ public class BluetoothLeService extends Service {
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             broadcastUpdate(ACTION_RSSI_VALUE_READ, rssi);
         }
-
     };
 
     private void broadcastUpdate(final String action) {
@@ -101,19 +100,16 @@ public class BluetoothLeService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        public BluetoothLeService getService() {
-            return BluetoothLeService.this;
+        public BluetoothLeConnectionService getService() {
+            return BluetoothLeConnectionService.this;
         }
     }
+
+    private final IBinder mBinder = new LocalBinder();
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    public void restartBluetooth() {
-        mBluetoothAdapter.disable();
-        mBluetoothAdapter.enable();
     }
 
     @Override
@@ -125,7 +121,7 @@ public class BluetoothLeService extends Service {
         return super.onUnbind(intent);
     }
 
-    private final IBinder mBinder = new LocalBinder();
+
 
     /**
      * Initializes a reference to the local Bluetooth adapter.

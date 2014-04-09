@@ -35,15 +35,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simons.bluetoothtracker.BluetoothTrackerApplication;
-import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.R;
-import com.simons.bluetoothtracker.controllers.BluetoothLeService;
 import com.simons.bluetoothtracker.controllers.CompassController;
 import com.simons.bluetoothtracker.controllers.CompassOrientationSensor;
 import com.simons.bluetoothtracker.controllers.DeviceMeasurementsManager;
 import com.simons.bluetoothtracker.interfaces.CompassCalibrationListener;
 import com.simons.bluetoothtracker.interfaces.CompassOrientationSensorListener;
 import com.simons.bluetoothtracker.models.Compass;
+import com.simons.bluetoothtracker.services.BluetoothLeConnectionService;
+import com.simons.bluetoothtracker.settings.CompassSettings;
 import com.simons.bluetoothtracker.sqlite.Measurements;
 import com.simons.bluetoothtracker.sqlite.MeasurementsDataSource;
 import com.simons.bluetoothtracker.views.CompassView;
@@ -70,23 +70,17 @@ public class CompassActivity extends Activity {
     private boolean developmentMode;
 
     private TextView rssiValuesTextView;
-    //We are not using below anymore
-//    private TextView timeDeltasTextView;
-//    private TextView rssiDeltasTextView;
 
     private BluetoothTrackerApplication application;
-
-    //private CompassView compassView;
-    private CompassSettings compassSettings;
     private CompassController compassController;
 
-    private BluetoothLeService mBluetoothLeService;
+    private BluetoothLeConnectionService mBluetoothLeConnectionService;
 
     private CompassOrientationSensor orientationSensor;
 
     private MeasurementsDataSource measurementsDataSource;
 
-    private float azimuth = 0f;
+    private float azimuth = 0;
 
     private DeviceMeasurementsManager measurementsManager;
 
@@ -100,18 +94,18 @@ public class CompassActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
+            mBluetoothLeConnectionService = ((BluetoothLeConnectionService.LocalBinder) service).getService();
+            if (!mBluetoothLeConnectionService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
             // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mDeviceAddress,refreshRate);
+            mBluetoothLeConnectionService.connect(mDeviceAddress,refreshRate);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
+            mBluetoothLeConnectionService = null;
         }
     };
 
@@ -125,7 +119,7 @@ public class CompassActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+            if (BluetoothLeConnectionService.ACTION_GATT_CONNECTED.equals(action)) {
                 mConnected = true;
                 updateConnectionState(R.string.connected);
                 measurementsManager = new DeviceMeasurementsManager();
@@ -135,14 +129,14 @@ public class CompassActivity extends Activity {
                 if (compassController != null) {
                     compassController.clearData();
                 }
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            } else if (BluetoothLeConnectionService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
                 Log.i(TAG, "Disconnected from GATT server.");
                 Toast.makeText(CompassActivity.this, "Disconnected from GATT server", Toast.LENGTH_SHORT).show();
-            } else if (BluetoothLeService.ACTION_RSSI_VALUE_READ.equals(action)) {
-                int newRSSI = intent.getExtras().getInt(BluetoothLeService.RSSI_VALUE_KEY);
+            } else if (BluetoothLeConnectionService.ACTION_RSSI_VALUE_READ.equals(action)) {
+                int newRSSI = intent.getExtras().getInt(BluetoothLeConnectionService.RSSI_VALUE_KEY);
                 if (isValidRSSI(newRSSI) && !paused) {
                     updateMeasurements(newRSSI);
                 }
@@ -169,8 +163,6 @@ public class CompassActivity extends Activity {
         setContentView(R.layout.device_control);
 
         application = (BluetoothTrackerApplication) getApplication();
-        compassSettings = application.loadCompassSettings();
-
 
 //        Log.d(TAG,"Found refresh rate value of " + refreshRate);
 
@@ -201,7 +193,7 @@ public class CompassActivity extends Activity {
 
         //	getActionBar().setTitle(mDeviceName);
         //	getActionBar().setDisplayHomeAsUpEnabled(true);
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        Intent gattServiceIntent = new Intent(this, BluetoothLeConnectionService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
         measurementsManager = new DeviceMeasurementsManager();
@@ -225,10 +217,11 @@ public class CompassActivity extends Activity {
             compassController.setCompassCalibrationListener(new CompassCalibrationListener() {
                 @Override
                 public void onCalibrationFinished() {
-                    //Pause compass controller
-                    CompassActivity.this.paused = true;
+
                     //Show export possibilities if development mode is on
                     if(developmentMode) {
+                        CompassActivity.this.paused = true;
+
                         LinearLayout exportToolbar = (LinearLayout) findViewById(R.id.exportToolBar);
                         exportToolbar.setVisibility(View.VISIBLE);
 
@@ -330,7 +323,7 @@ public class CompassActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        mBluetoothLeService.stopReading();
+        mBluetoothLeConnectionService.stopReading();
         unregisterReceiver(mGattUpdateReceiver);
         orientationSensor.stop();
     }
@@ -359,16 +352,16 @@ public class CompassActivity extends Activity {
         invalidateOptionsMenu();
         switch (item.getItemId()) {
             case R.id.menu_connect:
-                mBluetoothLeService.connect(mDeviceAddress,refreshRate);
+                mBluetoothLeConnectionService.connect(mDeviceAddress,refreshRate);
                 mConnected = true;
                 return true;
             case R.id.menu_disconnect:
                 mConnected = false;
-                mBluetoothLeService.disconnect();
+                mBluetoothLeConnectionService.disconnect();
                 return true;
             case android.R.id.home:
                 onBackPressed();
-                mBluetoothLeService.disconnect();
+                mBluetoothLeConnectionService.disconnect();
                 return true;
             case R.id.menu_settings:
                 Intent intent = new Intent(this,SettingsActivity.class);
@@ -389,9 +382,9 @@ public class CompassActivity extends Activity {
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_RSSI_VALUE_READ);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeConnectionService.ACTION_RSSI_VALUE_READ);
         return intentFilter;
     }
 
