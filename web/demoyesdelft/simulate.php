@@ -106,7 +106,7 @@ var th = 0;
 function AnimateLabels() {
 	var xstart = <?php echo array_sum($xs) / count($xs); ?>;
 	var ystart = <?php echo array_sum($ys) / count($ys); ?>;
-	var r = 1;
+	var r = 2;
 	
 	var x = xstart + r * Math.cos(th);
 	var y = ystart + r * Math.sin(th);

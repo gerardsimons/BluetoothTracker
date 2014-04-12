@@ -16,7 +16,7 @@ try {
 	$connstr = "mysql:host=".$dbhost.";dbname=".$dbname.";charset=utf8";
 	$db = new PDO($connstr, $dbuser, $dbpass);
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (Expression $e) {
+} catch (Exception $e) {
 	echo "No database connection.";
 	exit();
 }

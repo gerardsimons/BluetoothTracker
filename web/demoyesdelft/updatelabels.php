@@ -68,8 +68,12 @@ foreach ($signaldata as $labelid=>$data)
 {
 	//$coords = TriangulateFake($data);
 	ob_start();
+	$start = microtime(true);
 	$coords = Triangulate($data);
-	ob_clean();
+	$diff = (microtime(true) - $start) * 1000;
+	echo "Search time: $diff ms\n";
+	$output = ob_get_clean();
+	if (isset($_GET["echo"])) echo $output;
 	if ($coords !== false)
 	{
 		$labeldata[$labelid] = $coords;

@@ -87,7 +87,7 @@ class API
 		try {
 			$connstr = "mysql:host=".APISettings::$dbhost.";dbname=".APISettings::$dbname.";charset=utf8";
 			$this->db = new PDO($connstr, APISettings::$dbuser, APISettings::$dbpass);
-		} catch (Expression $e) {
+		} catch (Exception $e) {
 			$this->apiactive = false;
 			$this->apimsg = $this->txt["nodbconnection"];
 		}
