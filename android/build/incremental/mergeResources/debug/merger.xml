@@ -69,6 +69,11 @@
                 qualifiers="xxhdpi"
                 type="drawable" />
             <file
+                name="ic_launcher"
+                path="/Users/gerardsimons/Git/BluetoothTracker/android/res/drawable-xxxhdpi/ic_launcher.png"
+                qualifiers="xxxhdpi"
+                type="drawable" />
+            <file
                 name="actionbar_indeterminate_progress"
                 path="/Users/gerardsimons/Git/BluetoothTracker/android/res/layout/actionbar_indeterminate_progress.xml"
                 qualifiers=""
@@ -179,9 +184,9 @@
                 </string>
                 <string name="s_dashboard" >Dashboard
                 </string>
-                <string name="s_email" >Email adres:
-                </string>
                 <string name="unknown_device" >Unknown device
+                </string>
+                <string name="s_email" >Email adres:
                 </string>
                 <string name="menu_scan" >Scan
                 </string>
