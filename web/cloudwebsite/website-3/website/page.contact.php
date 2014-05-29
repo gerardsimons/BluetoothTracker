@@ -2,12 +2,15 @@
 	<div class="container">
     	<h1 id="title" style="padding:50px;display:inline-block;">Contact</h1>
         <div style="float:right;margin:39px;">
-        	whereAt<br />
+        	whereAt International&#8482;<br />
             Molengraafsingel 12<br />
             2629 JD, Delft, The Netherlands
         </div>
     </div>
 </div>
+
+<?php include_once("analyticstracking.php") ?>
+
 
 <div class="wrapper">
 	<div class="container">

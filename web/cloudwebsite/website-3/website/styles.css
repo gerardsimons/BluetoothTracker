@@ -10,10 +10,13 @@ img {
 	border:none;
 }
 
+
+
+
 body {
 	color:#000;
-	font-size:14px;
-	font-family:Tahoma, Geneva, sans-serif;
+	font-size:18px;
+	font-family: BrandonGrotesque-Regular;
 	font-weight:lighter;
 }
 
@@ -52,7 +55,7 @@ a:hover {
 	top:80px;
 	width:580px;
 	font-size:36px;
-	font-family:Calibri;
+	font-family:BrandonGrotesque-Regular;
 }
 #headernav a {
 	color:#000;

@@ -40,5 +40,7 @@ else
 	$pagecontent = "";
 
 //render website
+
+
 include("template.php");
 ?>

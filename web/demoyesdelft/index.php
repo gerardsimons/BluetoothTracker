@@ -50,7 +50,7 @@ body, html {
 	top:-4px;
 	height:8px;
 	width:8px;
-	background:#f00;
+	background:#108fff;
 	border-radius:4px;
 }
 

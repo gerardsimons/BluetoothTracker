@@ -8,6 +8,52 @@
 		<meta name="description" content="whereAt Label, whereAt Shield and whereAt Asset Tracking, all connected via the whereAt Cloud." />
 		
         <link rel="shortcut icon" HREF="<?php echo $mainurl ?>favicon.png" type="image/png" />
+        
+        
+        
+        
+        <!--
+/**
+ * @license
+ * MyFonts Webfont Build ID 2798713, 2014-04-22T07:59:33-0400
+ * 
+ * The fonts listed in this notice are subject to the End User License
+ * Agreement(s) entered into by the website owner. All other parties are 
+ * explicitly restricted from using the Licensed Webfonts(s).
+ * 
+ * You may obtain a valid license at the URLs below.
+ * 
+ * Webfont: Brandon Grotesque Thin Italic by HVD Fonts
+ * URL: http://www.myfonts.com/fonts/hvdfonts/brandon-grotesque/thin-italic/
+ * 
+ * Webfont: Brandon Grotesque Thin by HVD Fonts
+ * URL: http://www.myfonts.com/fonts/hvdfonts/brandon-grotesque/thin/
+ * 
+ * Webfont: Brandon Grotesque Regular by HVD Fonts
+ * URL: http://www.myfonts.com/fonts/hvdfonts/brandon-grotesque/regular/
+ * 
+ * Webfont: Brandon Grotesque Bold by HVD Fonts
+ * URL: http://www.myfonts.com/fonts/hvdfonts/brandon-grotesque/bold/
+ * 
+ * 
+ * License: http://www.myfonts.com/viewlicense?type=web&buildid=2798713
+ * Licensed pageviews: 10,000
+ * Webfonts copyright: Copyright (c) 2009 by Hannes von Doehren. All rights reserved.
+ * 
+ * © 2014 MyFonts Inc
+*/
+
+-->
+		
+        
+        
+        
+        
+        
+        
+        
+        
+        
 		
 		<link rel="stylesheet" href="<?php echo $mainurl ?>styles.css" type="text/css" />
         
@@ -113,7 +159,7 @@
 				var buttonstop = $("#headernav").offset().top + 50;
 				var buttonsheight =  $("#headernav").height();
 				var buttonsbottom = buttonstop + buttonsheight;
-				buttonsheight = 50;
+				buttonsheight = 30;
 				buttonstop = buttonsbottom - buttonsheight;
 				
 				if (pos < buttonstop) {
@@ -172,6 +218,8 @@
 	</head>
     <body>
     	
+    	<?php include_once("analyticstracking.php") ?> 
+    	
         <div class="menubarfloatbg"></div>
         <div id="menubarfloatcenter" class="menubarfloat">
         </div>
@@ -200,7 +248,7 @@
                             <li><a href="<?php echo $mainurl ?>contact">Contact</a></li>
                         </ul>
                     </div>
-                    <div style="float:right;margin-right:20px;margin-top:80px;">
+                    <div style="float:right;margin-right:60px;margin-top:100px;">
                     	<a href="https://www.facebook.com/pages/whereAt/229252010581611" target="new"><img src="<?php echo $mainurl ?>images/fb.jpg" /></a>
                     	<a href="https://twitter.com/@whereAtcloud" target="new"><img src="<?php echo $mainurl ?>images/tw.jpg" /></a>
                     	<a href="https://www.linkedin.com/company/5028689" target="new"><img src="<?php echo $mainurl ?>images/li.jpg" /></a>
@@ -219,9 +267,9 @@
                     	<a href="https://twitter.com/@whereAtcloud" target="new"><img src="<?php echo $mainurl ?>images/tw.jpg" /></a>
                     	<a href="https://www.linkedin.com/company/5028689" target="new"><img src="<?php echo $mainurl ?>images/li.jpg" /></a>
                     </div>
-                    &copy; 2014, whereAt Industries. All rights reserved.
+                    &copy; 2014, whereAt International&#8482;. All rights reserved.
                     <div id="disclaimer">
-                        The whereAt logo, the whereAt Label logo, the whereAt Cloud logo and the whereAt Shield logo are registered trademarks of whereAt Industries and may not be copied or reproduced without written permission.
+                        The whereAt &#8482; logo, the whereAt Label&#8482; logo, the whereAt Cloud&#8482; logo and the whereAt Shield&#8482; logo are registered trademarks of whereAt International&#8482; and may not be copied or reproduced without written permission.
                     </div>
                 </div>
             </div>

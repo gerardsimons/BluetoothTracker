@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$font = dirname(__FILE__)."/calibri.ttf";
+$font = dirname(__FILE__)."/Brandon Grotesque Regular.ttf";
 $height = 50;
 $width = 200;
 
