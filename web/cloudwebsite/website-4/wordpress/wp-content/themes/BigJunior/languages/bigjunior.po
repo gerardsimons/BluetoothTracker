@@ -1,0 +1,1854 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-09-19 19:54+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\404.php:7
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:14
+msgid "Error 404"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\404.php:15
+msgid "404 ERROR"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\404.php:16
+msgid "PAGE NOT FOUND"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\404.php:18
+msgid "Sorry, the page you are looking for is not available. You can use the search box below if you like."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:11
+msgid "Your Name"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:13
+msgid "Email Address (never published)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:15
+msgid "Website (Optional)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:54
+#, php-format
+msgid "<cite>%s</cite> <span class=\"says\">says:</span>"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:55
+msgid "(Author)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:57
+#, php-format
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:59
+msgid "(Edit)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:84
+msgid "This post is password protected. Enter the password to view comments."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:106
+msgid "Trackbacks for this post"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:125
+msgid "Comments are now closed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:128
+msgid "Comments are now closed for this article."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:140
+msgid "No comments so far."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:143
+msgid "There are no comments for this article."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:150
+msgid "Comments are closed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:153
+msgid "Comments are closed for this article."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:165
+msgid "Your email address will not be published. Website Field Is Optional"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\comments.php:166
+msgid "Your Message"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\search.php:10
+#, php-format
+msgid "Results for '%s'"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\search.php:10
+msgid "No Results Found"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\search.php:17
+msgid "You can start a new search by using the box below."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\searchform.php:4
+msgid "Type and press enter to search"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\menus.php:4
+msgid "Primary Navigation"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\menus.php:5
+msgid "Mobile Navigation"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:54
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:164
+msgid "Install Required Plugins"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:55
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:165
+msgid "Install Plugins"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:56
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:166
+#, php-format
+msgid "Installing Plugin: %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:57
+msgid "Something went wrong with the plugin API."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:68
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:178
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:490
+msgid "Return to Required Plugins Installer"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:69
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:179
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1846
+msgid "Plugin activated successfully."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\plugins-handler.php:70
+#, php-format
+msgid "All plugins installed and activated successfully. %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\portfolio-walker.php:16
+#, php-format
+msgid "View all items filed under %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:134
+msgid "right now"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:136
+msgid " seconds ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:138
+msgid "about 1 minute ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:140
+msgid " minutes ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:142
+msgid "about 1 hour ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:144
+msgid " hours ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:146
+msgid "yesterday"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:148
+msgid " days ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\twitter-timeline.php:150
+msgid "over a year ago"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:26
+msgid "Prev"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:68
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:1091
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:51
+msgid "Next"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:488
+msgid "Search"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:492
+msgid " Results found for"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:496
+#, php-format
+msgid "All posts in %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:499
+#, php-format
+msgid "All posts tagged %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:502
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:505
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:508
+#, php-format
+msgid "Archive for %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\utilities.php:517
+#, php-format
+msgid "Posts by %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:45
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:488
+msgid "Appearance"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:49
+msgid "Custom Logo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:50
+msgid "Specify custom logo url or upload new logo here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:54
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:65
+msgid "Upload Favicon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:60
+msgid "Custom Favicon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:61
+msgid "Specify custom favicon url or upload new icon here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:71
+msgid "Responsive Layout"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:72
+msgid "Choose between fixed and responsive layout"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:76
+msgid "Fixed"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:77
+msgid "Responsive"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:109
+msgid "Colors"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:113
+msgid "Preset Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:114
+msgid "Choose a preset theme accent color or choose individual colors from below color pickers"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:124
+msgid "Accent color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:125
+msgid "Accent color for page elements"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:129
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:140
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:151
+msgid "Choose"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:135
+msgid "Content color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:136
+msgid "Primary font and content elements color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:146
+msgid "Highlight color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:147
+msgid "Color for highlighted elements"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:157
+msgid "Link Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:158
+msgid "Choose link color and hover color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:162
+msgid "Normal Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:167
+msgid "Hover Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:180
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:489
+msgid "Fonts"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:184
+msgid "Body Font"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:185
+msgid "Select your desired font name for contents"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:195
+msgid "Navigation Font"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:196
+msgid "Select your desired font name for header navigation area"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:206
+msgid "Headings Font"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:207
+msgid "Select your desired font name for headings and titles"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:221
+msgid "Sidebars"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:224
+msgid "Custom Sidebar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:225
+msgid "Add custom sidebar that can be used in pages. You could customize sidebar widgets in widgets panel"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:229
+msgid "Enter a sidebar name"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:234
+msgid "Page Sidebar Position"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:235
+msgid "Choose default sidebar position for pages that has sidebar, you can override this option in page settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:249
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:492
+msgid "Social"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:252
+msgid "Social Network URLs"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:253
+msgid "Enter your social network addresses in respective fields. You can clear fields to hide icons from the website user interface"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:257
+msgid "Facebook"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:261
+msgid "Twitter"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:265
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:155
+msgid "Vimeo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:269
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:156
+msgid "YouTube"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:273
+msgid "Google+"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:277
+msgid "Dribbble"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:281
+msgid "Tumblr"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:285
+msgid "LinkedIn"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:289
+msgid "Flickr"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:293
+msgid "Forrst"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:297
+msgid "GitHub"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:301
+msgid "Last.fm"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:305
+msgid "PayPal"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:309
+msgid "RSS Feed"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:314
+msgid "Skype"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:318
+msgid "WordPress"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:322
+msgid "Yahoo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:326
+msgid "deviantART"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:330
+msgid "Steam"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:334
+msgid "reddit"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:338
+msgid "StumbleUpon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:342
+msgid "Pinterest"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:346
+msgid "XING"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:350
+msgid "Blogger"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:354
+msgid "SoundCloud"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:358
+msgid "Delicious"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:362
+msgid "Foursquare"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:370
+msgid "Footer Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:373
+msgid "Widget Areas"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:374
+msgid "How many widget areas you like to have in the footer"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:385
+msgid "Footer Logo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:386
+msgid "Specify custom logo url for footer or upload new logo here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:390
+msgid "Upload Footer Logo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:396
+msgid "Copyright Message"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:397
+msgid "Enter footer copyright text. "
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:401
+msgid "Copyright Text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:411
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:493
+msgid "Additional Scripts"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:415
+msgid "Additional JavaScript"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:416
+msgid "Enter custom JavaScript code such as Google Analytics code here. Please note that you should not include &lt;script&gt; tags in your scripts."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:424
+msgid "Additional CSS"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:425
+msgid "Enter custom CSS code such as style overrides here. Please note that you should not include &lt;style&gt; tags in your css code."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:437
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:494
+msgid "API Keys"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:441
+msgid "Google API Key"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:442
+msgid "Google API key for services such as Google Maps. Click <a href=\"https://developers.google.com/maps/documentation/javascript/tutorial#api_key\" target=\"_blank\">here</a> for more information on how to obtain Google API key."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:455
+msgid "Import Dummy Data"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:459
+msgid "Import Posts, Pages and Categories"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:460
+msgid "If you are new to WordPress or have problems creating posts or pages that look like the theme preview you can import dummy posts and pages here that will definitely help to understand how those tasks are done."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:464
+msgid "Don't Import"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:465
+msgid "Import"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:487
+msgid "Theme Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:490
+msgid "Footer"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:491
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:83
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:600
+msgid "Sidebar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:495
+msgid "Dummy Data"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:499
+msgid "General Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:500
+msgid "Other Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\form-settings.php:506
+msgid "Theme Options"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\mediabox-strings.php:6
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\mediabox-strings.php:7
+msgid "Insert Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\mediabox-strings.php:8
+msgid "Insert Logo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\mediabox-strings.php:9
+msgid "Insert Favicon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\admin\mediabox-strings.php:10
+msgid "Insert"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\forms\templates\admin-panels.php:14
+msgid "Save"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\forms\templates\admin-panels.php:19
+msgid "Documentation"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\forms\templates\admin-panels.php:19
+msgid "Support"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\forms\templates\upload-field.php:6
+msgid "Upload Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\forms\templates\upload-field.php:12
+msgid "Browse"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:167
+msgid "Something went wrong."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:180
+#, php-format
+msgid "All plugins installed and activated successfully. %1$s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:517
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:2058
+msgid "Return to the Dashboard"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:545
+#, php-format
+msgid "The following plugin was activated successfully: %s."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:704
+msgid "Dismiss this notice"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1091
+msgid "External Link"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1096
+msgid "Private Repository"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1099
+msgid "Pre-Packaged"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1103
+msgid "WordPress Repository"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1106
+msgid "Required"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1106
+msgid "Recommended"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1109
+msgid "Not Installed"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1111
+msgid "Installed But Not Activated"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1281
+#, php-format
+msgid "No plugins to install or activate. <a href=\"%1$s\" title=\"Return to the Dashboard\">Return to the Dashboard</a>"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1297
+msgid "Plugin"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1298
+msgid "Source"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1299
+msgid "Type"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1300
+msgid "Status"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1318
+msgid "Install"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1319
+msgid "Activate"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1829
+msgid "Install package not available."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1830
+#, php-format
+msgid "Downloading install package from <span class=\"code\">%s</span>&#8230;"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1831
+msgid "Unpacking the package&#8230;"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1832
+msgid "Installing the plugin&#8230;"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1833
+msgid "Plugin install failed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1834
+msgid "Plugin installed successfully."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1845
+msgid "Plugin activation failed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1955
+msgid "The installation and activation process is starting. This process may take a while on some hosts, so please be patient."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1956
+#, php-format
+msgid "%1$s installed and activated successfully."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1956
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1965
+msgid "Show Details"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1956
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1965
+msgid "Hide Details"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1957
+msgid "All installations and activations have been completed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1958
+#, php-format
+msgid "Installing and Activating Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1962
+msgid "The installation process is starting. This process may take a while on some hosts, so please be patient."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1963
+#, php-format
+msgid "An error occurred while installing %1$s: <strong>%2$s</strong>."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1964
+#, php-format
+msgid "The installation of %1$s failed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1965
+#, php-format
+msgid "%1$s installed successfully."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1966
+msgid "All installations have been completed."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\includes\class-tgm-plugin-activation.php:1967
+#, php-format
+msgid "Installing Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:52
+msgid "Video URL"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:56
+msgid "Audio URL"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:60
+msgid "Gallery Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:69
+msgid "Post Video"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:70
+msgid "You can enter video urls hosted in YouTube or Vimeo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:76
+msgid "Post Audio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:77
+msgid "You can enter audio url hosted in SoundCloud"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:83
+msgid "Post Gallery"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:84
+msgid "Upload your gallery images here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\blog.php:94
+msgid "Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:34
+msgid "Default Page Sidebar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:52
+msgid "Show title bar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:52
+msgid "Don't show title bar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:56
+msgid "Override title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:68
+msgid "Show"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:68
+msgid "Don't Show"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:75
+msgid "Title Bar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:76
+msgid "Page title bar (the bar under the page header) settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:84
+msgid "Page sidebar settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:90
+msgid "LayerSlider "
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:91
+msgid "Select which slider you would like to show under the page header"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:97
+msgid "Footer Widgets Area"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:98
+msgid "Show or hide the footer widgets area. This setting overrides admin panel settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\page.php:108
+msgid "Page Settings"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:16
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:17
+msgid "Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:18
+msgid "Add New"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:19
+msgid "Add New Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:20
+msgid "Edit Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:21
+msgid "New Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:22
+msgid "View Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:23
+msgid "Search Portfolio"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:24
+msgid "No portfolios found"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:25
+msgid "No portfolios found in Trash"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:36
+msgid "portfolios"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:49
+msgid "Skills"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:50
+msgid "Skill"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:134
+msgid "Split"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:135
+msgid "Full Width"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:141
+msgid "Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:142
+msgid "Video"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:143
+msgid "None"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:148
+msgid "Portfolio Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:161
+msgid "Video ID"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:168
+msgid "Page Layout"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:169
+msgid "Specify layout of the portfolio item (Split or Full-Width)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:175
+msgid "Display Media Type"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:176
+msgid "Specify what kind of media (Image(s), Video or Audio) you would like to be displayed in single portfolio. You can always use shortcodes to add other media types in content"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:182
+msgid "Portfolio Images"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:183
+msgid "Upload your portfolio Image(s) here. If you upload more than one image it will be shown as slider"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:189
+msgid "Portfolio Video"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:190
+msgid "Set Video ID of your portfolio here. Please refer to documentation for learning how to obtain your video ID. You could upload more info in the content area"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\post-types\portfolio.php:201
+msgid "Portfolio Options"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\forms.php:8
+msgid "Type parameter must be provided"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\forms.php:16
+#, php-format
+msgid "No shortcode is defined with type \"%s\""
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:12
+msgid "Title of the progress"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:13
+msgid "Add title for your progress bar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:18
+msgid "Progress done"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:19
+msgid "Enter how much progress is done in percent"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:24
+msgid "Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:25
+msgid "Color of the progress bar, if empty, defaults to theme accent color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:46
+msgid "Number of columns"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:47
+msgid "Select number of portfolio grid columns"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:54
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:301
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:324
+msgid "Number of items"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:55
+msgid "Number of portfolio items per page"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:60
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:330
+msgid "Filter skills"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:61
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:331
+msgid "Only show items that has specific skills"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:67
+msgid "Grid Style"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:68
+msgid "Choose between regular grid and uncropped images grid"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:75
+msgid "Pagination"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:76
+msgid "You can show or hide pagination feature here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:93
+msgid "Separator size"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:94
+msgid "Select size of the separator"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:101
+msgid "Vertical Spacing"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:102
+msgid "Select size of vertical space"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:119
+msgid "Title Text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:120
+msgid "Enter the title text for your separator"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:125
+msgid "Separator style"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:126
+msgid "Select separator title position"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:143
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:347
+msgid "Name"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:144
+msgid "Name of the team member"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:149
+msgid "Job Title"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:150
+msgid "Team member's job title"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:155
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:225
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:353
+msgid "Image Address"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:156
+msgid "Optional URL of the person's image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:161
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:196
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:237
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:470
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:630
+msgid "Link"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:162
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:197
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:238
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:471
+msgid "Optional url to another web page"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:167
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:202
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:243
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:482
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:636
+msgid "Link's target"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:168
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:203
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:637
+msgid "Open the link in the same page or a blank browser window"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:175
+msgid "Description"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:176
+msgid "Small description text about the person"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:190
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:231
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:260
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:398
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:456
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:553
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:624
+msgid "Title"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:191
+msgid "Icon title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:210
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:417
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:495
+msgid "Choose an icon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:211
+msgid "Select an icon for team member"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:226
+msgid "URL of the image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:232
+msgid "Item title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:244
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:483
+msgid "Open the link in the same tab or a blank browser tab"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:261
+msgid "Tab title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:266
+msgid "Keep Open"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:267
+msgid "Keep the tab content open"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:274
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:412
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:490
+msgid "Content"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:275
+msgid "Enter some description for your tab"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:302
+msgid "Number of posts to show (optional)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:307
+msgid "Filter categories"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:308
+msgid "Only show items that are in specific category"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:325
+msgid "Number of items to show (optional)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:348
+msgid "Enter name of the person"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:354
+msgid "URL of the person's image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:359
+msgid "Comment"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:360
+msgid "Enter person's comment here"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:365
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:652
+msgid "Style"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:366
+msgid "Choose between testimonial styles"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:373
+msgid "Skin"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:374
+msgid "Choose between dark and light skins"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:381
+msgid "Has Background"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:382
+msgid "Show or hide testimonial's background color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:399
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:457
+msgid "Enter title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:404
+msgid "Background Shape"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:405
+msgid "Select icon's background shape"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:413
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:491
+msgid "Enter some description for your IconBox"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:418
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:496
+msgid "Select an icon for the top of the box"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:423
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:501
+msgid "Icon Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:424
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:502
+msgid "Enter optional icon color (e.g #CCCCCC or gray)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:429
+msgid "Shape Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:430
+msgid "Enter optional background shape color (e.g #CCCCCC or gray)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:435
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:507
+msgid "Title Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:436
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:508
+msgid "Enter optional title text color (e.g #CCCCCC or gray)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:441
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:513
+msgid "Text Color"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:442
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:514
+msgid "Enter optional content text color (e.g #CCCCCC or gray)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:462
+msgid "Icon Position"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:463
+msgid "Select icon's position (left or top of the box)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:476
+msgid "Link Text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:477
+msgid "Enter link's text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:529
+msgid "Background Image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:530
+msgid "Enter url of container's background image"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:535
+msgid "Scroll Speed"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:536
+msgid "Scroll speed multiplier ( eg 0.1 )"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:541
+msgid "Height"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:542
+msgid "Enter height of the container in pixels ( eg 200 )"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:547
+msgid "Vertical Position"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:548
+msgid "Optional background vertical position in percent ( eg 50% )"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:554
+msgid "Optional title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:559
+msgid "Subtitle"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:560
+msgid "Optional subtitle text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:565
+msgid "Title Animation"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:566
+msgid "Select title animation"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:568
+msgid "Enter from top"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:568
+msgid "Enter from bottom"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:568
+msgid "Enter from left"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:568
+msgid "Enter from right"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:573
+msgid "Title Animation Duration"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:574
+msgid "Optional duration of title animation in seconds ( eg 1.5 , default value is one second )"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:582
+msgid "Main Sidebar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:583
+msgid "Page Sidebar"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:601
+msgid "Select a sidebar from the list"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:618
+msgid "Text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:619
+msgid "Button text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:625
+msgid "Button title text"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:631
+msgid "URL to another web page"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:644
+msgid "Size"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:645
+msgid "Choose between three button sizes"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:653
+msgid "Choose between button styles"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:669
+msgid "Slider"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:670
+msgid "Select a slider that is created in LayerSlider WP panel"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:686
+msgid "Form"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:687
+msgid "Select a form that is created in \"Contact\" panel"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:709
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:757
+msgid "Address"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:710
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:758
+msgid "Specify an address on the map or use latitude and longitude fields below"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:715
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:763
+msgid "Latitude"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:716
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:764
+msgid "Enter Latitude here, if you enter this value you must enter longitude as well"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:721
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:769
+msgid "Longitude"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:722
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:770
+msgid "Enter Longitude here, if you enter this value you must enter latitude as well"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:727
+msgid "Zoom"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:728
+msgid "Select a zoom level"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:734
+msgid "Map Controls"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:735
+msgid "Should map controls be visible or hidden"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:742
+msgid "Map Height"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:743
+msgid "Optional map height in pixels. Default value is 300"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:775
+msgid "Icon"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\settings.php:776
+msgid "Optional marker icon url"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:305
+msgid "All"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:430
+msgid "More Details"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:879
+msgid "No Comments"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:879
+msgid "1 Comment"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:879
+msgid "% Comments"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:886
+msgid "Said:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:1089
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:49
+msgid "Previous"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:1257
+msgid "Learn More"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\shortcodes\shortcodes.php:1479
+msgid "View Page"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-advertisement.php:12
+msgid "Displays your image ads"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-advertisement.php:102
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:78
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-progress.php:86
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-portfolio.php:84
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-posts.php:95
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:99
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:115
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-video.php:90
+msgid "Title:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-advertisement.php:108
+msgid "How many advertisement to display?"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-advertisement.php:113
+msgid "Note: Please input FULL URL <br/>(e.g. <code>http://www.example.com</code>)"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-advertisement.php:133
+msgid "Image sizes should be exactly <br />125px * 125px"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:10
+msgid "Displays your flickr photo stream"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:84
+msgid "Flickr ID:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:90
+msgid "Number of Photos:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:100
+msgid "Type (user or group):"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-flickr.php:109
+msgid "Display (random or latest):"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-progress.php:10
+msgid "Displays 5 progress bars with a title"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-progress.php:94
+#, php-format
+msgid "Progress %d Title:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-progress.php:101
+#, php-format
+msgid "Progress %d:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-portfolio.php:10
+msgid "Displays your recent portfolio items"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-portfolio.php:90
+msgid "Number Of Recent Works:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-posts.php:10
+msgid "Displays your recent posts"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-recent-posts.php:101
+msgid "Number Of Posts:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:18
+msgid "Testimonials widget"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:113
+msgid "Remove"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:116
+msgid "Name:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:119
+msgid "Text:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-testimonials.php:128
+msgid "Add Testimonial"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:22
+msgid "Displays your recent tweets"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:121
+msgid "Twitter Screen Name:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:127
+msgid "Consumer Key:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:133
+msgid "Consumer Secret:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:139
+msgid "User Token:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:145
+msgid "User Secret:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:151
+msgid "Number Of Tweets:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-twitter.php:157
+msgid "Follow Text e.g Follow @pixflow"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-video.php:10
+msgid "A widget that displays your YouTube or Vimeo Video."
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-video.php:97
+msgid "Video URL:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\lib\widgets\widget-video.php:103
+msgid "Video Description:"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:9
+msgid "Home"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:10
+#, php-format
+msgid "Archive by Category \"%s\""
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:11
+#, php-format
+msgid "Search Results for \"%s\" Query"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:12
+#, php-format
+msgid "Posts Tagged \"%s\""
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:13
+#, php-format
+msgid "Articles Posted by %s"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\breadcrumb.php:190
+msgid "Page"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\footer.php:39
+msgid "Logo"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\head.php:3
+msgid "All Posts"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-audio.php:19
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-gallery.php:33
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-standard.php:12
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-video.php:32
+msgid "Keep Reading &rarr;"
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-meta.php:9
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\single-post-meta.php:9
+msgid "in "
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\loop-blog-meta.php:11
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\single-post-meta.php:11
+msgid "by "
+msgstr ""
+
+#: d:\workshop\wordpress\wp-content\themes\bigjunior\templates\single-portfolio.php:86
+msgid "Related Entries"
+msgstr ""

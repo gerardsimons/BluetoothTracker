@@ -1,0 +1,179 @@
+@import "vars";
+@import "grid";
+
+/* Landscape Phone */
+@media (max-width: 480px) {
+
+/*-------------------------*/
+/*	X.	Blog Listing
+/*-------------------------*/
+
+  .archive .post-meta,
+  .blog .post-meta
+  {
+    float:none;
+    width:auto;
+    padding-right: 0;
+    margin-bottom:20px;
+  }
+
+  .archive .post-content,
+  .blog .post-content {
+    float: none;
+    width: auto;
+  }
+
+  .archive .post-meta .tagcloud, .blog .post-meta .tagcloud{
+    margin-top: 20px;
+  }
+
+  .archive .format-quote .post-meta,
+  .blog .format-quote .post-meta{
+    display: none;
+  }
+
+}
+
+/* All Mobile Sizes */
+@media (max-width: 767px) {
+  // Show
+  .visible-phone     { display: inherit !important; } // Use inherit to restore previous behavior
+  // Hide
+  .hidden-phone      { display: none !important; }
+  // Hide everything else
+  .hidden-desktop    { display: inherit !important; }
+  .visible-desktop   { display: none !important; }
+
+  /* General */
+  .container {
+    width: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .wrap{
+    width: auto;
+  }
+  [class*="span"]{
+    display: block;
+    float: none;
+    width: auto;
+    margin-left: 0;
+    margin-bottom: 20px;
+  }
+  [class*="offset"]:first-child,
+  [class*="offset"]{
+    margin-left: 0;
+  }
+
+/*-------------------------*/
+/*	X.	Portfolio Single
+/*-------------------------*/
+
+  .portfolio-related .item {
+    display: table;
+    margin: 0 auto 20px;
+  }
+
+/*-------------------------*/
+/*	X.	Blog Listing
+/*-------------------------*/
+  .post .post-title{
+    font-size: 26px!important;
+  }
+
+/*-------------------------*/
+/*	X.	Widget area
+/*-------------------------*/
+  /*Remove Sidebar altogether (comment below selector if you wish to have sidebar on mobile devices)*/
+
+  .sidebar{
+    display: none;
+  }
+
+  .sidebar.widget-area
+  {
+    margin-top:60px;
+  }
+
+/*-------------------------*/
+/*	X.	Footer
+/*-------------------------*/
+
+  #footer-bottom .copyright{
+    line-height: 1.4em;
+  }
+
+  /* Widgets */
+
+  .footer-widgets .widget-area .widget{
+    margin-bottom: 30px;
+  }
+
+  .footer-widgets .widget-area > div:last-child .widget:last-child{
+    margin-bottom: 0;
+  }
+
+}
+
+/***** Tablet Portrait size to standard 960 (devices and browsers) *****/
+
+@media (min-width: 768px) and (max-width: 979px) {
+  // Show
+  .visible-tablet    { display: inherit !important; }
+  // Hide
+  .hidden-tablet     { display: none !important; }
+  // Hide everything else
+  .hidden-desktop    { display: inherit !important; }
+  .visible-desktop   { display: none !important ; }
+
+  .boxed .wrap{
+    width: 764px;
+  }
+
+  @include grid-fluid($gridColumns, $gridColumnWidth768, $gridGutterWidth768);
+}
+
+/***** Tablet Portrait size to standard 960 (devices and browsers) *****/
+
+@media (max-width: 979px) {
+
+  .layout{
+      -webkit-transform: translateZ(0);/*Webkit rendering problem fix*/
+  }
+
+/*-------------------------*/
+/*	X.	Blog Listing
+/*-------------------------*/
+  .post .post-title{
+    font-size: 28px;
+  }
+
+  .post blockquote{
+    font-size: 20px;
+  }
+
+/*-------------------------*/
+/*	X.	Footer
+/*-------------------------*/
+
+  footer .social-icons
+  {
+    clear:both;
+    float:none;
+    margin:0 auto;
+    padding:10px 0 0;
+    display: table;
+  }
+
+
+}
+
+/***** Large Desktop *****/
+
+@media (min-width: 1200px) {
+  .boxed .wrap{
+    width: 1230px;
+  }
+
+  @include grid-fluid($gridColumns, $gridColumnWidth1200, $gridGutterWidth1200);
+}

@@ -1,0 +1,88 @@
+body#tinymce.wp-editor {
+    font-family: Arial, Helvetica, sans-serif;
+    color:#666;
+    font-size:13px;
+    line-height:1.54em;
+}
+
+/* Anchor */
+
+body#tinymce.wp-editor a{
+    color:#ff4c2f;
+    text-decoration:none;
+
+    -webkit-transition:color .3s;
+    -moz-transition:color .3s;
+    -o-transition:color .3s;
+    transition:color .3s;
+}
+
+body#tinymce.wp-editor a:hover{
+    color:#333;
+    text-decoration: underline;
+}
+
+body#tinymce.wp-editor img
+{
+    height:auto;
+    max-width:100%;
+    /* Fix for problem with moving images on hover */
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility:    hidden;
+    -ms-backface-visibility:     hidden;
+}
+
+body#tinymce.wp-editor a img{
+    vertical-align: top;
+}
+
+/* Paragraph */
+
+body#tinymce.wp-editor p{
+    margin: 0.85em 0;
+}
+
+/* hr */
+
+body#tinymce.wp-editor hr{
+    display: block;
+    height:1px;
+    background-color: #bdbdbd;
+    border: 0;
+    margin: 30px 0;
+}
+
+/* Headings */
+
+body#tinymce.wp-editor h1,
+body#tinymce.wp-editor h2,
+body#tinymce.wp-editor h3,
+body#tinymce.wp-editor h4,
+body#tinymce.wp-editor h5,
+body#tinymce.wp-editor h6{
+    font-weight: 400; line-height: 1.25em; margin:0 0 10px; color: #222
+}
+
+body#tinymce.wp-editor h1{ font-size: 32px; }
+
+body#tinymce.wp-editor h2{ font-size: 24px; }
+
+body#tinymce.wp-editor h3{ font-size: 19px; }
+
+body#tinymce.wp-editor h4{ font-size: 17px; }
+
+body#tinymce.wp-editor h5{ font-size: 16px; }
+
+body#tinymce.wp-editor h6{ font-size: 14px; }
+
+/* Text Selection */
+
+body#tinymce.wp-editor ::-moz-selection {
+    background: #ff4c2f; /* Firefox */
+    color: #FFF;
+}
+
+body#tinymce.wp-editor ::selection {
+    background: #ff4c2f; /* Safari */
+    color: #FFF;
+}

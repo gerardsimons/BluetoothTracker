@@ -1,0 +1,53 @@
+@mixin span($cols, $colWidth, $gutterWidth)
+{
+  width: ($colWidth * $cols) + ($gutterWidth * ($cols - 1));
+}
+
+@mixin grid-fluid($cols, $colWidth, $gutterWidth){
+
+  $rowWidth: ($cols * $colWidth) + ($gutterWidth * ($cols - 1));
+  $gutterWidth: percentage($gutterWidth/$rowWidth);
+  $colWidth:    percentage($colWidth/$rowWidth);
+
+  .container{
+    width:$rowWidth;
+  }
+
+  [class*="span"] {
+    margin-left: $gutterWidth;
+  }
+
+  [class*="span"]:first-child {
+    margin-left: 0;
+  }
+
+  //Generate columns
+  $i: 1;
+
+  @while $i <= $cols {
+    .span#{$i}
+    {
+      @include span($i, $colWidth, $gutterWidth);
+    }
+
+    $i: $i + 1;
+  }
+
+  //Generate offsets
+  $i: 1;
+
+  @while $i <= $cols {
+    .offset#{$i}
+    {
+      margin-left: ($colWidth * $i) + ($gutterWidth * ($i - 1)) + ($gutterWidth*2);
+    }
+
+    .offset#{$i}:first-child
+    {
+     margin-left: ($colWidth * $i) + ($gutterWidth * ($i - 1)) + ($gutterWidth);
+    }
+
+    $i: $i + 1;
+  }
+
+}

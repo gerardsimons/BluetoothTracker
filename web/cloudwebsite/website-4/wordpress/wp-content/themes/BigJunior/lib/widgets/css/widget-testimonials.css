@@ -1,0 +1,12 @@
+.testimonial-group{
+    background-color: #ededed;
+    padding:20px 5px 5px;
+    position:relative;
+    margin-bottom:10px;
+}
+
+.testimonial-remove-btn{
+    position: absolute;
+    top:5px;
+    right:8px;
+}

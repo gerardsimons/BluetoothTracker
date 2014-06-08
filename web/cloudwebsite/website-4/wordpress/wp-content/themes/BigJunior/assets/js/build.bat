@@ -1,0 +1,1 @@
+node ../../../r.js -o name=theme-dev out=theme.js baseUrl=.

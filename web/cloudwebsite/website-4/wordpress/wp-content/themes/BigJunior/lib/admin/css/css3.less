@@ -1,0 +1,27 @@
+.box-shadow(@xOffset: 3px, @yOffset: 3px, @blur-radius: 0, @spread-radius: 0, @color: #CCC)
+{
+	-moz-box-shadow:    @arguments;
+	-webkit-box-shadow: @arguments;
+	box-shadow:         @arguments;
+}
+
+.box-shadow-inset(@xOffset: 3px, @yOffset: 3px, @blur-radius: 0, @spread-radius: 0, @color: #CCC)
+{
+	-moz-box-shadow:   inset @xOffset @yOffset @blur-radius @spread-radius @color;
+	-webkit-box-shadow:inset @xOffset @yOffset @blur-radius @spread-radius @color;
+	box-shadow:        inset @xOffset @yOffset @blur-radius @spread-radius @color;
+}
+
+
+.animate(@property: color, @speed: 300ms, @transition: ease-in-out, @delay: 0s){
+	-moz-transition: @arguments;
+	-webkit-transition: @arguments; 
+	-o-transition: @arguments; 
+	transition: @arguments;
+}
+
+.border-radius(@amount){
+	-webkit-border-radius: @amount;
+	-moz-border-radius: @amount;
+	border-radius: @amount;
+}
