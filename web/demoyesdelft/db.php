@@ -7,6 +7,7 @@ ini_set("display_errors", 1);
 query("CREATE TABLE IF NOT EXISTS YesDemo_Units
 		(
 		ID int AUTO_INCREMENT,
+		MAC text,
 		CoordX double,
 		CoordY double,
 		PRIMARY KEY (ID)
