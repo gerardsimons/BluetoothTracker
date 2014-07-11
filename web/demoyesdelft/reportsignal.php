@@ -6,7 +6,7 @@ $gapikey = $_GET["apikey"];
 $labelids = $_GET["labelids"];
 $signals = $_GET["signals"];
 
-if ($gapikey != $apikey) exit();
+//if ($gapikey != $apikey) exit();
 
 if (!getRow("SELECT * FROM YesDemo_Units WHERE ID=?", array($unitid))) exit();
 
