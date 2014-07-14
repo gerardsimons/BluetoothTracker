@@ -23,6 +23,12 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Tracking
 		PRIMARY KEY (ID)
 		)", array());
 
+query("CREATE TABLE IF NOT EXISTS YesDemo_Version
+		(
+		Version int,
+		PRIMARY KEY (VERSION)
+		)", array());
+
 /*query("CREATE TABLE IF NOT EXISTS YesDemo_Position
 		(
 		ID int AUTO_INCREMENT,
