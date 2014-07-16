@@ -2,7 +2,7 @@
 require_once("settings.php");
 
 $tmethod = $_GET["tmethod"];
-if (!is_numeric($tmethod)) $tmethod = 6;
+if (!is_numeric($tmethod)) $tmethod = 1;
 $filename = "triangulation$tmethod.php";
 if (!file_exists($filename)) $filename = "triangulation1.php";
 require_once($filename);
