@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="C:\Users\danie_000\AndroidStudioProjects\whereAtAssetTracking\app\build\intermediates\pre-dexed\debug\android-async-http-1.4.4-25b44a9f9a715046f49945d47981e9ceea2908ba.jar"
+        jar="C:\Users\danie_000\AndroidStudioProjects\whereAtAssetTracking\app\libs\android-async-http-1.4.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3bae85a076241828810bf8fbcc12e5891d5fc34c"/>
+    <item
+        dex="C:\Users\danie_000\AndroidStudioProjects\HelloBluetooth2\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-e311e493b238b75da4095bd5ee7b69d76d73dc42.jar"
+        jar="C:\Program Files (x86)\Android\android-studio\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="C:\Users\danie_000\AndroidStudioProjects\HelloBluetooth2\app\build\intermediates\pre-dexed\debug\android-async-http-1.4.4-5f432446bee2fb8f7db45bba5d5d3c0ee3497e37.jar"
+        jar="C:\Users\danie_000\AndroidStudioProjects\HelloBluetooth2\app\libs\android-async-http-1.4.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3bae85a076241828810bf8fbcc12e5891d5fc34c"/>
+    <item
+        dex="C:\Users\danie_000\AndroidStudioProjects\whereAtAssetTracking\app\build\intermediates\pre-dexed\debug\classes-848929d2bc46fd9d1a03df00ccc06ee3961f4d66.jar"
+        jar="C:\Users\danie_000\AndroidStudioProjects\whereAtAssetTracking\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+    <item
+        dex="C:\Users\danie_000\AndroidStudioProjects\HelloBluetooth2\app\build\intermediates\pre-dexed\debug\classes-3de5105cae9e1a7ec2cbd952e77d91f406895054.jar"
+        jar="C:\Users\danie_000\AndroidStudioProjects\HelloBluetooth2\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+
+</pre-dex-items>
