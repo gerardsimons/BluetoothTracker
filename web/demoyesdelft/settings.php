@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-$pathtoapi = "../../api.whereatcloud.com/";
+$pathtoapi = "../../cloudapi/";
 
-$dbhost = "localhost";
-$dbuser = "isilvestrov_cld";
-$dbpass = "F647b2Po";
+$dbhost = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "";
 $dbname = "isilvestrov_cld";
 
 $adminpass = "whereAtDemoYesDelft";

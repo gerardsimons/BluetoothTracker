@@ -1,4 +1,4 @@
-RewriteEngine on
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule .? http://www.whereatcloud.com/ [L,R=301]
+Options -Indexes
+<filesMatch "\.php$"> 
+Deny from all 
+</filesMatch>

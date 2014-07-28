@@ -1,0 +1,16 @@
+nodbconnection = Could not connect to database.
+apibroken = API broken.
+
+apikeynotactive = API key not active
+
+class = Class
+function = Function
+doesnotexist = does not exist.
+
+notenoughinput = Not enough input arguments.
+
+mustlogin = Must be logged in to access this function.
+
+nostatusrequest = Must request API status first.
+
+error = An error occured while executing the function.

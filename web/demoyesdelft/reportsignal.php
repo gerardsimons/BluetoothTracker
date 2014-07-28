@@ -1,6 +1,8 @@
 <?php
 require_once("settings.php");
 
+$start = microtime(true);
+
 $unitid = $_GET["unitid"];
 $gapikey = $_GET["apikey"];
 $labelids = $_GET["labelids"];
@@ -42,4 +44,9 @@ foreach ($labels as $labelid)
 		query("INSERT INTO YesDemo_Tracking (UnitID, LabelID, Timestamp, SignalStrength) VALUES (?, ?, ?, ?)", array($unitid, $labelid, $ts, $signal));
 	}
 }
+
+$end = microtime(true);
+$diff = ($end - $start) * 1000;
+
+echo "\n\nExecution time: $diff ms";
 ?>

@@ -84,14 +84,14 @@ function Triangulate($data) {
 	$start = microtime(true);
 	$minima = FindMinima($data, $gridstep, $roundto, $bounds, $strongesti);
 	$diff = (microtime(true) - $start) * 1000;
-	echo "\nSearch time: $diff ms\n\n";
+	//echo "\nSearch time: $diff ms\n\n";
 	
 	global $counter, $t, $t1, $t2, $t3;
 	$avg = ($t / $counter) * 1000;
 	$avg1 = ($t1 / $counter) * 1000;
 	$avg2 = ($t2 / $counter) * 1000;
 	$avg3 = ($t3 / $counter) * 1000;
-	echo "Called GetValue $counter times with an average execution time of $avg ms (1: $avg1 ms, 2: $avg2 ms, 3: $avg3 ms), total: ".($t * 1000)." ms\n\n";
+	//echo "Called GetValue $counter times with an average execution time of $avg ms (1: $avg1 ms, 2: $avg2 ms, 3: $avg3 ms), total: ".($t * 1000)." ms\n\n";
 	
 	//merge similar
 	$found = true;
@@ -145,7 +145,7 @@ function FindMinima($data, $gridstep, $roundto, $bounds /*minx, miny, maxx, maxy
 	
 	$return = ($stepx < $gridstep || $stepy < $gridstep) ? true: false;
 	
-	echo "Starting search between ($bounds[0] - $bounds[2]),($bounds[1] - $bounds[3]) with step size: $stepx, $stepy ($steps steps), minval: $minval\n";
+	//echo "Starting search between ($bounds[0] - $bounds[2]),($bounds[1] - $bounds[3]) with step size: $stepx, $stepy ($steps steps), minval: $minval\n";
 	
 	$values = array();
 	for ($i=0;$i<$steps;$i++)
@@ -206,7 +206,7 @@ function FindMinima($data, $gridstep, $roundto, $bounds /*minx, miny, maxx, maxy
 			
 			if ($val <= $min)
 			{
-				echo "$val, surrounding: $min\n";
+				//echo "$val, surrounding: $min\n";
 				if ($return == false)
 				{
 					//echo "Found minima between ($minx, $miny),($maxx, $maxy) continuing search\n";
@@ -221,7 +221,7 @@ function FindMinima($data, $gridstep, $roundto, $bounds /*minx, miny, maxx, maxy
 				}
 				else
 				{
-					echo "Found minima at ($x, $y): $val\n";
+					//echo "Found minima at ($x, $y): $val\n";
 					$minval = $val;
 					$x = $bounds[0] + $i * $stepx;
 					$y = $bounds[1] + $a * $stepy;
@@ -230,7 +230,7 @@ function FindMinima($data, $gridstep, $roundto, $bounds /*minx, miny, maxx, maxy
 			}
 		}
 	}
-	echo "\n";
+	//echo "\n";
 	if ($return == false)
 	{
 		foreach ($buffer as $finddata)

@@ -28,6 +28,16 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Version
 		Version int,
 		PRIMARY KEY (VERSION)
 		)", array());
+		
+query("CREATE TABLE IF NOT EXISTS YesDemo_Positions
+		(
+		ID int AUTO_INCREMENT,
+		LabelID int,
+		Timestamp double,
+		CoordX double,
+		CoordY double,
+		PRIMARY KEY (ID)
+		)", array());
 
 /*query("CREATE TABLE IF NOT EXISTS YesDemo_Position
 		(

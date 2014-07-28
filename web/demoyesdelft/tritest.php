@@ -2,7 +2,7 @@
 require_once("settings.php");
 
 $tmethod = $_GET["t"];
-if (!is_numeric($tmethod)) $tmethod = 1;
+if (!is_numeric($tmethod)) $tmethod = 6;
 $filename = "triangulation$tmethod.php";
 if (!file_exists($filename)) $filename = "triangulation1.php";
 require_once($filename);
@@ -13,7 +13,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 $data = array(
-	array(0, 0, -30, -31, -29),
+	array(0, 0, -50, -51, -49),
 	array(0, 100, -30, -31, -29),
 	array(100, 0, -30, -31, -29),
 	array(100, 100, -30, -31, -29)
