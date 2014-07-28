@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+        <TextView
+            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_margin="5dp"
+            android:id="@+id/dialog_message"
+            android:text="Edit the coordinates of this device:"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center"/>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/holo_blue_dark"></RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/dialog_lat"
+                android:layout_weight="0.5"
+                android:hint="Lattitude"/>
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/dialog_lon"
+                android:layout_weight="0.5"
+                android:hint="Longitude"/>
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="5dp">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="Cancel"
+                android:id="@+id/dialog_cancel"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="Apply"
+                android:id="@+id/dialog_apply"/>
+        </LinearLayout>
+
+
+
+
+
+
+</LinearLayout>
