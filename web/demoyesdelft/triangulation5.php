@@ -349,9 +349,9 @@ function ConvertToRelativeDistance($data) {
 	$f = 1; //this should come from empirical measurements
 	foreach ($data as $i=>$unitdata)
 	{
-		$unitdata[] = round(pow(10, $sig) / pow($unitdata[8], $f)) / pow(10, $sig);
-		$unitdata[] = round(pow(10, $sig) / pow($unitdata[9], $f)) / pow(10, $sig);
-		$unitdata[] = round(pow(10, $sig) / pow($unitdata[10], $f)) / pow(10, $sig);
+		$unitdata[] = round(pow(10, $sig) / pow($unitdata[8], 1/$f)) / pow(10, $sig);
+		$unitdata[] = round(pow(10, $sig) / pow($unitdata[9], 1/$f)) / pow(10, $sig);
+		$unitdata[] = round(pow(10, $sig) / pow($unitdata[10], 1/$f)) / pow(10, $sig);
 		$data[$i] = $unitdata;
 	}
 	

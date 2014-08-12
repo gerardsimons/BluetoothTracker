@@ -20,7 +20,13 @@
 	<!--[if lt IE 9]><script src="<?php echo path_combine(THEME_JS_URI , 'html5shiv.js') ?>"></script><![endif]-->
 
 	<!-- Theme Hook -->
-	<?php wp_head(); ?>
+	<?php
+	//súper smerige oplossing: bah bah bah
+	ob_start();
+    wp_head();
+	$head = ob_get_clean();
+	echo str_replace("Open Sans", "BrandonGrotesque-Regular", $head);
+	?>
 	<!-- Custom CSS -->
 </head>
 <body <?php body_class('no-js'); ?>>

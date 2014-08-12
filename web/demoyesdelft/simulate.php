@@ -108,8 +108,10 @@ function AnimateLabels() {
 	var ystart = <?php echo array_sum($ys) / count($ys); ?>;
 	var r = 2;
 	
-	var x = xstart + r * Math.cos(th);
-	var y = ystart + r * Math.sin(th);
+	//var x = xstart + r * Math.cos(th);
+	//var y = ystart + r * Math.sin(th);
+	var x = xstart + 1;
+	var y = ystart;
 	
 	labels[1][0] = x;
 	labels[1][1] = y;
@@ -125,6 +127,7 @@ function AnimateLabels() {
 
 function CalcDistance() {
 	var noisewidth = 0.0;
+	var ratio = 2; //2 times further away = 'ratio' times weaker signal
 	for (var i in labeldisdata) {
 		var xunit = units[i][0];
 		var yunit = units[i][1];
@@ -138,9 +141,9 @@ function CalcDistance() {
 			
 			labeldisdata[i][a][0] = d;
 			
-			var frac = 2 / d;
-			var ddB = 10 * (Math.log(frac) / Math.LN10);
-			labeldisdata[i][a][1] = ddB - 30;
+			var frac = 1 / Math.pow(d, ratio*.5);
+			var ddB = Math.round(10 * (Math.log(frac) / Math.LN10));
+			labeldisdata[i][a][1] = ddB - 50;
 		}
 	}
 	//console.log(labeldisdata[1][1][1], labeldisdata[2][1][1], labeldisdata[3][1][1], labeldisdata[4][1][1]);
@@ -159,7 +162,7 @@ function ReportSignal() {
 		$.ajax(uurl, {
 			success: function() {
 				clearTimeout(tid);
-				tid = setTimeout(ReportSignal, 1000);
+				tid = setTimeout(ReportSignal, 5000);
 			}
 		});
 	}
