@@ -109,7 +109,12 @@ foreach ($res as $row) $units[] = $row["ID"].": [".$row["CoordX"].", ".$row["Coo
 echo implode(", ", $units);
 ?>};
 
-var labels = {};
+var labels = {<?php
+$labels = array();
+$res = getRows("SELECT * FROM YesDemo_Positions", array());
+foreach ($res as $row) $labels[] = $row["ID"].": [".$row["CoordX"].", ".$row["CoordY"]."]";
+echo implode(", ", $labels);
+?>};
 var fromts = 0;
 
 $(document).ready(function(e) {
@@ -207,11 +212,12 @@ function ReportPos(unitid, coordx, coordy) {
 }
 
 function DrawLabels() {
-	$(".whereatlabel").remove();
+	//$(".whereatlabel").remove();
 	for (var id in labels) {
 		var coordx = labels[id][0];
 		var coordy = labels[id][1];
-		var accuracy = labels[id][2];
+		var accuracy = 1;
+		//var accuracy = labels[id][2];
 		
 		coordy = coordy * (imgw / imgh);
 		var left = coordx;
