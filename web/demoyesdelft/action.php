@@ -18,9 +18,9 @@ if ($action == "setcoordunit")
 {
 	if ($id != "")
 	{
-		$coordx = $_GET["coordx"];
-		$coordy = $_GET["coordy"];
-		query("UPDATE YesDemo_Units SET CoordX=?, CoordY=? WHERE ID=?", array($coordx, $coordy, $id));
+		$lat = $_GET["lat"];
+		$lon = $_GET["lon"];
+		query("UPDATE YesDemo_Units SET Lat=?, Lon=? WHERE ID=?", array($lat, $lon, $id));
 		exit();
 	}
 }

@@ -28,6 +28,11 @@
 	echo str_replace("Open Sans", "BrandonGrotesque-Regular", $head);
 	?>
 	<!-- Custom CSS -->
+    
+    <script type="text/javascript" src="<?php echo path_combine(THEME_JS_URI, 'jquery.smooth-scroll.js'); ?>"></script>
+    <script type="text/javascript" src="<?php echo path_combine(THEME_JS_URI, 'jquery.smoothscrolling.js'); ?>"></script>
+    <script type="text/javascript" src="<?php echo path_combine(THEME_JS_URI, 'jquery.longpagemenu.js'); ?>"></script>
+    <link rel="stylesheet" href="<?php echo path_combine(THEME_CSS_URI, 'jquery.longpagemenu.css'); ?>">
 </head>
 <body <?php body_class('no-js'); ?>>
 <?php

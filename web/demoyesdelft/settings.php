@@ -1,14 +1,15 @@
 <?php
 session_start();
 
-$pathtoapi = "../../cloudapi/";
+$pathtoapi = "../../api.whereatcloud.com/";
 
-$dbhost = "127.0.0.1";
-$dbuser = "root";
-$dbpass = "";
+$dbhost = "localhost";
+$dbuser = "isilvestrov_cld";
+$dbpass = "F647b2Po";
 $dbname = "isilvestrov_cld";
 
-$adminpass = "whereAtDemoYesDelft";
+$adminuser = "whereAt";
+$adminpass = "Industries";
 
 try {
 	$connstr = "mysql:host=".$dbhost.";dbname=".$dbname.";charset=utf8";
@@ -97,6 +98,19 @@ function getRow($sql, $fields = false) {
 		$dberror = $e->getMessage();
 		return false;
 	}
+}
+
+function GetSetting($var) {
+	$res = getRow("SELECT * FROM YesDemo_Settings WHERE Var=?", $var);
+	if ($res === false) return false;
+	return $res["Val"];
+}
+
+function SetSetting($var, $val) {
+	if (getRow("SELECT * FROM YesDemo_Settings WHERE Var=?", $var))
+		return query("UPDATE YesDemo_Settings SET Val=? WHERE Var=?", array($val, $var));
+	else
+		return query("INSERT INTO YesDemo_Settings (Var, Val) VALUES (?, ?)", array($var, $val));
 }
 
 function GenerateCode($length = 32) {

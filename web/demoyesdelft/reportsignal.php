@@ -8,9 +8,26 @@ $gapikey = $_GET["apikey"];
 $labelids = $_GET["labelids"];
 $signals = $_GET["signals"];
 
+if (isset($_GET["lat"]))
+{
+	$lat = $_GET["lat"];
+	$lon = $_GET["lon"];
+	$acc = $_GET["acc"];
+}
+else
+{
+	$lat = NULL;
+	$lon = NULL;
+	$acc = NULL;
+}
+
 //if ($gapikey != $apikey) exit();
 
-if (!getRow("SELECT * FROM YesDemo_Units WHERE ID=?", array($unitid))) exit();
+$row = getRow("SELECT * FROM YesDemo_Units WHERE ID=?", array($unitid));
+if (!$row) exit();
+
+$calibration = $row["Calibration"];
+if (!is_numeric($calibration) || $calibration === NULL) $calibration = 0;
 
 if (!is_array($labelids)) $labelids = array($labelids);
 if (!is_array($signals)) $signals = array($signals);
@@ -19,6 +36,7 @@ $data = array();
 foreach ($labelids as $i=>$labelid)
 {
 	$signal = $signals[$i];
+	$signal += $calibration;
 	$data[$labelid] = $signal;
 }
 
@@ -34,6 +52,11 @@ if (!isset($res["error"]))
 	}
 }
 
+if ($lat !== NULL)
+{
+	query("UPDATE YesDemo_Units SET Lat=?, Lon=?, Acc=? WHERE ID=?", array($lat, $lon, $acc, $unitid));
+}
+
 $ts = microtime(true);
 
 foreach ($labels as $labelid)
@@ -41,7 +64,7 @@ foreach ($labels as $labelid)
 	if (isset($data[$labelid]))
 	{
 		$signal = $data[$labelid];
-		query("INSERT INTO YesDemo_Tracking (UnitID, LabelID, Timestamp, SignalStrength) VALUES (?, ?, ?, ?)", array($unitid, $labelid, $ts, $signal));
+		query("INSERT INTO YesDemo_Tracking (UnitID, LabelID, Timestamp, SignalStrength, Lat, Lon, Acc) VALUES (?, ?, ?, ?, ?, ?, ?)", array($unitid, $labelid, $ts, $signal, $lat, $lon, $acc));
 	}
 }
 

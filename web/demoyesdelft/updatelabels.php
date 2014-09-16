@@ -1,15 +1,10 @@
 <?php
 require_once("settings.php");
 
-$tmethod = $_GET["tmethod"];
-if (!is_numeric($tmethod)) $tmethod = 1;
-$filename = "triangulation$tmethod.php";
-if (!file_exists($filename)) $filename = "triangulation1.php";
-require_once($filename);
-
 header("Content-Type: text/javascript");
 
 $tsrange = 4; //sec
+$postime = 15; //sec
 
 $fromts = $_GET["fromts"];
 if (!is_numeric($fromts) || $fromts == "") $fromts = 0;
@@ -26,74 +21,43 @@ if (!isset($res["error"]))
 	}
 }
 
-$units = array();
-$res = getRows("SELECT * FROM YesDemo_Units", array());
-foreach ($res as $row) $units[$row["ID"]] = array($row["CoordX"], $row["CoordY"]);
-
-$highestts = false;
-$signaldata = array();
-foreach ($labels as $labelid)
-{
-	$row = getRow("SELECT * FROM YesDemo_Tracking WHERE LabelID=? AND Timestamp>? ORDER BY Timestamp DESC", array($labelid, $fromts));
-	if ($row !== false)
-	{
-		$lastts = $row["Timestamp"];
-		$mints = $lastts - $tsrange;
-		if ($lastts > $higestts) $highestts = $lastts;
-		
-		$data = array();
-		$res = getRows("SELECT AVG(SignalStrength) AS SignalStrength, MIN(SignalStrength) AS MinSignal, MAX(SignalStrength) AS MaxSignal, UnitID FROM YesDemo_Tracking WHERE LabelID=? AND Timestamp>=? GROUP BY UnitID", array($labelid, $mints));
-		foreach ($res as $row)
-		{
-			$unitid = $row["UnitID"];
-			$signal = $row["SignalStrength"];
-			$max = $row["MaxSignal"];
-			$min = $row["MinSignal"];
-			if (isset($units[$unitid]))
-			{
-				$unitx = $units[$unitid][0];
-				$unity = $units[$unitid][1];
-				$data[] = array($unitx, $unity, $signal, $min, $max);
-			}
-		}
-		if (count($data) >= 3) $signaldata[$labelid] = $data;
-	}
-}
-
-//fake data
-//foreach ($labels as $labelid) $signaldata[$labelid] = array();
-
 $labeldata = array();
-foreach ($signaldata as $labelid=>$data)
+//$res = getRows("SELECT p.* FROM (SELECT * FROM YesDemo_Positions ORDER BY ID DESC) AS p GROUP BY p.LabelID", array()); //select latest positions
+$res = getRows("SELECT o.LabelID, IF(p.NrUnits=1,p.Lat,AVG(o.Lat)) AS Lat, IF(p.NrUnits=1,p.Lon,AVG(o.Lon)) AS Lon, IF(p.NrUnits=1,p.Acc,AVG(o.Acc)) AS Acc, p.Timestamp FROM (SELECT p.* FROM (SELECT * FROM YesDemo_Positions ORDER BY ID DESC) AS p GROUP BY p.LabelID) AS p JOIN YesDemo_Positions AS o ON o.LabelID=p.LabelID WHERE o.Timestamp>=p.Timestamp-$postime GROUP BY o.LabelID", array()); //select average of last x seconds of position reports per label
+foreach ($res as $row)
 {
-	//$coords = TriangulateFake($data);
-	ob_start();
-	$start = microtime(true);
-	$coords = Triangulate($data);
-	$diff = (microtime(true) - $start) * 1000;
-	echo "Search time: $diff ms\n";
-	$output = ob_get_clean();
-	if (isset($_GET["echo"])) echo $output;
-	if ($coords !== false)
-	{
-		$labeldata[$labelid] = $coords;
-	}
+	$ago = microtime(true) - $row["Timestamp"];
+	$labeldata[$row["LabelID"]] = array($row["Lat"], $row["Lon"], $row["Acc"], $ago);
 }
 
-function TriangulateFake($data) {
-	$x = (rand() / getrandmax()) * 100;
-	$y = (rand() / getrandmax()) * 100;
-	$acc = (rand() / getrandmax()) * 10;
-	return array($x, $y, $acc);
+$lastupdates = array();
+$res = getRows("SELECT UnitID, MAX(Timestamp) AS LastTime FROM YesDemo_Tracking GROUP BY UnitID");
+foreach ($res as $row) $lastupdates[$row["UnitID"]] = $row["LastTime"];
+
+$units = array();
+$res = getRows("SELECT * FROM YesDemo_Units WHERE Hide<>1 OR Hide IS NULL", array());
+foreach ($res as $row)
+{
+	$id = $row["ID"];
+	$ago = (isset($lastupdates[$id])) ? time() - $lastupdates[$id]: 99999999;
+	$units[] = $row["ID"].": [".$row["Lat"].", ".$row["Lon"].", $ago]";
 }
+$jsunitdata = "var unitsupdate = {".implode(", ", $units)."};\n";
 
 $jslabeldata = array();
 foreach ($labeldata as $labelid=>$data) $jslabeldata[] = "$labelid: [".implode(", ", $data)."]";
 $jslabeldata = "var labelsupdate = {".implode(", ", $jslabeldata)."};\n";
 
 echo $jslabeldata;
+echo $jsunitdata;
 ?>
 for (var id in labelsupdate) {
-	labels[id] = labelsupdate[id];
+	for (var i in labelsupdate[id]) {
+		labels[id][i] = labelsupdate[id][i];
+    }
 }
-<?php if ($highestts !== false) { ?>fromts = <?php echo $highestts; ?>;<?php } ?>
+for (var id in unitsupdate) {
+	for (var i in unitsupdate[id]) {
+		units[id][i] = unitsupdate[id][i];
+    }
+}

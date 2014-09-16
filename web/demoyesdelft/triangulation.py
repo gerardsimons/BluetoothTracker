@@ -26,9 +26,9 @@ def triangulate(data):
     minima = find_min(data, gridstep, roundto, bounds)
     if minima != None:
         if size(minima, 0):
-            minimum = minima[argmin(minima[:, 2]), :2]
+            minimum = minima[argmin(minima[:, 2]), :3]
         else:
-            minimum = minima[0, :2]
+            minimum = minima[0, :3]
 
         return minimum
     else:

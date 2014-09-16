@@ -8,8 +8,12 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Units
 		(
 		ID int AUTO_INCREMENT,
 		MAC text,
-		CoordX double,
-		CoordY double,
+		Lat double,
+		Lon double,
+		Acc double,
+		Name text,
+		Hide int,
+		Calibration double,
 		PRIMARY KEY (ID)
 		)", array());
 
@@ -20,6 +24,9 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Tracking
 		LabelID int,
 		Timestamp double,
 		SignalStrength double,
+		Lat double,
+		Lon double,
+		Acc double,
 		PRIMARY KEY (ID)
 		)", array());
 
@@ -34,10 +41,20 @@ query("CREATE TABLE IF NOT EXISTS YesDemo_Positions
 		ID int AUTO_INCREMENT,
 		LabelID int,
 		Timestamp double,
-		CoordX double,
-		CoordY double,
+		Lat double,
+		Lon double,
+		Acc double,
+		NrUnits int,
 		PRIMARY KEY (ID)
 		)", array());
+
+query("CREATE TABLE IF NOT EXISTS YesDemo_Settings
+		(
+		ID int AUTO_INCREMENT,
+		Var text,
+		Val text,
+		PRIMARY KEY (ID)
+		)");
 
 /*query("CREATE TABLE IF NOT EXISTS YesDemo_Position
 		(

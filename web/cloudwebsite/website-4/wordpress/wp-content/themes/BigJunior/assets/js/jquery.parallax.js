@@ -51,19 +51,32 @@ http://www.gnu.org/licenses/gpl.html
 
 			$this.each(function(){
 				var $element = $(this);
+				
 				var top = $element.offset().top;
 				var height = getHeight($element);
-
+				
 				// Check if totally above or totally below viewport
 				if (top + height < pos || top > pos + windowHeight) {
 					return;
 				}
-
-				$this.css('backgroundPosition', xpos + " " + Math.round((firstTop - pos) * speedFactor) + "px");
+				
+				var useSpeedFactor = speedFactor;
+				
+				var wwidth = $(window).width();
+				if (wwidth <= 962) { //disable parralax for mobile website
+					useSpeedFactor = 1;
+					$this.css('background-position', xpos + " 0px");
+				} else {
+					var csspos = Math.round((firstTop - pos) * useSpeedFactor);
+					$this.css('background-position', xpos + " " + csspos + "px");
+				}
 			});
 		}		
 
-		$window.bind('scroll', update).resize(update);
+		$window.bind('scroll', function() {
+			$(this).trigger("resize");
+		});
+		$window.resize(update);
 		update();
 	};
 })(jQuery);

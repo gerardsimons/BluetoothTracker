@@ -133,11 +133,13 @@ class APILabel extends APISub
 		if ($ownerid == $userid) //label owned by user
 		{
 			$data["ownerid"] = $ownerid;
+			$data["name"] = $name;
 			$data["shared"] = ($this->getRow("SELECT * FROM LabelSharing WHERE LabelID=? AND (Timeout IS NULL OR (Timeout IS NOT NULL AND Timestamp+Timeout<?))", array($labelid, time()))) ? true: false;
 		}
 		elseif ($sharedwith == true) //label shared with user
 		{
 			$data["ownerid"] = $ownerid;
+			$data["name"] = $name;
 			$data["shared"] = true;
 		}
 		elseif ($public == 1) //public label

@@ -60,6 +60,7 @@ define('NONCE_SALT',       'whereAtIsBaas');
  * prefix. Only numbers, letters, and underscores please!
  */
 $table_prefix  = 'wp_';
+define('FS_METHOD', 'direct');
 
 /**
  * WordPress Localized Language, defaults to English.
