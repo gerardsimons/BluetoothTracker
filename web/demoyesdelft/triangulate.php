@@ -33,7 +33,7 @@ if ($nowupdating == 1)
 	{
 		if ($lastupdate < time() - $resetupdating) $nowupdating = 0;
 	}
-	exit();
+	if ($nowupdating == 1) exit();
 }
 SetSetting("nowupdating", 1);
 
