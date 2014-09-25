@@ -14,7 +14,7 @@ var menuobj = null;
 var menuattobj = null;
 var menutop = null;
 var buttontops = null;
-var lpforceheight = 35;
+var lpforceheight = 48;
 
 var lpbgcolor = null;
 var lpcolor = null;

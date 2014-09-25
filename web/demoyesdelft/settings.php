@@ -11,6 +11,9 @@ $dbname = "isilvestrov_cld";
 $adminuser = "whereAt";
 $adminpass = "Industries";
 
+$enablelogging = true;
+$logfilesavepath = "log.txt";
+
 try {
 	$connstr = "mysql:host=".$dbhost.";dbname=".$dbname.";charset=utf8";
 	$db = new PDO($connstr, $dbuser, $dbpass);
@@ -130,5 +133,17 @@ function Email($to, $subject, $message) {
 	$message = str_replace("\n", "<br />", $message);
 	
 	mail($to, $subject, $message, $headers);
+}
+
+function WriteLog($logstr) {
+	global $enablelogging, $logfilesavepath;
+	if ($enablelogging != true) return;
+	if ($file = fopen($logfilesavepath, "a"))
+	{
+		if (fwrite($file, $logstr."\n"))
+		{
+			@fclose($file);
+		}
+	}
 }
 ?>

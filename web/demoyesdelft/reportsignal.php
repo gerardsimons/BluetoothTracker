@@ -24,7 +24,12 @@ else
 //if ($gapikey != $apikey) exit();
 
 $row = getRow("SELECT * FROM YesDemo_Units WHERE ID=?", array($unitid));
-if (!$row) exit();
+if (!$row)
+{
+	//WriteLog("Reporting signal for non-existing unit!");
+	//WriteLog(print_r($_GET, true)."\n");
+	exit();
+}
 
 $calibration = $row["Calibration"];
 if (!is_numeric($calibration) || $calibration === NULL) $calibration = 0;
