@@ -15,6 +15,7 @@ var menuattobj = null;
 var menutop = null;
 var buttontops = null;
 var lpforceheight = 48;
+var lpspacerheight = 5;
 
 var lpbgcolor = null;
 var lpcolor = null;
@@ -44,13 +45,13 @@ var lpmenuheight = null;
 		});
 		var buttonw = maxw;
 		
-		var html = "<div id='longpagemenu' style='top:"+menuoffset+"px;height:"+lpmenuheight+"px;line-height:"+lpmenuheight+"px;'>";
+		var html = "<div class='longpagemenuspacer' style='height:"+lpspacerheight+"px;top:"+menuoffset+"px' id='lpspacer1'></div><div id='longpagemenu' style='top:"+(menuoffset+lpspacerheight)+"px;height:"+lpmenuheight+"px;line-height:"+lpmenuheight+"px;'>";
 		menuobj.find("a.button").each(function(index, element) {
             var href = $(this).attr("href");
 			var content = $(this).html();
 			html += "<a style='height:"+lpmenuheight+"px;max-width:"+maxperc+"%;width:"+buttonw+"px;' href='"+href+"'>"+content+"</a>";
         });
-		html += "</div><div id='longpagemenushadow' style='top:"+(menuoffset+0.5*lpmenuheight)+"px;height:"+(lpmenuheight*0.5)+"px;'></div>";
+		html += "</div><div class='longpagemenuspacer' style='height:"+lpspacerheight+"px;top:"+(menuoffset+lpspacerheight+lpmenuheight)+"px' id='lpspacer2'></div><div id='longpagemenushadow' style='top:"+(menuoffset+0.5*lpmenuheight+lpspacerheight*2)+"px;height:"+(lpmenuheight*0.5)+"px;'></div>";
 		
 		menuobj.after(html);
 		
@@ -124,7 +125,7 @@ var lpmenuheight = null;
 	function setMenuTop() {
 		var headertop = parseInt($("header.header-default").offset().top - $(window).scrollTop() + $("header.header-default").height());
 		if (headertop < 0) headertop = 0;
-		var menutop = headertop;
+		var menutop = headertop + lpspacerheight;
 		
 		var currtop = parseInt($("#longpagemenu").css("top").replace("px", ""));
 		if (currtop != menutop) {
@@ -133,6 +134,12 @@ var lpmenuheight = null;
 			
 			var shadowtop = parseInt($("#longpagemenushadow").css("top").replace("px", "")) + diff;
 			$("#longpagemenushadow").css("top", shadowtop+"px");
+			
+			var shadowtop = parseInt($("#lpspacer1").css("top").replace("px", "")) + diff;
+			$("#lpspacer1").css("top", shadowtop+"px");
+			
+			var shadowtop = parseInt($("#lpspacer2").css("top").replace("px", "")) + diff;
+			$("#lpspacer2").css("top", shadowtop+"px");
 		}
 	}
 })(jQuery);

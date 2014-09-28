@@ -5,7 +5,6 @@ div#longpagemenu {
 	width:100%;
 	background:#fff;
 	z-index:5000;
-	border-top:1px solid #eee;
 }
 
 div#longpagemenushadow {
@@ -54,4 +53,16 @@ div#longpagemenu a {
 div#longpagemenu a:hover {
 	background-color:#838383;
 	color:#fff;
+}
+
+div.longpagemenuspacer {
+	position:fixed;
+	width:100%;
+	background:#fff;
+	left:0px;
+	z-index:4995;
+}
+
+div.longpagemenuspacer#lpspacer1 {
+	border-top:1px solid #eee;
 }

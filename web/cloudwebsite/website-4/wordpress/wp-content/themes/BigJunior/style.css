@@ -106,7 +106,7 @@ blockquote
     margin:0;
 }
 .parallax blockquote {
-	background: rgba(11, 55, 180, 0.5) !important;
+	background: rgba(11, 55, 180, 0.0) url(assets/img/blockquote-start.png) no-repeat 20px 20px !important;
 }
 
 blockquote p
@@ -3194,8 +3194,29 @@ q
 }
 
 .horizontal-tab .tabs-container{
-    width: 50.76923076%;
+    /*width: 50.76923076%;*/
+    width: 88%;
     float: left;
+}
+
+.horizontal-tab .tabs-container .testimonial div.image {
+	display:inline-block;
+}
+.horizontal-tab .tabs-container .testimonial div.quote {
+	display:inline-block;
+	vertical-align:top;
+	padding:0 30px;
+}
+@media (max-width: 980px) {
+	.horizontal-tab .tabs-container .testimonial {
+		text-align:center;
+	}
+	.horizontal-tab .tabs-container li.tab.current {
+		padding:0;
+	}
+	.horizontal-tab .titles-container ul {
+		text-align:center;
+	}
 }
 
 .horizontal-tab .tabs-container > li{
@@ -3258,6 +3279,7 @@ q
     font-size: 8px;
     font-weight: 300;
     line-height: 30px;
+position:relative;
     color:#1a1a1a;
 }
 
@@ -3371,6 +3393,7 @@ q
 .2 .image{
     padding:0;
     border:none;
+position:relative;
 }
 
 /* Element Query */
