@@ -136,7 +136,7 @@ blockquote .name
 
 /* Headings */
 
-h1, h2, h3, h4, h5, h6{ font-weight: 400; line-height: 1.25em; margin:0 0 10px; color: #222 }
+h1, h2, h3, h4, h5,j1, h6{ font-weight: 400; line-height: 1.25em; margin:0 0 10px; color: #222 }
 
 h1{ font-size: 32px; }
 
@@ -144,9 +144,11 @@ h2{ font-size: 24px; }
 
 h3{ font-size: 19px; }
 
-h4{ font-size: 17px; }
+h4{ text-align: justify ; }
 
 h5{ font-size: 16px; }
+
+
 
 h6{ font-size: 14px; }
 
@@ -1117,7 +1119,7 @@ header #menu-item-search .search-template{
     transition: opacity .3s, margin-top .3s;
 }
 header #menu-item-search .search-template.visible{
-    visibility: visible;
+    visibility: hidden;
     opacity: 1;
     margin-top:0;
 }

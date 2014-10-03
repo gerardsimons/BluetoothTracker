@@ -1,5 +1,5 @@
-<?php
-
-interface IValueProvider {
-    public function GetValue($key);
+<?php
+
+interface IValueProvider {
+    public function GetValue($key);
 }

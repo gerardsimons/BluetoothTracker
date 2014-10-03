@@ -70,6 +70,7 @@ var lpmenuheight = null;
 		$(window).scroll(function(e) {
 			longPageHandleScroll();
         });
+		setTimeout(longPageHandleScroll, 50);
 		longPageHandleScroll();
 		
 		menuobj.hide();

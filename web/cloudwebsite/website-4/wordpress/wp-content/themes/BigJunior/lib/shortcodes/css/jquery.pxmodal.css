@@ -1,106 +1,106 @@
-
-.px-modal-open{
-    overflow: hidden;
-}
-
-.px-modal-backdrop{
-    background-color: rgba(0, 0, 0, .6);
-    position: fixed;
-    width:100%;
-    height: 100%;
-    top:0;
-    left:0;
-}
-
-.px-modal-wrap{
-    position: fixed;
-    left:15%;
-    right:15%;
-    top:30px;
-    bottom:30px;
-    background-color: #ffffff;
-}
-
-.px-modal-header{
-    height: 50px;
-    border-bottom: 1px solid #DFDFDF;
-    box-shadow: 0 4px 4px -4px rgba(0, 0, 0, 0.1);
-    position: relative;
-}
-
-.px-modal-title{
-    color: #555555;
-    font-size: 22px;
-    font-weight: 200;
-    left: 14px;
-    line-height: 50px;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    top: 0;
-}
-
-.px-modal-close{
-    right: 14px;
-    top:50%;
-    position: absolute;
-    width:18px;
-    height:18px;
-    margin-top:-9px;
-    background:url(../images/close-modal.png) no-repeat;
-	
-	-webkit-transition-duration: 0.2s;
-	-moz-transition-duration: 0.2s;
-	-o-transition-duration: 0.2s;
-	transition-duration: 0.2s;
-}
-
-.px-modal-close:hover{
-    background-position: -18px 0;
-}
-
-.px-modal-content{
-    overflow: auto;
-    position: absolute;
-    top:52px;
-    bottom:50px;
-    left:0;
-    right:0;
-}
-
-.px-modal-footer{
-    height: 50px;
-    border-top: 1px solid #DFDFDF;
-    box-shadow: inset 0 4px 4px -4px rgba(0, 0, 0, 0.1);
-    position: absolute;
-    bottom: 0;
-    background: #FCFCFC;
-    width: 100%;
-}
-
-.px-modal-buttons{
-    position: absolute;
-    right: 12px;
-    top: 10px;
-    margin-left:-10px;
-}
-
-.px-modal-buttons:after{
-    content: '';
-    display: table;
-    clear: both;
-}
-
-.px-modal-wrap .px-modal-footer .button-large{
-    padding: 0 35px 2px;
-}
-
-.px-modal-wrap .px-modal-footer .button{
-    margin-left: 10px;
-}
-
-.px-preview-frame{
-    width:96%;
-    height:85%;
-    margin: 2% 2%;
+
+.px-modal-open{
+    overflow: hidden;
+}
+
+.px-modal-backdrop{
+    background-color: rgba(0, 0, 0, .6);
+    position: fixed;
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+}
+
+.px-modal-wrap{
+    position: fixed;
+    left:15%;
+    right:15%;
+    top:30px;
+    bottom:30px;
+    background-color: #ffffff;
+}
+
+.px-modal-header{
+    height: 50px;
+    border-bottom: 1px solid #DFDFDF;
+    box-shadow: 0 4px 4px -4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.px-modal-title{
+    color: #555555;
+    font-size: 22px;
+    font-weight: 200;
+    left: 14px;
+    line-height: 50px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+}
+
+.px-modal-close{
+    right: 14px;
+    top:50%;
+    position: absolute;
+    width:18px;
+    height:18px;
+    margin-top:-9px;
+    background:url(../images/close-modal.png) no-repeat;
+	
+	-webkit-transition-duration: 0.2s;
+	-moz-transition-duration: 0.2s;
+	-o-transition-duration: 0.2s;
+	transition-duration: 0.2s;
+}
+
+.px-modal-close:hover{
+    background-position: -18px 0;
+}
+
+.px-modal-content{
+    overflow: auto;
+    position: absolute;
+    top:52px;
+    bottom:50px;
+    left:0;
+    right:0;
+}
+
+.px-modal-footer{
+    height: 50px;
+    border-top: 1px solid #DFDFDF;
+    box-shadow: inset 0 4px 4px -4px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    bottom: 0;
+    background: #FCFCFC;
+    width: 100%;
+}
+
+.px-modal-buttons{
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    margin-left:-10px;
+}
+
+.px-modal-buttons:after{
+    content: '';
+    display: table;
+    clear: both;
+}
+
+.px-modal-wrap .px-modal-footer .button-large{
+    padding: 0 35px 2px;
+}
+
+.px-modal-wrap .px-modal-footer .button{
+    margin-left: 10px;
+}
+
+.px-preview-frame{
+    width:96%;
+    height:85%;
+    margin: 2% 2%;
 }

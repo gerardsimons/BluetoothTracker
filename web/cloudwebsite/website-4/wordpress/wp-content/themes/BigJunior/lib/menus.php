@@ -9,6 +9,9 @@ add_action( 'init', 'px_register_menus' );
 
 function px_add_search_menu_item($items, $args)
 {
+	//disable search menu item
+	return $items;
+	
     if( 'primary-nav' != $args->theme_location )
         return $items;
 
