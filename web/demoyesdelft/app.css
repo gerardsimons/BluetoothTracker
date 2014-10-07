@@ -1,0 +1,47 @@
+.itemwrapper {
+	position:absolute;
+}
+.itemtext {
+	z-index:150;
+}
+
+.unitdot {
+	position:relative;
+	left:-6px;
+	top:-6px;
+	height:12px;
+	width:12px;
+	background:#27348b;
+	border-radius:5px;
+	border:1px solid #fff;
+	box-sizing:border-box;
+}
+.unittext {
+	position:relative;
+	top:-30px;
+}
+
+.labeldot {
+	position:relative;
+	left:-4px;
+	top:-4px;
+	height:8px;
+	width:8px;
+	background:#0f0;
+	border-radius:4px;
+	z-index:100;
+}
+.accuracywrapper {
+	position:absolute;
+	z-index:50;
+}
+.accuracy {
+	opacity:0.2;
+	background:#0CF;
+	border:1px #00F solid;
+	width:100%;
+	height:100%;
+	border-radius:50%;
+	z-index:50;
+	box-sizing:border-box;
+}

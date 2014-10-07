@@ -1,0 +1,84 @@
+@media (min-width: 1200px) { /*large desktop*/
+	
+}
+
+@media (max-width: 1200px) { /*small desktop*/
+	#controlpanel {
+		width:320px;
+	}
+	#mapwrapper {
+		left:320px;
+		border-right:320px solid #fff;
+	}
+}
+
+@media (max-width: 979px) { /*tablet and smaller*/
+	body {
+		font-size:18px;
+	}
+	
+	#mapwrapper {
+		left:0px;
+		border-right:none;
+		z-index:-5;
+	}
+	#controlpanel {
+		z-index:0;
+		width:250px;
+		border-top:none;
+	}
+	#controlpanelshadow {
+		display:none;
+	}
+	#controlpanel {
+		display:none;
+	}
+	#header {
+		height:50px;
+		line-height:50px;
+	}
+	#container {
+		border-top:50px solid #fff;
+	}
+	#logoutcontainer img {
+		height:30px;
+		padding:10px 0;
+	}
+	#mobilemenu {
+		display:inline;
+	}
+	
+	body.movedright #header, body.movedright #container {
+		left:250px;
+		width:calc(100% - 250px);
+	}
+	body.movedright #controlpanel {
+		display:block;
+	}
+	#controlpanel button:not(.toggle), #controlpanel input[type=button], #controlpanel input[type=submit] {
+		width:100%;
+		font-size:18px;
+	}
+	#controlpanel button.toggle {
+		font-size:18px;
+	}
+	#controlpanel .togglecontainer {
+		width:100%;
+	}
+	#controlpanel label {
+		margin-bottom:3px;
+		display:inline-block;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 979px) { /*tablet only*/
+	
+}
+
+@media (max-width: 767px) { /*phone*/
+	
+}
+
+@media (max-width: 480px) { /*portrait phone*/
+	
+}
