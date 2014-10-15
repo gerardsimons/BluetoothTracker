@@ -56,10 +56,13 @@ if ($loggedin == true)
                 $lon = $row["Lon"];
                 $name = $row["Name"];
                 if ($name === NULL || $name == "") $name = $row["ID"];
-                if ($lat < $minlat || $minlat === false) $minlat = $lat;
-                if ($lat > $maxlat || $maxlat === false) $maxlat = $lat;
-                if ($lon < $minlon || $minlon === false) $minlon = $lon;
-                if ($lon > $maxlon || $maxlon === false) $maxlon = $lon;
+				if ($lat !== NULL)
+				{
+					if ($lat < $minlat || $minlat === false) $minlat = $lat;
+					if ($lat > $maxlat || $maxlat === false) $maxlat = $lat;
+					if ($lon < $minlon || $minlon === false) $minlon = $lon;
+					if ($lon > $maxlon || $maxlon === false) $maxlon = $lon;
+				}
                 $units[] = $row["ID"].": [".$row["Lat"].", ".$row["Lon"].", 0, '".htmlspecialchars($name)."']";
             }
             $lat = (count($lats) > 0) ? array_sum($lats) / count($lats): 0;
@@ -87,10 +90,13 @@ if ($loggedin == true)
             {
                 $lat = $row["Lat"];
                 $lon = $row["Lon"];
-                if ($lat < $minlat || $minlat === false) $minlat = $lat;
-                if ($lat > $maxlat || $maxlat === false) $maxlat = $lat;
-                if ($lon < $minlon || $minlon === false) $minlon = $lon;
-                if ($lon > $maxlon || $maxlon === false) $maxlon = $lon;
+				if ($lat !== NULL)
+				{
+					if ($lat < $minlat || $minlat === false) $minlat = $lat;
+					if ($lat > $maxlat || $maxlat === false) $maxlat = $lat;
+					if ($lon < $minlon || $minlon === false) $minlon = $lon;
+					if ($lon > $maxlon || $maxlon === false) $maxlon = $lon;
+				}
                 $id = $row["LabelID"];
                 $ago = microtime(true) - $row["Timestamp"];
                 $name = (isset($labelnames[$id])) ? $labelnames[$id]: $id;
