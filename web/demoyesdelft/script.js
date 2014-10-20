@@ -101,6 +101,34 @@ $(document).ready(function(e) {
 		if (minlat === false) return;
         map.fitBounds(new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlon), new google.maps.LatLng(maxlat, maxlon)));
     });
+	$("#settings_toggle").click(function(e) {
+        $("#settingscontainer").toggle();
+        $("#clusternetwork").toggle();
+    });
+	$("#toggletags").click(function(e) {
+        $("#arrowup").toggle();
+        $("#arrowdown").toggle();
+        $("#tagstable").toggle();
+		$(window).trigger("resize");
+    });
+	$(window).resize(function(e) {
+        if ($("#tagstable").is(":hidden") == false) {
+			if ($(window).width() < 979) {
+				var top = $("#tagswrapper").offset().top;
+				var bottom = top + $("#tagscontainer").outerHeight();
+				console.log(top, bottom, $(window).height());
+				if (top < 60 || bottom > $(window).height()) {
+					$("#tagswrapper").css("top", "60px");
+					$("#tagswrapper").css("bottom", "");
+					return;
+				}
+			}
+		}
+		
+		$("#tagswrapper").css("top", "");
+		$("#tagswrapper").css("bottom", "0px");
+    });
+	setTimeout(function() {$(window).trigger("resize");}, 10);
 	
 	$("button.toggle").each(function(index, element) {
 		$(this).click(function(e) {

@@ -124,72 +124,74 @@ if ($loggedin == true)
         <?php } ?>
 	</head>
 <body<?php if ($loggedin == false) { ?> class="loggedout"<?php } ?>>
-	<?php if ($loggedin == true) { ?>
-    <div id="clusternetwork" style="display:none;">
-    	<table border="0"><tr><td valign="middle">
-    		<div>Cluster Network</div>
-            <div>by</div>
-            <div>where<b>At</b> Industries</div>
-        </td></tr></table>
-    </div>
-	<div id="headerwrapper">
-        <div id="header">
-        	<a id="settings_toggle" class="marginright"><img src="f1.png" class="headerborder" /></a><a id="pos_you"><img src="f2.png" class="headerborder" /></a><div class="headertext marginright headerborder">Ivan Silvestrov</div><a id="pos_warehouse"><img src="f3.png" class="headerborder" /></a><div class="headertext marginright headerborder">Yes!Delft | 2629 JD</div><a id="pos_bullseye"><img src="f4.png" class="headerborder" /></a>
-            <div id="settingscontainer" style="display:none">
-                <div id="settingscontent">
-                    <span class="togglelabel">Map type:</span>
-                    <div class="togglecontainer">
-                        <button class="toggle left active" name="maptype" value="map">Map</button><button class="toggle right" name="maptype" value="sat">Sat</button>
-                    </div><br /><br />
-                    
-                    <span class="togglelabel">Indoor:</span>
-                    <div class="togglecontainer">
-                        <button class="toggle left active" name="indoor" value="on">On</button><button class="toggle right" name="indoor" value="off">Off</button>
-                    </div><br /><br />
-                    
-                    <?php /*
-                    <span class="togglelabel">Access points:</span>
-                    <div class="togglecontainer">
-                        <button class="toggle left active" name="access" value="on">On</button><button class="toggle right" name="access" value="off">Off</button>
-                    </div><br /><br />
-                    */ ?>
-                    
-                    <span class="togglelabel">Info:</span>
-                    <div class="togglecontainer">
-                        <button class="toggle left active" name="labelinfo" value="on">On</button><button class="toggle right" name="labelinfo" value="off">Off</button>
-                    </div><br /><br />
-                    
-                    <span class="togglelabel">Live:</span>
-                    <div class="togglecontainer">
-                        <button class="toggle right" name="labellive" value="on">On</button><button class="toggle left active" name="labellive" value="rt">RT</button>
-                    </div><br /><br />
-                    
-                    <div id="logoutcontainer">
-                        <button onclick="window.location.href='./?logout'">Log Out</button>
-                    </div>
-                </div>
+    <div id="header">
+    	<img src="mobilemenu.png" id="mobilemenu" />
+        <span style="font-size:large">Cluster Network</span>
+		<?php if ($loggedin == true) { ?>
+        	<div id="logoutcontainer">
+            	<a href="./?logout"><img src="logout.png" /></a>
             </div>
-        </div>
+    	<?php } else { ?>
+        
+        <?php } ?>
     </div>
-	<div id="tagswrapper" style="bottom:0px">
-        <div id="tagscontainer">
-        	<a id="toggletags"><img id="arrowup" src="arrowup.png" /><img id="arrowdown" src="arrowdown.png" style="display:none" /></a>
-            <table id="tagstable" style="display:none">
-            	<tr>
-                	<td>Tag</td>
-                </tr>
-                <?php
+	<?php if ($loggedin == true) { ?>
+        <div id="controlpanel">
+    		<div id="controlpanelshadow"></div>
+            <h2>Tags:</h2><br />
+            
+            <?php
+			if (count($labeldata) == 0)
+				echo "No tags available.";
+			else
+			{
 				asort($labeldata);
 				foreach ($labeldata as $id=>$name)
 				{
-					echo "<tr><td><label><input type='checkbox' labelid='$id' id='label_$id' class='labelcheckbox' checked='checked' /> $name | T°: n/a</label></td></tr>";
+					echo "<label><input type='checkbox' labelid='$id' id='label_$id' class='labelcheckbox' checked='checked' /> $name | T°: n/a</label><br />";
 				}
-				?>
-            </table>
+			}
+			?>
+            <br />
+            
+            <h2>Focus on:</h2><br />
+            
+            <button id="pos_you" class="block">Your position</button>
+            <button id="pos_warehouse" class="block">Warehouse</button>
+            <button id="pos_bullseye" class="block">Selected tags</button><br />
+            
+            <h2>Settings:</h2><br />
+            
+            <div id="settingscontainer">
+                <span class="togglelabel">Map type:</span>
+                <div class="togglecontainer">
+                    <button class="toggle left active" name="maptype" value="map">Map</button><button class="toggle right" name="maptype" value="sat">Sat</button>
+                </div><br /><br />
+                
+                <span class="togglelabel">Indoor:</span>
+                <div class="togglecontainer">
+                    <button class="toggle left active" name="indoor" value="on">On</button><button class="toggle right" name="indoor" value="off">Off</button>
+                </div><br /><br />
+                
+                <span class="togglelabel">Access points:</span>
+                <div class="togglecontainer">
+                    <button class="toggle left active" name="access" value="on">On</button><button class="toggle right" name="access" value="off">Off</button>
+                </div><br /><br />
+                
+                <span class="togglelabel">Info:</span>
+                <div class="togglecontainer">
+                    <button class="toggle left active" name="labelinfo" value="on">On</button><button class="toggle right" name="labelinfo" value="off">Off</button>
+                </div><br /><br />
+                
+                <span class="togglelabel">Live:</span>
+                <div class="togglecontainer">
+                    <button class="toggle left active" name="labellive" value="rt">Realtime</button><button class="toggle right" name="labellive" value="on">On</button>
+                </div>
+            </div>
         </div>
-    </div>
     <?php } ?>
     <div id="container">
+    	<div id="headershadow"></div>
     	<div id="mapwrapper">
         	<div id="map"></div>
         </div>

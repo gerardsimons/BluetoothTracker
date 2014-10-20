@@ -7,23 +7,14 @@
 		width:320px;
 	}
 	#mapwrapper {
-		
+		left:320px;
+		border-right:320px solid #fff;
 	}
 }
 
 @media (max-width: 979px) { /*tablet and smaller*/
 	body {
 		font-size:18px;
-	}
-	
-	#clusternetwork table {
-		position:absolute;
-		bottom:0px;
-		left:0px;
-		height:200px;
-	}
-	#clusternetwork table td div {
-		display:block;
 	}
 	
 	#mapwrapper {
@@ -42,32 +33,16 @@
 	#controlpanel {
 		display:none;
 	}
-	#headerwrapper {
-		width:100%;
-		left:0px;
-	}
-	#header .headertext {
-		display:none;
-	}
-	#header > a {
-		width:25%;
-		text-align:center;
-		display:inline-block !important;
-	}
-	#header .marginright {
-		margin:0;
-	}
 	#header {
-		width:100%;
-		left:0px;
-		top:0px;
+		height:50px;
+		line-height:50px;
 	}
-	body:not(.loggedout) #container {
-		border-top:60px solid #fff;
+	#container {
+		border-top:50px solid #fff;
 	}
-	#logoutcontainer {
-		padding-top:15px;
-		clear:both;
+	#logoutcontainer img {
+		height:30px;
+		padding:10px 0;
 	}
 	#mobilemenu {
 		display:inline;
@@ -93,15 +68,6 @@
 	#controlpanel label {
 		margin-bottom:3px;
 		display:inline-block;
-	}
-	#tagswrapper {
-		width:100%;
-		left:0px;
-	}
-	#tagscontainer {
-		width:100%;
-		left:0px;
-		bottom:0px;
 	}
 }
 
