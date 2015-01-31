@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -21,10 +22,15 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.devriesdev.whereatassettracking.system.AssetTracker;
+import com.devriesdev.whereatassettracking.system.LatLng;
+import com.devriesdev.whereatassettracking.system.Locator;
 import com.devriesdev.whereatassettracking.utils.Utils;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+
+//import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.GooglePlayServicesUtil;
+//import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by danie_000 on 7/11/2014.
@@ -54,6 +60,10 @@ public class MainService extends Service {
 
     private AssetTracker assetTracker;
 
+    private Locator locator;
+
+    private static boolean googlePlayServicesAvailable = false;
+
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
             super(looper);
@@ -64,6 +74,11 @@ public class MainService extends Service {
             final PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             long now = SystemClock.uptimeMillis();
             powerManager.userActivity(now, false);
+
+            /*if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+                googlePlayServicesAvailable = true;
+            }
+            locator.init(googlePlayServicesAvailable);*/
 
             fixedLocation = new LatLng(0, 0);
 
@@ -96,6 +111,11 @@ public class MainService extends Service {
                         // Stop AssetTracking
                         assetTracker.stop();
 
+                        if (googlePlayServicesAvailable) {
+                            // Stop Locator
+                            locator.disconnect();
+                        }
+
                         // Unregister the UI broadcast receivers
                         unregisterReceiver(uiCallbackReceiver);
                         unregisterReceiver(toggleLocationFixedReceiver);
@@ -124,8 +144,14 @@ public class MainService extends Service {
 
                         if (locationFixed) {
                             builder = getNewBuilder("Location was fixed");
+                            if (googlePlayServicesAvailable) {
+                                locator.stopUpdates();
+                            }
                         } else {
                             builder = getNewBuilder("Location was released");
+                            if (googlePlayServicesAvailable) {
+                                locator.requestUpdates();
+                            }
                         }
 
                         notificationManager.notify(notificationID, builder.build());
@@ -142,6 +168,12 @@ public class MainService extends Service {
                         lon = intent.getDoubleExtra("LONGITUDE", -1);
                         if (lat != -1 && lon != -1) {
                             fixedLocation = new LatLng(lat, lon);
+
+                            Location location = new Location("");
+                            location.setLatitude(lat);
+                            location.setLongitude(lon);
+
+                            locator.setLastLocation(location);
 
                             builder = getNewBuilder("Location was updated");
 
@@ -171,7 +203,9 @@ public class MainService extends Service {
     public void onCreate() {
         context = this;
 
-        assetTracker = new AssetTracker(context, ACTION_UICALLBACK);
+        locator = new Locator(context, ACTION_UICALLBACK);
+
+        assetTracker = new AssetTracker(context, ACTION_UICALLBACK, locator);
 
         sharedPreferences = getSharedPreferences("wACNPrefs", Context.MODE_PRIVATE);
 
@@ -224,6 +258,15 @@ public class MainService extends Service {
                 .acquire();
 
         assetTracker.start();
+
+        if (googlePlayServicesAvailable) {
+            locator.connect(!locationFixed);
+
+            builder = getNewBuilder("Google Play services available");
+        } else {
+            builder = getNewBuilder("Google Play services unavailable");
+        }
+        notificationManager.notify(notificationID, builder.build());
     }
 
     private NotificationCompat.InboxStyle addLine(String str) {
@@ -259,7 +302,7 @@ public class MainService extends Service {
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(
                         getResources().getString(R.string.app_name) +
-                                " V" + String.valueOf(getResources().getInteger(R.integer.version))
+                                " V" + String.valueOf(getResources().getInteger(R.integer.google_play_services_version))
                 )
                 .setAutoCancel(true)
                 .addAction(R.drawable.ic_action_cancel, "exit",
@@ -277,19 +320,31 @@ public class MainService extends Service {
         if (locationFixed) {
             Intent editLocationIntent = new Intent(context, EditCoordinatesDialog.class);
             editLocationIntent.putExtra("REQUEST_ACTION", ACTION_EDITLOCATION);
+            String lat = "", lon = "";
+            if (googlePlayServicesAvailable) {
+                if (locator.isConnected()) {
+                    Location location = locator.getLastLocation();
+                    lat = Double.toString(location.getLatitude());
+                    lon = Double.toString(location.getLongitude());
+                }
+
+                b
+                        .addAction(R.drawable.ic_action_location_off, "release",
+                                PendingIntent.getBroadcast(
+                                        context,
+                                        0,
+                                        toggleLocationFixedIntent,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                        );
+            }
+            editLocationIntent.putExtra("CURRENT_LAT", lat);
+            editLocationIntent.putExtra("CURRENT_LON", lon);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addParentStack(EditCoordinatesDialog.class);
             stackBuilder.addNextIntent(editLocationIntent);
 
             b
-                    .addAction(R.drawable.ic_action_location_off, "release",
-                            PendingIntent.getBroadcast(
-                                    context,
-                                    0,
-                                    toggleLocationFixedIntent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                    )
                     .addAction(R.drawable.ic_action_edit, "edit",
                             stackBuilder.getPendingIntent(
                                     0,
@@ -297,15 +352,17 @@ public class MainService extends Service {
                             )
                     );
         } else {
-            b
-                    .addAction(R.drawable.ic_action_location_found, "fix",
-                            PendingIntent.getBroadcast(
-                                    context,
-                                    0,
-                                    toggleLocationFixedIntent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
-                            )
-                    );
+            if (googlePlayServicesAvailable) {
+                b
+                        .addAction(R.drawable.ic_action_location_found, "fix",
+                                PendingIntent.getBroadcast(
+                                        context,
+                                        0,
+                                        toggleLocationFixedIntent,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                )
+                        );
+            }
         }
 
         return b;

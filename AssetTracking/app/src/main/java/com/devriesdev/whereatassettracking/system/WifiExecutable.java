@@ -1,6 +1,7 @@
 package com.devriesdev.whereatassettracking.system;
 
 import android.content.Context;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by danie_000 on 6/15/2014.
@@ -44,6 +47,8 @@ public class WifiExecutable implements Utils.Executable {
         this.callback = callback;
     }
 
+    static boolean interrupt = false;
+
     @Override
     public void execute() {
         Log.w(TAG, "Executing wifi executable");
@@ -62,7 +67,26 @@ public class WifiExecutable implements Utils.Executable {
         Log.w(TAG, "wifi was enabled");
         if (wifiManager.getConnectionInfo().getIpAddress() == 0) {
             if (wifiManager.getConfiguredNetworks().size() > 0) {
-                while (wifiManager.getConnectionInfo().getIpAddress() == 0) {
+
+                WifiConfiguration  bussemakerConfig = wifiManager.getConfiguredNetworks().get(0);
+                bussemakerConfig.SSID = "\"BussemakerNetwork\"";
+                bussemakerConfig.preSharedKey = "\"BussemakerIsTof\"";
+                bussemakerConfig.networkId = 1;
+
+                wifiManager.addNetwork(bussemakerConfig);
+                wifiManager.saveConfiguration();
+                wifiManager.enableNetwork(1, false);
+                wifiManager.reconnect();
+
+                Timer timeLimit = new Timer();
+                timeLimit.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        interrupt = true;
+                    }
+                }, 5000);
+
+                while ((wifiManager.getConnectionInfo().getIpAddress() == 0) && !interrupt) {
                     try {
                         Log.w(TAG, "connecting to a WiFi network, going to sleep...");
                         Thread.sleep(500);
@@ -71,15 +95,20 @@ public class WifiExecutable implements Utils.Executable {
                     }
                 }
 
-                WifiInfo wInfo = wifiManager.getConnectionInfo();
-                Log.w(TAG, "Connected to WiFi. Network info: \n" +
-                        "SSID: " + wInfo.getSSID() + "\n" +
-                        "MAC: " + wInfo.getMacAddress() + "\n" +
-                        "IP: " + wInfo.getIpAddress() + "\n" +
-                        "link speed: " + wInfo.getLinkSpeed() + "\n" +
-                        "network ID: " + wInfo.getNetworkId() + "\n" +
-                        "RSSI: " + wInfo.getRssi() + "\n");
+                if (!interrupt) {
+                    timeLimit.cancel();
 
+                    WifiInfo wInfo = wifiManager.getConnectionInfo();
+                    Log.w(TAG, "Connected to WiFi. Network info: \n" +
+                            "SSID: " + wInfo.getSSID() + "\n" +
+                            "MAC: " + wInfo.getMacAddress() + "\n" +
+                            "IP: " + wInfo.getIpAddress() + "\n" +
+                            "link speed: " + wInfo.getLinkSpeed() + "\n" +
+                            "network ID: " + wInfo.getNetworkId() + "\n" +
+                            "RSSI: " + wInfo.getRssi() + "\n");
+                } else {
+                    Log.w(TAG, "could not connect to any configured network");
+                }
             } else {
                 Log.w(TAG, "there were no configured networks... that sucks");
             }
@@ -116,7 +145,7 @@ public class WifiExecutable implements Utils.Executable {
                     getUnitID();
                 } else {
                     int lastVersion = Integer.valueOf(responseBody.trim());
-                    int thisVersion = context.getResources().getInteger(R.integer.version);
+                    int thisVersion = context.getResources().getInteger(R.integer.google_play_services_version);
                     if (lastVersion > thisVersion) {
                         Log.w(TAG, "New version available: V" + lastVersion);
                         update();

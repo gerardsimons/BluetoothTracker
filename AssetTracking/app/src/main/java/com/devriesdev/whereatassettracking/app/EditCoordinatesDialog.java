@@ -1,6 +1,5 @@
 package com.devriesdev.whereatassettracking.app;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,8 +7,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -27,10 +24,15 @@ public class EditCoordinatesDialog extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_location);
 
+        String _lat;
+        String _lon;
+
         Bundle intentExtras = getIntent().getExtras();
         if (!intentExtras.isEmpty())
         {
             requestAction = intentExtras.getString("REQUEST_ACTION");
+            _lat = intentExtras.getString("CURRENT_LAT");
+            _lon = intentExtras.getString("CURRENT_LON");
 
             findViewById(R.id.dialog_cancel).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -62,10 +64,12 @@ public class EditCoordinatesDialog extends Activity {
             });
 
             findViewById(R.id.dialog_apply).setEnabled(false);
-            ((EditText) findViewById(R.id.dialog_lat))
-                    .addTextChangedListener(new EnableApplyListener());
-            ((EditText) findViewById(R.id.dialog_lon))
-                    .addTextChangedListener(new EnableApplyListener());
+            EditText editLat = (EditText) findViewById(R.id.dialog_lat);
+            EditText editLon = (EditText) findViewById(R.id.dialog_lon);
+            editLat.setText(_lat);
+            editLon.setText(_lon);
+            editLat.addTextChangedListener(new EnableApplyListener());
+            editLon.addTextChangedListener(new EnableApplyListener());
         } else {
             finish();
         }
