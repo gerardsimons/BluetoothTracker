@@ -21,11 +21,14 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GetGPSCoordinates();
+        getGPSCoordinates();
     }
 
+    private void startNewPath() {
 
-    private void GetGPSCoordinates() {
+    }
+
+    private void getGPSCoordinates() {
         // Acquire a reference to the system Location Manager
         LocationManager locationManager = (LocationManager) MainActivity.this.getSystemService(Context.LOCATION_SERVICE);
 

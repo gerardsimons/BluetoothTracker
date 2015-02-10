@@ -75,10 +75,10 @@ public class MainService extends Service {
             long now = SystemClock.uptimeMillis();
             powerManager.userActivity(now, false);
 
-            /*if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
                 googlePlayServicesAvailable = true;
             }
-            locator.init(googlePlayServicesAvailable);*/
+            locator.init(googlePlayServicesAvailable);
 
             fixedLocation = new LatLng(0, 0);
 
