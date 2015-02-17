@@ -43,9 +43,18 @@
         android:id="@+id/temperatureLabelText"
         android:layout_below="@+id/latitudeText"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="70dp" />
+        android:layout_marginTop="20dp" />
 
-
+    <TextView
+        android:lines="1"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/latitudeText"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Temp"
+        android:id="@+id/temperatureText"
+        android:layout_marginTop="20dp"
+        android:layout_toEndOf="@id/temperatureLabelText" />
 
 
 </RelativeLayout>

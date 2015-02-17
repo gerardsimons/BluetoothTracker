@@ -1,0 +1,7 @@
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\classes\debug
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\internal_impl-21.0.2-730a9f016853a8674e8c0404361075d635ceb6d9.jar
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\support-annotations-21.0.2-2ef0d5baba759dfe4a1bf7b373facd0f04fc6067.jar
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\classes-90d3f9f00a02fb5ade4f679d5f74873ae84bc2e0.jar
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\classes-db5214795abd42ac4b5ef42760d52d6870eb88db.jar
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\internal_impl-21.0.2-ce0f0dbde9fcb345e21b7ef990f2032b63076715.jar
+C:\Users\Gerard\GitHub\BluetoothTracker\BluetoothLeGatt\Application\build\intermediates\pre-dexed\debug\classes-30afe01ad1cab0dc136ef335bceff88f73dd257c.jar
