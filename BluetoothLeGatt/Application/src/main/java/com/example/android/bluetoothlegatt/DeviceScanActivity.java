@@ -17,11 +17,13 @@
 package com.example.android.bluetoothlegatt;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -34,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +50,8 @@ public class DeviceScanActivity extends ListActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
+
+    private int calibrationValue = -8;
 
     private static final String TAG = "DeviceScanActivity";
 
@@ -119,6 +124,40 @@ public class DeviceScanActivity extends ListActivity {
                 break;
             case R.id.menu_stop:
                 scanLeDevice(false);
+                break;
+            case R.id.set_calibration_value:
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                alert.setTitle("Calibration");
+                alert.setMessage("Set New Calibration Value");
+
+// Set an EditText view to get user input
+                final int minValue = -50;
+                final int maxValue = 50;
+                final NumberPicker numberPicker = new NumberPicker(this);
+
+                numberPicker.setMinValue(0);
+                numberPicker.setMaxValue(100);
+                numberPicker.setValue(-calibrationValue);
+
+                alert.setView(numberPicker);
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        calibrationValue = -numberPicker.getValue();
+                        Log.d(TAG,"New calibration value = " + calibrationValue);
+                        mLeDeviceListAdapter.clear();
+                        scanLeDevice(true);
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+// see http://androidsnippets.com/prompt-user-input-with-an-alertdialog
                 break;
         }
         return true;
@@ -353,7 +392,7 @@ public class DeviceScanActivity extends ListActivity {
             System.out.println("\tRSSI = " + rssi);
 
             //Calibrate the power level
-            final int powerLevel = getPowerLevel(scanRecord) - 4;
+            final int powerLevel = getPowerLevel(scanRecord) + calibrationValue;
             System.out.println("Power level = " + powerLevel);
 
 //            System.out.println("\tScan Record = \n");

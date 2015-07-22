@@ -26,4 +26,8 @@
           android:title="@string/menu_stop"
           android:orderInCategory="101"
           android:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/set_calibration_value"
+        android:title="Calibration"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom|withText"/>
 </menu>

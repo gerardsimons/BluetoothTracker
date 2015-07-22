@@ -157,6 +157,7 @@ containing a value of this type.
         public static final int menu_refresh=0x7f090006;
         public static final int menu_scan=0x7f090009;
         public static final int menu_stop=0x7f09000a;
+        public static final int set_calibration_value=0x7f09000b;
         public static final int temperature=0x7f090005;
     }
     public static final class layout {
