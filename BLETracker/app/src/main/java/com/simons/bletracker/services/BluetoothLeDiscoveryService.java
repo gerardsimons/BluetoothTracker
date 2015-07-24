@@ -30,7 +30,7 @@ public class BluetoothLeDiscoveryService extends Service {
     private static final int RSSI_THRESHOLD = -80;
 
     //Scanning interval
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 3000;
 
     private final IBinder mBinder = new LocalBinder();
 
@@ -46,6 +46,13 @@ public class BluetoothLeDiscoveryService extends Service {
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        stopScanning();
+
+
     }
 
     public void startScanning() {
@@ -94,8 +101,10 @@ public class BluetoothLeDiscoveryService extends Service {
         }
 
         public void pauseScanning() {
-            running = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            if(running) {
+                running = false;
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            }
         }
 
         public void resumeScanning() {
@@ -113,8 +122,10 @@ public class BluetoothLeDiscoveryService extends Service {
                     if (running) {
                         Log.d(TAG,"Starting scan...");
                         mBluetoothAdapter.startLeScan(mLeScanCallback);
+                        sleep(SCAN_PERIOD);
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     }
-                    sleep(SCAN_PERIOD);
+                    else sleep(SCAN_PERIOD);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -127,7 +138,7 @@ public class BluetoothLeDiscoveryService extends Service {
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
 
-//            Log.d(TAG,"Device discovered " + device.getName());
+            Log.d(TAG,"Device discovered " + device.getName());
 
             Intent intent = new Intent();
             intent.setAction(ACTION_NAME);

@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.simons.bletracker.models.BLETag;
-import com.simons.bletracker.views.DeviceStrengthIndicator;
+import com.simons.bletracker.views.CircularValueIndicator;
 
 import java.util.ArrayList;
 
@@ -40,12 +40,12 @@ public class BleDevicesAdapter extends BaseAdapter {
         }
     }
 
-    public void addTag(BLETag tag) {
-        BLETag existingDevice = getExistingDevice(tag.getAddress());
+    public void addTag(BLETag newTag) {
+        BLETag existingDevice = getExistingDevice(newTag.getAddress());
         if (existingDevice == null) {
-            leDevices.add(tag);
+            leDevices.add(newTag);
         } else {
-            existingDevice.setLatestRSSI(tag.getLatestRSSI());
+            existingDevice.setLatestRSSI(newTag.getLatestRSSI());
         }
     }
 
@@ -81,7 +81,7 @@ public class BleDevicesAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-            viewHolder.deviceRssi = (DeviceStrengthIndicator) view.findViewById(R.id.device_rssi);
+            viewHolder.deviceRssi = (CircularValueIndicator) view.findViewById(R.id.device_rssi);
 
             view.setTag(viewHolder);
         } else {
@@ -103,6 +103,7 @@ public class BleDevicesAdapter extends BaseAdapter {
 
         Integer latestRSSI = device.getLatestRSSI();
         viewHolder.deviceRssi.setStrengthValue(BLETrackerApplication.RelativeSignalStrength(latestRSSI));
+         viewHolder.deviceRssi.setRawValue(latestRSSI);
 
         return view;
     }
@@ -110,6 +111,6 @@ public class BleDevicesAdapter extends BaseAdapter {
     private static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
-        DeviceStrengthIndicator deviceRssi;
+        CircularValueIndicator deviceRssi;
     }
 }

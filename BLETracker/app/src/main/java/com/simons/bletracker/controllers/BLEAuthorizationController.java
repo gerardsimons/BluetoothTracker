@@ -11,6 +11,7 @@ public class BLEAuthorizationController {
 
     private static BLEAuthorizationController Instance;
     private static String[] authorizedBLETags = new String[] {
+            "ED:77:96:59:D1:F1", //whereAt T
             "E3:8E:9A:75:CE:D0", //whereAt La2
             "F8:01:51:4D:1F:96",
             "F0:17:35:EF:3C:0F",
@@ -34,7 +35,7 @@ public class BLEAuthorizationController {
 
     public boolean isAuthorized(BLETag tag) {
         for(String mac : authorizedBLETags) {
-            if(mac == tag.getAddress()) {
+            if(mac.equals(tag.getAddress())) {
                 return true;
             }
         }

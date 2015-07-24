@@ -25,6 +25,8 @@ import com.devriesdev.whereatassettracking.system.AssetTracker;
 import com.devriesdev.whereatassettracking.system.LatLng;
 import com.devriesdev.whereatassettracking.system.Locator;
 import com.devriesdev.whereatassettracking.utils.Utils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import java.util.ArrayList;
 
@@ -59,7 +61,7 @@ public class MainService extends Service {
     private BroadcastReceiver toggleLocationFixedReceiver, editLocationReceiver;
 
     private AssetTracker assetTracker;
-
+`
     private Locator locator;
 
     private static boolean googlePlayServicesAvailable = false;

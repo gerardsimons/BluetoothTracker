@@ -1,5 +1,6 @@
 package com.simons.bletracker.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -9,7 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
+import com.simons.bletracker.models.BLETag;
+import com.simons.bletracker.remote.Connection;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
 
@@ -18,16 +22,15 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private enum STATE {
-        WAITING_FOR_CASE_SCAN,
-        WAITING_FOR_LABEL_SCAN,
-        READY_FOR_DEPARTURE,
-        EN_ROUTE,
-        ARRIVED,
-        RETURNED
-    }
-
+    private Connection connection;
     private TextView caseValueText;
+    private TextView bleValueText;
+
+    private BLETrackerApplication application;
+
+    private String caseScan = "PLACEHOLDER";
+
+    private BLETag scannedTag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         caseValueText = (TextView)findViewById(R.id.caseValueText);
+        bleValueText = (TextView)findViewById(R.id.bleTagText);
+        application = (BLETrackerApplication)getApplication();
 
         //Set button listeners
 
@@ -59,23 +64,70 @@ public class MainActivity extends ActionBarActivity {
         findViewById(R.id.scanLabelButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e(TAG,"Not yet implemented...");
+                if(caseScan != null) {
+                    Intent intent = new Intent(MainActivity.this,ScanLabelActivity.class);
+                    startActivityForResult(intent,ScanLabelActivity.REQUEST_SCAN_CODE);
+
+
+                }
+                else {
+                    Log.d(TAG,"Case needs to be scanned first!");
+                }
             }
         });
+
+        //Authenticate at server
+//        remoteLogin();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanResult != null) {
+        IntentResult barcodeScanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (barcodeScanResult != null) {
             // handle scan result
 
-            String UPCScanned = scanResult.getContents();
-            Log.d(TAG,String.format("Scan code = %s",UPCScanned));
+            caseScan = barcodeScanResult.getContents();
+            Log.d(TAG,String.format("Scan code = %s",caseScan));
 
-            caseValueText.setText(UPCScanned);
+
+
+            caseValueText.setText(caseScan);
         }
-        // else continue with any other code you need in the method
+        else if(requestCode == ScanLabelActivity.REQUEST_SCAN_CODE && resultCode == Activity.RESULT_OK) {
 
+            Intent i = getIntent();
+            scannedTag = i.getParcelableExtra("name_of_extra");
+
+            if(scannedTag != null) {
+                Log.d(TAG, "BLETag succesfully scanned : " + scannedTag);
+                bleValueText.setText(scannedTag.getAddress());
+            }
+
+            //Now we have both the case scanned and the label, these two are now considered linked together.
+
+            //Update this at the server
+
+            //Possibly continue scanning more labels and cases or check for departure of truck
+
+            //Initialize a route service which detects departures, not sure if this should actually be a service
+        }
+    }
+
+    private void remoteLogin() {
+        //TODO: Authenticate user and get labels he is allowed to see and use, this should return a temporary token which is then used in conjunction with the api key to retrieve any further information
+
+//        connection = new Connection(this);
+//
+//        connection.authIsLoggedIn(new Connection.ConnectionRequestListener() {
+//            @Override
+//            public void onRequestFinished() {
+//                Log.d(TAG,"User succesfully logged in.");
+//            }
+//
+//            @Override
+//            public void onRequestFailed(String errorMessage) {
+//                Log.d(TAG, "Login failed message = " + errorMessage);
+//            }
+//        });
     }
 
     @Override
@@ -85,6 +137,16 @@ public class MainActivity extends ActionBarActivity {
         //UNCOMMENT TO SHOW MENU
 //        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        caseValueText.setText(caseScan);
+
+        if(scannedTag != null)
+            bleValueText.setText(scannedTag.getAddress());
     }
 
     @Override

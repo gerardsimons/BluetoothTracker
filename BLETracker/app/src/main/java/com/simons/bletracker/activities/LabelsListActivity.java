@@ -5,6 +5,8 @@ import android.app.ListActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,6 +17,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -32,13 +36,12 @@ public class LabelsListActivity extends ListActivity {
     private BleDevicesAdapter mLeDevicesAdapter;
     private BLETrackerApplication application;
 
-    private static final int REQUEST_ENABLE_BT = 1;
-
     private boolean mScanning = true;
 
     private BluetoothLeDiscoveryService discoveryService;
 
     BroadcastReceiver receiver = new BroadcastReceiver() {
+
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.hasExtra(BluetoothLeDiscoveryService.DEVICE_THRESHOLD)) {
@@ -51,9 +54,18 @@ public class LabelsListActivity extends ListActivity {
 
                 BLETag tag = new BLETag(name, address, rssi);
 
+                Log.d(TAG,"New BLE tag : " + tag.toString());
+
                 if (application.isAuthorized(tag)) {
                     mLeDevicesAdapter.addTag(tag);
-                    mLeDevicesAdapter.notifyDataSetChanged();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLeDevicesAdapter.notifyDataSetChanged();
+                            ((ListView)findViewById(android.R.id.list)).invalidateViews();
+                        }
+                    });
                 }
             }
         }
@@ -84,14 +96,11 @@ public class LabelsListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "DeviceScanActivity created.");
+        Log.d(TAG, "LabelsListActivity created.");
 
         application = (BLETrackerApplication) getApplication();
 
         setContentView(R.layout.activity_labels_list);
-
-        Intent serviceIntent = new Intent(this, BluetoothLeDiscoveryService.class);
-        bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -123,44 +132,23 @@ public class LabelsListActivity extends ListActivity {
         notificationManager.notify(0, noti);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        if (!mScanning) {
-//            menu.findItem(R.id.menu_stop).setVisible(false);
-//            menu.findItem(R.id.menu_scan).setVisible(true);
-//            menu.findItem(R.id.menu_refresh).setActionView(null);
-//        } else {
-//            menu.findItem(R.id.menu_stop).setVisible(true);
-//            menu.findItem(R.id.menu_scan).setVisible(false);
-//            menu.findItem(R.id.menu_refresh).setActionView(R.layout.actionbar_indeterminate_progress);
-//        }
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_scan:
-//                mLeDevicesAdapter.clear();
-//                discoveryService.startScanning();
-//                break;
-//            case R.id.menu_stop:
-//                discoveryService.stopScanning();
-//                break;
-//            case R.id.menu_settings:
-//                Intent intent = new Intent(this,SettingsActivity.class);
-//                startActivity(intent);
-//                break;
-//        }
-//        return true;
-//    }
-
     @Override
     protected void onResume() {
         super.onResume();
 
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, BLETrackerApplication.REQUEST_ENABLE_BT);
+        }
+
         registerReceiver(receiver, new IntentFilter(BluetoothLeDiscoveryService.ACTION_NAME));
+
+        Intent serviceIntent = new Intent(this, BluetoothLeDiscoveryService.class);
+        bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
         // Initializes list view adapter.
         mLeDevicesAdapter = new BleDevicesAdapter(this);
@@ -170,7 +158,7 @@ public class LabelsListActivity extends ListActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // User chose not to enable Bluetooth.
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
+        if (requestCode == BLETrackerApplication.REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
             finish();
             return;
         }
@@ -181,10 +169,13 @@ public class LabelsListActivity extends ListActivity {
     protected void onPause() {
         super.onPause();
 
-        createNotification();
+//        createNotification();
+
         mLeDevicesAdapter.clear();
 
         unregisterReceiver(receiver);
+        unbindService(mServiceConnection);
+
     }
 
     @Override
@@ -203,5 +194,39 @@ public class LabelsListActivity extends ListActivity {
 //        }
 //        discoveryService.stopScanning();
 //        startActivity(intent);?
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_labels_list, menu);
+        if (!mScanning) {
+            menu.findItem(R.id.menu_stop).setVisible(false);
+            menu.findItem(R.id.menu_scan).setVisible(true);
+            menu.findItem(R.id.menu_refresh).setActionView(null);
+        } else {
+            menu.findItem(R.id.menu_stop).setVisible(true);
+            menu.findItem(R.id.menu_scan).setVisible(false);
+            menu.findItem(R.id.menu_refresh).setActionView(R.layout.actionbar_indeterminate_progress);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_scan:
+                mLeDevicesAdapter.clear();
+                discoveryService.startScanning();
+                break;
+            case R.id.menu_stop:
+                discoveryService.stopScanning();
+                break;
+            case R.id.menu_settings:
+//                Intent intent = new Intent(this,Labe.class);
+//                startActivity(intent);
+                Log.d(TAG,"Settings unavailable");
+                break;
+        }
+        return true;
     }
 }

@@ -1,9 +1,11 @@
-package com.simons.bletracker;
+package com.simons.bletracker.remote;
 
 import android.util.Log;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import com.simons.bletracker.models.BLETag;
+import com.simons.bletracker.models.OrderCase;
+import com.simons.bletracker.models.Route;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -19,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Created by Gerard on 18-7-2015.
@@ -28,29 +29,31 @@ import java.util.zip.GZIPInputStream;
  */
 public class ServerAPI {
 
-
-
     private static final HttpClient HttpClient = new DefaultHttpClient();
 
     private static final String TAG = ServerAPI.class.getSimpleName();
     private static final String SERVER_API_URL = "www.api2.whereatcloud.com";
     private static final String API_KEY = "}168N$lL974o}ng1*k:ebIS154;]Bj";
 
+    private interface RequestCallback {
+//        public void onRequestFailed(JSONException exception);
+        public void onRequestDenied(JSONObject respsonse);
+        public void onRequestSuccesfull(JSONObject response);
+    }
+
     private static String ConvertStreamToString(InputStream inputStream) {
-
-            String line = "";
-            StringBuilder total = new StringBuilder();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
-            try {
-                while ((line = rd.readLine()) != null) {
-                    total.append(line);
-                }
+        String line = "";
+        StringBuilder total = new StringBuilder();
+        BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
+        try {
+            while ((line = rd.readLine()) != null) {
+                total.append(line);
             }
-            catch(IOException ioE) {
-                Log.e(TAG,"Unable to convert response inputstream to String",ioE);
-            }
-            return total.toString();
-
+        }
+        catch(IOException ioE) {
+            Log.e(TAG,"Unable to convert response inputstream to String",ioE);
+        }
+        return total.toString();
     }
 
     private static JSONObject GetResponseFromServer(HttpPost postRequest) {
@@ -113,32 +116,27 @@ public class ServerAPI {
         return null;
     }
 
-    public static JSONObject GetJSONFromHttpResponse(HttpResponse httpResponse) {
-        if(httpResponse != null) {
+    private static JSONObject DoRequest(String... keyValuePairs) {
+        HttpPost postObject = CreateJSONPostRequest(keyValuePairs);
+        return GetResponseFromServer(postObject);
+    }
 
-            try {
-                HttpEntity resultentity = httpResponse.getEntity();
-                InputStream inputstream = resultentity.getContent();
-                Header contentencoding = httpResponse.getFirstHeader("Content-Encoding");
-                if (contentencoding != null && contentencoding.getValue().equalsIgnoreCase("gzip")) {
-                    inputstream = new GZIPInputStream(inputstream);
-                }
-                String resultstring = ConvertStreamToString(inputstream);
-                inputstream.close();
-                resultstring = resultstring.substring(1, resultstring.length() - 1);
-
-                JSONObject jsonReply = new JSONObject(resultstring);
-                return jsonReply;
-            }
-            catch(IOException e) {
-                Log.e(TAG,"Unable to create stream from httpRespionse",e);
-            }
-            catch(JSONException e) {
-                Log.e(TAG,"Unable to create JSONObject from response",e);
-            }
-        }
+    public static OrderCase CreateOrderCase(OrderCase orderCase, BLETag tag) {
         return null;
     }
+
+    public static Route CreateRoute() {
+        return null;
+    }
+
+    public static boolean StartRoute() {
+        return false;
+    }
+
+    public static boolean FinishRoute() {
+        return false;
+    }
+
 
 //    public static Order GetOrdersForUser(User user) {
 //        HttpPost postObject = CreateJSONPostRequest("user_id",user.getID()+"");

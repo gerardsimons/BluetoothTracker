@@ -16,12 +16,14 @@ import android.view.View;
  *
  * This view shows a circular device icon and a circular indicator surrounding the icon
  */
-public class DeviceStrengthIndicator extends View {
+public class CircularValueIndicator extends View {
 
     private final static String TAG = "DeviceStrengthIndicator";
 
     private Bitmap originalImage;
     private Bitmap scaledImage;
+
+    private Integer rawValue;
 
     private float strengthValue;
 
@@ -39,12 +41,12 @@ public class DeviceStrengthIndicator extends View {
 
     private boolean uiDimensionsDetermined = false;
 
-    public DeviceStrengthIndicator(Context context) {
+    public CircularValueIndicator(Context context) {
         super(context);
         setupPaint();
     }
 
-    public DeviceStrengthIndicator(Context context, AttributeSet attributeSet) {
+    public CircularValueIndicator(Context context, AttributeSet attributeSet) {
         super(context,attributeSet);
         setupPaint();
     }
@@ -90,13 +92,15 @@ public class DeviceStrengthIndicator extends View {
         }
     }
 
-    public void setRSSI(int rssi) {
-
+    public void setRawValue(int value) {
+        this.rawValue = value;
+        invalidate();
     }
 
     public void setStrengthValue(float newValue) {
         if(newValue >= 0 && newValue <= 1) {
             strengthValue = newValue;
+            invalidate();
         }
         else throw new IllegalArgumentException("Strength value should be between 0 and 1");
     }
@@ -140,7 +144,25 @@ public class DeviceStrengthIndicator extends View {
         if(scaledImage != null) {
             canvas.drawBitmap(scaledImage,centerX - scaledImage.getWidth() / 2F, centerY - scaledImage.getHeight() / 2F,paint);
         }
-        else Log.e(TAG,"No image set");
+        else {
+            Log.e(TAG,"No image set");
+
+            Paint textPaint = new Paint();
+            textPaint.setColor(Color.WHITE);
+            textPaint.setStyle(Paint.Style.FILL);
+//            canvas.drawPaint(textPaint);
+
+            textPaint.setColor(Color.BLACK);
+            textPaint.setTextSize(22);
+
+            if(rawValue != null) {
+                int xPos = (canvas.getWidth() / 2);
+                int yPos = (int) ((canvas.getHeight() / 2) - ((textPaint.descent() + textPaint.ascent()) / 2)) ;
+                //((textPaint.descent() + textPaint.ascent()) / 2) is the distance from the baseline to the center.
+
+                canvas.drawText(rawValue + "", xPos, yPos, textPaint);
+            }
+        }
 
 
 

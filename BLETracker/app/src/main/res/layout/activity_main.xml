@@ -46,6 +46,29 @@
             style="@style/marginStyle"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
+            >
+            <TextView
+                android:id="@+id/tagLabel"
+                android:text="Tag: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:text=""
+                android:id="@+id/bleTagText"
+                android:layout_toRightOf="@id/caseLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/currentStateTxt"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/marginStyle"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
             android:layout_below="@id/currentStateTxt">
             <TextView
                 android:id="@+id/userLabel"
@@ -62,6 +85,15 @@
                 android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true" />
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Button
+                style="@style/marginStyle"
+                android:id="@+id/scanCaseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan Case"/>
         <Button
             style="@style/marginStyle"
             android:id="@+id/scanLabelButton"
@@ -70,15 +102,10 @@
             android:text="Scan Label"/>
         <Button
             style="@style/marginStyle"
-            android:id="@+id/scanCaseButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scan Case"/>
-        <Button
-            style="@style/marginStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/labelsButton"
             android:text="Labels"/>
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
