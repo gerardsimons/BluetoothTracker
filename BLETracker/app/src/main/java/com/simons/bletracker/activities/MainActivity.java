@@ -41,6 +41,8 @@ public class MainActivity extends ActionBarActivity {
         bleValueText = (TextView)findViewById(R.id.bleTagText);
         application = (BLETrackerApplication)getApplication();
 
+        application.checkRegistered(this);
+
         //Set button listeners
 
         //Scan case button starts the ZXing scanner app
@@ -67,8 +69,6 @@ public class MainActivity extends ActionBarActivity {
                 if(caseScan != null) {
                     Intent intent = new Intent(MainActivity.this,ScanLabelActivity.class);
                     startActivityForResult(intent,ScanLabelActivity.REQUEST_SCAN_CODE);
-
-
                 }
                 else {
                     Log.d(TAG,"Case needs to be scanned first!");
