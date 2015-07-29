@@ -1,13 +1,8 @@
 package com.simons.bletracker;
 
-import android.app.AlertDialog;
 import android.app.Application;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.util.Log;
 
 import com.simons.bletracker.controllers.BLEAuthorizationController;
 import com.simons.bletracker.controllers.StateController;
@@ -45,45 +40,18 @@ public class BLETrackerApplication extends Application {
 
     }
 
-    private void errorAlert(Context context, String title, String message) {
 
-        if(title == null) {
-            title = "Error";
-        }
-        if(message == null) {
-            message = "AN UNKNOWN ERROR OCCURRED";
-        }
 
-        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(message);
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+    public boolean isFirstRun() {
+        SharedPreferences settings = getSharedPreferences(PREFERENCES_NAME, 0);
+        return settings.getBoolean("FIRST_RUN", true);
     }
 
-    public void checkRegistered(Context context) {
-
+    public void setFirstRun(boolean firstRun) {
         SharedPreferences settings = getSharedPreferences(PREFERENCES_NAME, 0);
-        boolean firstRun= settings.getBoolean("FIRST_RUN", true);
-        if (firstRun) {
-            //Register device as ble controller
-            if(serverAPI.registerBLEController(Build.SERIAL, Installation.id(getApplicationContext()))) {
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("FIRST_RUN", false);
-                editor.commit();
-            }
-            else {
-                errorAlert(context,"RegisterError","Unable to register this device as a BLE controller");
-            }
-        }
-        else {
-            Log.d(TAG,"Device already registered");
-        }
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("FIRST_RUN", firstRun);
+        editor.commit();
     }
 
     public boolean isAuthorized(BLETag tag) {

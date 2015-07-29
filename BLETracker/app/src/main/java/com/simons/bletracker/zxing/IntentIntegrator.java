@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 /**
- * <p>A utility class which helps ease integration with Barcode Scanner via {@link Intent}s. This is a simple
+ * <p>A utility class which helps ease integration with IntegerBarcode Scanner via {@link Intent}s. This is a simple
  * way to invoke barcode scanning and receive the result, without any need to integrate, modify, or learn the
  * project's source code.</p>
  *
@@ -33,7 +33,7 @@ import android.net.Uri;
  * <p>Integration is essentially as easy as calling {@link #initiateScan(Activity)} and waiting
  * for the result in your app.</p>
  *
- * <p>It does require that the Barcode Scanner application is installed. The
+ * <p>It does require that the IntegerBarcode Scanner application is installed. The
  * {@link #initiateScan(Activity)} method will prompt the user to download the application, if needed.</p>
  *
  * <p>There are a few steps to using this integration. First, your {@link Activity} must implement
@@ -79,9 +79,9 @@ public final class IntentIntegrator {
 
     public static final int REQUEST_CODE = 6732; // get it?
 
-    public static final String DEFAULT_TITLE = "Install Barcode Scanner?";
+    public static final String DEFAULT_TITLE = "Install IntegerBarcode Scanner?";
     public static final String DEFAULT_MESSAGE =
-            "This application requires Barcode Scanner. Would you like to install it?";
+            "This application requires IntegerBarcode Scanner. Would you like to install it?";
     public static final String DEFAULT_YES = "Yes";
     public static final String DEFAULT_NO = "No";
 
@@ -122,12 +122,12 @@ public final class IntentIntegrator {
     /**
      * See {@link #initiateScan(Activity, CharSequence, CharSequence, CharSequence, CharSequence, CharSequence)} --
      * same, but scans for all supported barcode types.
-     * @param stringTitle title of dialog prompting user to download Barcode Scanner
-     * @param stringMessage text of dialog prompting user to download Barcode Scanner
+     * @param stringTitle title of dialog prompting user to download IntegerBarcode Scanner
+     * @param stringMessage text of dialog prompting user to download IntegerBarcode Scanner
      * @param stringButtonYes text of button user clicks when agreeing to download
-     *  Barcode Scanner (e.g. "Yes")
+     *  IntegerBarcode Scanner (e.g. "Yes")
      * @param stringButtonNo text of button user clicks when declining to download
-     *  Barcode Scanner (e.g. "No")
+     *  IntegerBarcode Scanner (e.g. "No")
      * @return an {@link AlertDialog} if the user was prompted to download the app,
      *  null otherwise
      */
@@ -148,12 +148,12 @@ public final class IntentIntegrator {
     /**
      * Invokes scanning.
      *
-     * @param stringTitle title of dialog prompting user to download Barcode Scanner
-     * @param stringMessage text of dialog prompting user to download Barcode Scanner
+     * @param stringTitle title of dialog prompting user to download IntegerBarcode Scanner
+     * @param stringMessage text of dialog prompting user to download IntegerBarcode Scanner
      * @param stringButtonYes text of button user clicks when agreeing to download
-     *  Barcode Scanner (e.g. "Yes")
+     *  IntegerBarcode Scanner (e.g. "Yes")
      * @param stringButtonNo text of button user clicks when declining to download
-     *  Barcode Scanner (e.g. "No")
+     *  IntegerBarcode Scanner (e.g. "No")
      * @param stringDesiredBarcodeFormats a comma separated list of codes you would
      *  like to scan for.
      * @return an {@link AlertDialog} if the user was prompted to download the app,
@@ -257,12 +257,12 @@ public final class IntentIntegrator {
      * scan the text off the screen of the device.
      *
      * @param text the text string to encode as a barcode
-     * @param stringTitle title of dialog prompting user to download Barcode Scanner
-     * @param stringMessage text of dialog prompting user to download Barcode Scanner
+     * @param stringTitle title of dialog prompting user to download IntegerBarcode Scanner
+     * @param stringMessage text of dialog prompting user to download IntegerBarcode Scanner
      * @param stringButtonYes text of button user clicks when agreeing to download
-     *  Barcode Scanner (e.g. "Yes")
+     *  IntegerBarcode Scanner (e.g. "Yes")
      * @param stringButtonNo text of button user clicks when declining to download
-     *  Barcode Scanner (e.g. "No")
+     *  IntegerBarcode Scanner (e.g. "No")
      */
     public static void shareText(Activity activity,
                                  CharSequence text,

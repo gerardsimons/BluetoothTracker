@@ -1,38 +1,23 @@
 package com.simons.bletracker.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Gerard on 18-7-2015.
  */
 public class Order {
 
-    private User creator;
-    private User assignedWorker;
-    private ArrayList<OrderItem> orders;
+    private int ID;
+    private Customer customer;
 
-    public Order() {
-
+    public Order(int ID,Customer customer) {
+        this.ID = ID;
+        this.customer = customer;
     }
 
-    public User getCreator() {
-        return creator;
+    public int getID() {
+        return ID;
     }
 
-    public User getAssignedWorker() {
-        return assignedWorker;
-    }
-
-    public int size() {
-        return orders.size();
-    }
-
-    public List<OrderItem> getOrders() {
-        return orders;
-    }
-
-    public OrderItem getOrder(int i) {
-        return orders.get(i);
+    public Customer getCustomer() {
+        return customer;
     }
 }

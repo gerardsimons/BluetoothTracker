@@ -1,7 +1,11 @@
 package com.simons.bletracker.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -11,11 +15,16 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.simons.bletracker.BLETrackerApplication;
+import com.simons.bletracker.Installation;
 import com.simons.bletracker.R;
+import com.simons.bletracker.controllers.DataController;
 import com.simons.bletracker.models.BLETag;
 import com.simons.bletracker.remote.Connection;
+import com.simons.bletracker.remote.ServerAPI;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
+
+import org.json.JSONObject;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -26,7 +35,9 @@ public class MainActivity extends ActionBarActivity {
     private TextView caseValueText;
     private TextView bleValueText;
 
+    private DataController dataController;
     private BLETrackerApplication application;
+    private ServerAPI serverAPI;
 
     private String caseScan = "PLACEHOLDER";
 
@@ -39,9 +50,29 @@ public class MainActivity extends ActionBarActivity {
 
         caseValueText = (TextView)findViewById(R.id.caseValueText);
         bleValueText = (TextView)findViewById(R.id.bleTagText);
-        application = (BLETrackerApplication)getApplication();
 
-        application.checkRegistered(this);
+        application = (BLETrackerApplication)getApplication();
+        serverAPI = ServerAPI.GetInstance();
+        dataController = DataController.GetInstance();
+
+        if(application.isFirstRun() || true) {
+            //Register device as ble controller
+            serverAPI.registerBLEController(Build.SERIAL, Installation.id(getApplicationContext()), new ServerAPI.ServerRequestListener() {
+                @Override
+                public void onRequestFailed() {
+                    errorAlert(MainActivity.this,"RegisterError","Unable to register this device as a BLE controller");
+                }
+
+                @Override
+                public void onRequestCompleted(JSONObject response) {
+                    Log.d(TAG,"Succesfully registered this device as a BLE_Tracker!");
+                    application.setFirstRun(false);
+                }
+            });
+        }
+        else {
+            Log.d(TAG,"Device already registered");
+        }
 
         //Set button listeners
 
@@ -57,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
         findViewById(R.id.labelsButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,LabelsListActivity.class);
+                Intent intent = new Intent(MainActivity.this, LabelsListActivity.class);
                 startActivity(intent);
             }
         });
@@ -66,18 +97,38 @@ public class MainActivity extends ActionBarActivity {
         findViewById(R.id.scanLabelButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(caseScan != null) {
-                    Intent intent = new Intent(MainActivity.this,ScanLabelActivity.class);
-                    startActivityForResult(intent,ScanLabelActivity.REQUEST_SCAN_CODE);
-                }
-                else {
-                    Log.d(TAG,"Case needs to be scanned first!");
+                if (caseScan != null) {
+                    Intent intent = new Intent(MainActivity.this, ScanLabelActivity.class);
+                    startActivityForResult(intent, ScanLabelActivity.REQUEST_SCAN_CODE);
+                } else {
+                    Log.d(TAG, "Case needs to be scanned first!");
                 }
             }
         });
 
         //Authenticate at server
 //        remoteLogin();
+    }
+
+    private void errorAlert(Context context, String title, String message) {
+
+        if(title == null) {
+            title = "Error";
+        }
+        if(message == null) {
+            message = "AN UNKNOWN ERROR OCCURRED";
+        }
+
+        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -88,7 +139,10 @@ public class MainActivity extends ActionBarActivity {
             caseScan = barcodeScanResult.getContents();
             Log.d(TAG,String.format("Scan code = %s",caseScan));
 
+            //Get the order ID
+            dataController.newOrderCaseScanned(caseScan);
 
+            //Get the
 
             caseValueText.setText(caseScan);
         }
