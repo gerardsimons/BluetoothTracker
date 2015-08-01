@@ -1,4 +1,4 @@
-package com.simons.bletracker.models;
+package com.simons.bletracker.models.sql;
 
 /**
  * Created by gerard on 29/07/15.

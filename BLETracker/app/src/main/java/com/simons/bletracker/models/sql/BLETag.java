@@ -1,12 +1,13 @@
-package com.simons.bletracker.models;
+package com.simons.bletracker.models.sql;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class BLETag implements Parcelable {
 
-    private String name = null;
-    private String address = null;
+    public final String name;
+    public final String address;
+
     private Integer latestRSSI = null;
 
     public BLETag(String name, String address) {

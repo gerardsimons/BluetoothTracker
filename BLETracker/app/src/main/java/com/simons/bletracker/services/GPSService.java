@@ -31,8 +31,17 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public static final String NEW_LOCATION_KEY = "NEW_LOCATION";
 
     public static boolean Running = false;
+    public static GPSService Instance;
 
-    public GPSService() {
+    public static GPSService GetInstance() {
+        if(Instance == null) {
+            Instance = new GPSService();
+        }
+        return Instance;
+    }
+
+    protected GPSService() {
+
     }
 
     @Override
@@ -99,9 +108,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
      * Starting the location updates
      * */
     protected void startLocationUpdates() {
-
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-
         Log.d(TAG, "Periodic location updates started!");
     }
 
@@ -124,6 +131,13 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API).build();
+    }
+
+    public Location getLocation() {
+        Location mLastLocation;
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        return mLastLocation;
     }
 
     @Override

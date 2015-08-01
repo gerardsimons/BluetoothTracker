@@ -10,8 +10,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.simons.bletracker.R;
-import com.simons.bletracker.models.Order;
-import com.simons.bletracker.models.OrderItem;
+import com.simons.bletracker.models.sql.Order;
+
+import java.util.List;
 
 public class OrderListActivity extends ListActivity {
 
@@ -23,7 +24,7 @@ public class OrderListActivity extends ListActivity {
 
     private class OrderListAdapter extends BaseAdapter {
 
-        private Order orderList;
+        private List<Order> orderList;
         private LayoutInflater mInflator;
 
         public OrderListAdapter() {
@@ -37,7 +38,7 @@ public class OrderListActivity extends ListActivity {
 
         @Override
         public Object getItem(int i) {
-            return orderList.getOrder(i);
+            return orderList.get(i);
         }
 
         @Override
@@ -60,7 +61,7 @@ public class OrderListActivity extends ListActivity {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            OrderItem order = orderList.getOrder(i);
+            Order order = orderList.get(i);
             final int orderId = order.getID();
 
 //            viewHolder.orderIDText.setText(deviceName);

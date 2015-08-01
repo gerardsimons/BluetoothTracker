@@ -1,12 +1,13 @@
 package com.simons.bletracker;
 
 import android.app.Application;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.simons.bletracker.controllers.BLEAuthorizationController;
+import com.simons.bletracker.controllers.BLETracker;
 import com.simons.bletracker.controllers.StateController;
-import com.simons.bletracker.models.BLETag;
+import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
 import com.simons.bletracker.services.GPSService;
 
@@ -32,15 +33,15 @@ public class BLETrackerApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        BLETracker tracker = BLETracker.GetInstance();
+        tracker.setDeviceId(Build.SERIAL);
+        tracker.setInstallId(Installation.id(getApplicationContext()));
+
         //Create controller structure
         bleAuthorizationController = BLEAuthorizationController.getInstance();
         stateController = StateController.GetInstance();
         serverAPI = ServerAPI.GetInstance();
-
-
     }
-
-
 
     public boolean isFirstRun() {
         SharedPreferences settings = getSharedPreferences(PREFERENCES_NAME, 0);
@@ -56,32 +57,6 @@ public class BLETrackerApplication extends Application {
 
     public boolean isAuthorized(BLETag tag) {
         return bleAuthorizationController.isAuthorized(tag);
-    }
-
-    public boolean onCaseScanned(String caseCode) {
-        //Cache the caseCode
-        StateController.State newState = stateController.doAction(StateController.Action.CASE_SCANNED);
-
-        if(newState == StateController.State.WAITING_FOR_LABEL_SCAN) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean onTagScanned(BLETag tag) {
-        //Link this tag with the previously cached case code
-        StateController.State newState = stateController.doAction(StateController.Action.LABEL_SCANNED);
-
-        //Create the route
-
-        //Start GPS service
-        if(!GPSService.Running) {
-            Intent gpsServiceIntent = new Intent(this,GPSService.class);
-            startService(gpsServiceIntent);
-        }
-
-        return true;
     }
 
     //TODO: This should probably go in some utility class

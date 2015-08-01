@@ -3,10 +3,8 @@ package com.simons.bletracker.remote;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.simons.bletracker.models.BLETag;
-import com.simons.bletracker.models.Order;
-import com.simons.bletracker.models.OrderCase;
-import com.simons.bletracker.models.Route;
+import com.simons.bletracker.models.sql.GPSMeasurement;
+import com.simons.bletracker.models.sql.RSSIMeasurement;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -15,6 +13,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,7 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +37,7 @@ public class ServerAPI {
 
 //    public static String SERVER_API_URL = "www.api2.whereatcloud.com";
 
-    public static String SERVER_API_URL = "http://192.168.1.16/bletracker/api/v1/device";
+    public static String SERVER_API_URL = "http://192.168.230.152/bletracker/api/v1/device";
     public static String API_KEY = "]wv2Np:c@e8V9@>r37g)?{18u.32lY";
 
     /** Request parameter keys **/
@@ -45,12 +47,33 @@ public class ServerAPI {
     private static final String DEVICE_ID_KEY = "deviceId";
     private static final String INSTALL_ID_KEY = "installId";
     private static final String ORDER_ID_KEY = "orderId";
+    private static final String ORDER_CASE_ID_KEY = "orderCaseId";
+    private static final String ORDER_CASES_KEY = "orderCases";
     private static final String CUSTOMER_ID_KEY = "customerId";
+    private static final String ROUTE_ID_KEY = "routeId";
+
+    /** Nested parameter JSON keys **/
+    private static final String MAC_ADDRESS_KEY = "mac";
+    private static final String RSSI_KEY = "rssi";
+    private static final String TIMESTAMP_KEY = "time";
+    private static final String LATITUDE_KEY = "lat";
+    private static final String LONGITUDE_KEY = "long";
+    private static final String END_TIME_KEY = "endTime";
+    private static final String START_TIME_KEY = "startTime";
 
     /** Server end-points **/
     private static final String BLE_TRACKER_ENDPOINT = "ble_tracker";
-    private static final String NEW_ORDER_ENDPOINT = "order";
+    private static final String ORDER_ENDPOINT = "order";
+    private static final String ORDER_CASE_ENDPOINT = "order_case";
+    private static final String COMPANY_ENDPOINT = "company";
+    private static final String ROUTE_ENDPOINT = "route";
+    private static final String TRACKING_DATA_ENDPOINT = "tracking_data";
 
+    /** Additional verbs to be used in conjunction with end-points **/
+    private static final String START_VERB = "start";
+    private static final String END_VERB = "end";
+
+    private final DateFormat serverDateTimeFormat = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
     private HttpClient httpClient;
     private static final String TAG = ServerAPI.class.getSimpleName();
 
@@ -133,32 +156,133 @@ public class ServerAPI {
         doRequest(httpPost,listener);
     }
 
-    public void addNewOrder(Order order) {
-        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + NEW_ORDER_ENDPOINT);
+    public void addNewOrder(int orderId, ServerRequestListener listener) {
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ORDER_ENDPOINT);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+        nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY, API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(ORDER_ID_KEY, orderId + ""));
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG,"Unable to create FormEntity from parameters");
+        }
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
+    }
+
+    public void addNewOrderCase(int orderId, int orderCaseId, ServerRequestListener listener) {
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ORDER_ENDPOINT);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
         nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY,API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(ORDER_ID_KEY, orderId+""));
+        nameValuePairs.add(new BasicNameValuePair(ORDER_CASE_ID_KEY, orderCaseId+""));
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG,"Unable to create FormEntity from parameters");
+        }
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
+    }
+
+    public void createRoute(String deviceId, String installId,int[] orderIds, int[] orderCaseIds, ServerRequestListener listener) {
+        assert orderCaseIds.length == orderIds.length;
+
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ORDER_ENDPOINT);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+
+        nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY,API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(DEVICE_ID_KEY,deviceId));
+        nameValuePairs.add(new BasicNameValuePair(INSTALL_ID_KEY,installId));
+
+        JSONArray orderCases = new JSONArray();
+        try {
+            for(int i = 0 ; i < orderIds.length ; ++i) {
+                JSONObject orderCaseJSON = new JSONObject();
+                orderCaseJSON.put(ORDER_ID_KEY,orderIds[i]);
+                orderCaseJSON.put(ORDER_CASE_ID_KEY,orderIds[i]);
+                orderCases.put(orderCaseJSON);
+            }
+            nameValuePairs.add(new BasicNameValuePair(ORDER_CASES_KEY,orderCases.toString()));
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG,"Unable to create FormEntity from parameters");
+        } catch (JSONException e) {
+            Log.e(TAG,"Unable to create JSON OrderCase array",e);
+        }
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
+    }
+
+    public void sendTrackingData(String deviceId, String installId, RSSIMeasurement[] rssiMeasurements, GPSMeasurement[] gpsMeasurements, ServerRequestListener listener) {
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ORDER_ENDPOINT);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+
+        nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY, API_KEY));
         nameValuePairs.add(new BasicNameValuePair(DEVICE_ID_KEY, deviceId));
         nameValuePairs.add(new BasicNameValuePair(INSTALL_ID_KEY, installId));
+
+        try {
+            JSONArray rssiJsonArray = new JSONArray();
+            for (RSSIMeasurement rssiMeasurement : rssiMeasurements) {
+                JSONObject rssiJson = new JSONObject();
+
+                rssiJson.put(MAC_ADDRESS_KEY, rssiMeasurement.getMacAddress());
+                rssiJson.put(RSSI_KEY, rssiMeasurement.rssi);
+                rssiJson.put(TIMESTAMP_KEY, rssiMeasurement.timestamp);
+
+                rssiJsonArray.put(rssiJson);
+            }
+
+            for (GPSMeasurement gpsMeasurement : gpsMeasurements) {
+                JSONObject rssiJson = new JSONObject();
+
+                rssiJson.put(LATITUDE_KEY, gpsMeasurement.latitude);
+                rssiJson.put(LONGITUDE_KEY, gpsMeasurement.longitude);
+                rssiJson.put(TIMESTAMP_KEY, gpsMeasurement.timestamp);
+
+                rssiJsonArray.put(rssiJson);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
     }
 
-    public void addNewOrderCase(OrderCase orderCase) {
+    public void finishOrderCase(int orderCaseId, int orderId, Date finishTime, ServerRequestListener listener) {
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ORDER_CASE_ENDPOINT + "/" + END_VERB);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
+        nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY, API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(ORDER_ID_KEY, orderId + ""));
+        nameValuePairs.add(new BasicNameValuePair(ORDER_CASE_ID_KEY, orderCaseId + ""));
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
     }
 
-    public static OrderCase CreateOrderCase(OrderCase orderCase, BLETag tag) {
-        return null;
+    public void startRoute(int routeId, Date startTime, ServerRequestListener listener) {
+        HttpPost httpPost = new HttpPost(SERVER_API_URL + "/" + ROUTE_ENDPOINT + "/" + START_VERB);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+
+        nameValuePairs.add(new BasicNameValuePair(API_KEY_KEY, API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(ROUTE_ID_KEY,routeId+""));
+        nameValuePairs.add(new BasicNameValuePair(START_TIME_KEY, serverDateTimeFormat.format(startTime)));
+
+        //Execute, the return value is given through the listener callback
+        doRequest(httpPost, listener);
     }
 
-    public static Route CreateRoute() {
-        return null;
-    }
-
-    public static boolean StartRoute() {
-        return false;
-    }
-
-    public static boolean FinishRoute() {
-        return false;
+    public void finishRoute() {
+        throw new RuntimeException("Stub");
     }
 
     public interface ServerRequestListener {

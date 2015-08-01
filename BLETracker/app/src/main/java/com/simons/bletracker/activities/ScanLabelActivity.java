@@ -19,8 +19,8 @@ import android.view.MenuItem;
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
 import com.simons.bletracker.controllers.BLEAuthorizationController;
-import com.simons.bletracker.models.BLETag;
-import com.simons.bletracker.services.BluetoothLeDiscoveryService;
+import com.simons.bletracker.models.sql.BLETag;
+import com.simons.bletracker.services.BLEDiscoveryService;
 import com.simons.bletracker.views.CircularValueIndicator;
 
 public class ScanLabelActivity extends ActionBarActivity {
@@ -34,7 +34,7 @@ public class ScanLabelActivity extends ActionBarActivity {
     private int roundsRequired = 3;
 
     private BLEAuthorizationController authorizationController;
-    private BluetoothLeDiscoveryService discoveryService;
+    private BLEDiscoveryService discoveryService;
 
     private CircularValueIndicator roundsValueIndicator;
 
@@ -42,12 +42,12 @@ public class ScanLabelActivity extends ActionBarActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(BluetoothLeDiscoveryService.DEVICE_THRESHOLD)) {
+            if (intent.hasExtra(BLEDiscoveryService.DEVICE_THRESHOLD)) {
 
                 //Get the values from the intent
-                String name = intent.getStringExtra(BluetoothLeDiscoveryService.DEVICE_NAME);
-                String address = intent.getStringExtra(BluetoothLeDiscoveryService.DEVICE_ADDRESS);
-                int rssi = intent.getIntExtra(BluetoothLeDiscoveryService.DEVICE_RSSI, -999);
+                String name = intent.getStringExtra(BLEDiscoveryService.DEVICE_NAME);
+                String address = intent.getStringExtra(BLEDiscoveryService.DEVICE_ADDRESS);
+                int rssi = intent.getIntExtra(BLEDiscoveryService.DEVICE_RSSI, -999);
 
                 BLETag tag = new BLETag(name, address, rssi);
 
@@ -85,7 +85,7 @@ public class ScanLabelActivity extends ActionBarActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             Log.d(TAG, "Connected to discovery service.");
-            discoveryService = ((BluetoothLeDiscoveryService.LocalBinder) service).getService();
+            discoveryService = ((BLEDiscoveryService.LocalBinder) service).getService();
             if (!discoveryService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
 
@@ -130,9 +130,9 @@ public class ScanLabelActivity extends ActionBarActivity {
             startActivityForResult(enableBtIntent, BLETrackerApplication.REQUEST_ENABLE_BT);
         }
 
-        registerReceiver(receiver, new IntentFilter(BluetoothLeDiscoveryService.ACTION_NAME));
+        registerReceiver(receiver, new IntentFilter(BLEDiscoveryService.ACTION_NAME));
 
-        Intent serviceIntent = new Intent(this, BluetoothLeDiscoveryService.class);
+        Intent serviceIntent = new Intent(this, BLEDiscoveryService.class);
         bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
         roundsRequired = MAX_ROUNDS_REQUIRED;

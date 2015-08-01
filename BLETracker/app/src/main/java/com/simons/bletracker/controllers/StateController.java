@@ -10,8 +10,8 @@ package com.simons.bletracker.controllers;
 public class StateController {
 
     public enum State {
-        WAITING_FOR_CASE_SCAN,
-        WAITING_FOR_LABEL_SCAN,
+        IDLE,
+        CASE_SCANNED,
         READY_FOR_DEPARTURE,
         EN_ROUTE,
         ARRIVED,
@@ -19,14 +19,14 @@ public class StateController {
     }
 
     public enum Action {
-        CASE_SCANNED,
-        LABEL_SCANNED,
+        SCAN_CASE,
+        SCAN_LABEL,
         DEPART,
         ARRIVE,
         RETURN
     }
 
-    private State state = State.WAITING_FOR_CASE_SCAN;
+    private State state = State.IDLE;
     private static StateController instance;
 
     private StateController() {
@@ -42,14 +42,14 @@ public class StateController {
 
     public State doAction(Action action) throws IllegalStateException {
         switch(state) {
-            case WAITING_FOR_CASE_SCAN:
-                if(action == Action.CASE_SCANNED) {
-                    state = State.WAITING_FOR_LABEL_SCAN;
+            case IDLE:
+                if(action == Action.SCAN_CASE) {
+                    state = State.CASE_SCANNED;
                 }
                 else throw new IllegalStateException();
                 break;
-            case WAITING_FOR_LABEL_SCAN:
-                if(action == Action.LABEL_SCANNED) {
+            case CASE_SCANNED:
+                if(action == Action.SCAN_LABEL) {
                     state = State.READY_FOR_DEPARTURE;
                 }
                 else throw new IllegalStateException();
@@ -58,8 +58,8 @@ public class StateController {
                 if(action == Action.DEPART) {
                     state = State.EN_ROUTE;
                 }
-                else if(action == Action.CASE_SCANNED) {
-                    state = State.WAITING_FOR_LABEL_SCAN;
+                else if(action == Action.SCAN_CASE) {
+                    state = State.CASE_SCANNED;
                 }
                 else throw new IllegalStateException();
                 break;
@@ -71,6 +71,10 @@ public class StateController {
                 break;
         }
 
+        return state;
+    }
+
+    public State getState() {
         return state;
     }
 }

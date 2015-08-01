@@ -11,9 +11,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-public class BluetoothLeDiscoveryService extends Service {
+public class BLEDiscoveryService extends Service {
 
-    private static final String TAG = BluetoothLeDiscoveryService.class.getSimpleName();
+    private static final String TAG = BLEDiscoveryService.class.getSimpleName();
 
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
@@ -35,8 +35,8 @@ public class BluetoothLeDiscoveryService extends Service {
     private final IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
-        public BluetoothLeDiscoveryService getService() {
-            return BluetoothLeDiscoveryService.this;
+        public BLEDiscoveryService getService() {
+            return BLEDiscoveryService.this;
         }
     }
 
@@ -51,8 +51,6 @@ public class BluetoothLeDiscoveryService extends Service {
     @Override
     public void onDestroy() {
         stopScanning();
-
-
     }
 
     public void startScanning() {

@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.simons.bletracker.models.BLETag;
+import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.views.CircularValueIndicator;
 
 import java.util.ArrayList;

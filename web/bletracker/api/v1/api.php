@@ -26,12 +26,12 @@ abstract class API
      * case, an integer ID for the resource. eg: /<endpoint>/<verb>/<arg0>/<arg1>
      * or /<endpoint>/<arg0>
      */
-    protected $args = Array();
+    protected $args = array();
     /**
      * Property: file
      * Stores the input of the PUT request
      */
-     protected $file = Null;
+     protected $file = null;
 
 
      // protected $request;
@@ -51,6 +51,8 @@ abstract class API
             $this->verb = array_shift($this->args);
         }
 
+        // echo $_SERVER['HTTP_X_HTTP_METHOD'];
+
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
             if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
@@ -60,7 +62,7 @@ abstract class API
             } else {
                 throw new Exception("Unexpected Header");
             }
-        }   
+        }
 
         // print_r("API:<br/>");
         // print_r($this);
@@ -77,6 +79,14 @@ abstract class API
                 $this->request = $this->_cleanInputs($_GET);
                 $this->file = file_get_contents("php://input");
                 break;
+            case 'PATCH':
+                // print_r(file_get_contents("php://input"));
+                $input = file_get_contents("php://input");
+                // $this->request = $this->_cleanInputs($input);
+                $this->request = $this->_paramArrayFromRaw($input);
+                // print_r($input);
+                print_r($this->request);
+                // echo $this->request;
             default:
                 $this->_response('Invalid Method', 405);
                 break;
@@ -90,13 +100,24 @@ abstract class API
         return $this->_response("No Endpoint: $this->endpoint", 404);
     }
 
+    private function _paramArrayFromRaw($rawString) {
+        $pairs = explode('&', $rawString);
+        $paramArray = array();
+        foreach($pairs as $pair) {
+            $keyValuePair = explode('=', $pair);
+            $paramArray[$keyValuePair[0]] = $keyValuePair[1];
+        }
+
+        return $paramArray;
+    }
+
     private function _response($data, $status = 200) {
         header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
         return json_encode($data);
     }
 
     private function _cleanInputs($data) {
-        $clean_input = Array();
+        $clean_input = array();
         if (is_array($data)) {
             foreach ($data as $k => $v) {
                 $clean_input[$k] = $this->_cleanInputs($v);
@@ -134,21 +155,36 @@ class Database {
         $this->db = new MysqliDb ($this->server,$this->user,$this->pass,$this->dbName);
     }
 
-    public function sql_error() {
-
+    /**
+     *      Throws the last query and error as an exception
+     */
+    private function sql_error() {
         throw new Exception("Failed to execute SQL Query " . $this->db->getLastQuery() . " ERROR : " . $this->db->getLastError());
     }
 
     //Does a company exist with this API_Key and is its subscription still active
     public function select_company($apiKey) {
         // $sql = 'SELECT * FROM Subscription,Company WHERE API_Key = ? AND Company.Subscription_ID = Subscription.ID AND Subscription.State = \'ACTIVE\' AND Expiry_Date > NOW()';
+        // $sql = 'SELECT companies.ID AS ID FROM subscriptions,companies WHERE API_Key = ? AND subscriptions.State = \'ACTIVE\'';
         $sql = 'SELECT companies.ID AS ID FROM subscriptions,companies WHERE API_Key = ?';
         $result = $this->db->rawQuery($sql,array($apiKey));
+        // echo $this->db->getLastQuery();
 
         if(isset($result) && count($result) > 0) {
             return $result[0]['ID'];
         }
         else return -1;
+    }
+
+    //Select the complete data for a given order 
+    public function select_order($orderId) {
+
+        $sql = "SELECT * FROM orders,customers,locations WHERE orders.ID = ? AND orders.Customer_ID = customers.ID AND locations.ID = customers.Location_ID";
+
+        $result = $this->db->rawQuery($sql,array($orderId));
+        // echo $this->db->getLastQuery();
+        // print_r($result);
+        return $result[0];
     }
 
     /**
@@ -173,7 +209,7 @@ class Database {
         $data = array(  
             'ID' => $orderId,
             'Customer_ID' => $customerId
-        );
+        );  
         $id = $this->db->insert('orders',$data);
         if(!$id) {
             $this->sql_error();
@@ -198,38 +234,149 @@ class Database {
       * Insert a new route, using the BLE_Tracker identified by the device and install ID
       */
     public function insert_route($deviceId,$installId) {
+        // $data = array("BLE_Tracker_ID" => $bleTrackerId);
+        // $sql = 'INSERT INTO routes (BLE_Tracker_ID) SELECT ID FROM ble_trackers WHERE Device_ID = ? AND Install_ID = ?';
 
-        $sql = 'INSERT INTO routes (BLE_Tracker_ID) SELECT ble_trackers.ID FROM ble_trackers WHERE Device_ID = ? AND Install_ID = ?';
-        $id = $this->db->rawQuery($sql,array($deviceId,$installId));
-        if(!$id) {
-            $this->sql_error();
+        $bleTracker = $this->db->subQuery();
+        $bleTracker->where ("Device_ID", $deviceId);
+        $bleTracker->where ("Install_ID", $installId);
+        $bleTracker->getOne ("ble_trackers", "ID");
+
+        $data = array(
+            "BLE_Tracker_ID" => $bleTracker
+        );     
+               
+        // $id = $this->db->rawQuery($sql,array($deviceId,$installId));
+        $id = $this->db->insert("routes",$data);
+        if($id) {
+
+            //Somehow the value is not being returned, get it manually
+            $data = array("Device_ID" => $deviceId,"Install_ID" => $installId);
+            $id = $this->db->rawQuery('SELECT routes.ID from routes,ble_trackers where Device_ID = ? AND Install_ID = ? AND ble_trackers.ID = routes.BLE_Tracker_ID',$data);
+            // print_r($id);
+
+            if($id !== null) {
+                return $id[0]['ID'];
+            }
+            else {
+                $this->sql_error();
+            }
         }
-        else {
-            return $id;
-        }
+        else $this->sql_error();
     }
 
     /**
       *     Update order cases matching the order and order case ids so they link to the route of the given route id
       */
-    public function update_order_cases($orderId,$orderCaseId,$routeId) {
+    public function update_order_case($orderId,$orderCaseId,$routeId) {
         // 'UPDATE items,month SET items.price=month.price WHERE items.id=month.id';
 
         $data = Array (
             'Route_ID' => $routeId,
         );
-        $db->where ('Order_ID', 1);
-        $db->where ('ID',$orderCaseId);
-        if ($db->update ('orders', $data)) {
-            echo $db->count . ' records were updated';
+        $this->db->where('Order_ID', $orderId);
+        $this->db->where('ID',$orderCaseId);
+        if ($this->db->update ('order_cases', $data)) {
+            // echo $this->db->count . ' records were updated';
+            // echo $this->db->getLastQuery();
+
+            return $this->db->count;
         }
     }
 
     /**
-      * Finish route by setting the end time
+      *     Insert a new GPS (latitude,longitude) row for a given route, the time indicating the time the device read it
       */
-    public function update_route($routeId, $endTime) {
+    public function insert_gps($routeId,$time,$latitude,$longitude) {
+        // echo $time;
 
+        $dt = new DateTime("@$time");
+        $time = $dt->format('Y-m-d H:i:s');
+
+        $data = array(
+            "Route_ID" => $routeId,
+            "Time_Read" => $time,
+            "Latitude" => $latitude,
+            "Longitude" => $longitude
+        );
+               
+        return $this->db->insert ('gps_data', $data);
+    }
+
+    /** 
+      *     Insert a new RSSI reading row for a given route, read at the specified time
+      */
+    public function insert_rssi($routeId,$bleTagMacAddress,$timestamp,$rssi) {
+        // $data = array(
+        //     "Route_ID" => $routeId,
+        //     "BLE_Tag_ID" => $bleTagId,
+        //     "Time_Read" => $time,
+        //     "RSSI" => $rssi
+        // );
+        $sql = "INSERT INTO rssi_data (Route_ID,BLE_Tag_ID,Time_Read,RSSI) SELECT ?,ID,?,? FROM ble_tags WHERE Mac_Address = ?";
+
+        $format = 'Y-m-d H:i:s';
+        $datetime = date($format,$timestamp);
+
+        $result = $this->db->rawQuery($sql,array($routeId,$datetime,$rssi,$bleTagMacAddress));
+
+        // echo $this->db->getLastQuery();
+        // print_r($result);
+
+        return $result;
+    }
+
+    /**
+      *  Insert new sensor data (time and value) for a route with the given route ID returns the id of the new row
+      */
+    public function insert_sensoric($routeId,$time,$sensoric) {
+        $data = array(
+            "Route_ID" => $routeId,
+            "Sensor_1" => $time
+        );
+        return $this->db->insert ('sensor_data', $data);
+    }
+
+    /**
+     *   Updates the end time to the value of end of the order case identified by the composite key matching the order and order case id
+     */
+    public function update_order_case_with_end_time($orderCaseId,$orderId,$end) {
+        $format = 'Y-m-d H:i:s';
+        $datetime = date($format,$end);
+
+        $data = array(
+            "End" => $datetime
+        );
+
+        $this->db->where('Order_ID', $orderId);
+        $this->db->where('ID',$orderCaseId);
+        return $this->db->update('order_cases', $data);
+    }
+
+    /**
+     *  Update a route with route id to reflect the new start time
+     */
+    public function update_route_with_start_time($routeId, $startTime) {
+        $data = array(
+            "Start" => $startTime
+        );
+        $this->db->where('ID', $routeId);
+        $result = $this->db->update('routes', $data);
+
+        return $result;
+    }
+
+    /**
+      * Finish route by updating the end time for the route with the given routeId
+      */
+    public function update_route_with_end_time($routeId, $endTime) {
+        $data = array(
+            "End" => $endTime
+        );
+        $this->db->where('ID', $routeId);
+        $result = $this->db->update('routes', $data);
+
+        return $result;
     }
 
     /*
@@ -250,12 +397,7 @@ class MyAPI extends API
 
         $this->database = new Database();
 
-        // print_r("request = " .  $request);  
-        // print_r($this->request['apiKey']);
-
-        // Abstracted out for example
-        // $APIKey = new Models\APIKey();
-        // $User = new Models\User();
+        // print_r($this->request);
 
         if (!array_key_exists('apiKey', $this->request)) {
             throw new Exception('No API Key provided');
@@ -265,36 +407,29 @@ class MyAPI extends API
             $this->companyId = $companyId;
         }
         else throw new Exception('Invalid API Key');
-
-
-        // } else if (!$APIKey->verifyKey($this->request['apiKey'], $origin)) {
-        //     throw new Exception('Invalid API Key');
-        // } else if (array_key_exists('token', $this->request) &&
-        //      !$User->get('token', $this->request['token'])) {
-
-        //     throw new Exception('Invalid User Token');
-        // }
-
-        // $this->User = $User;
     }
 
     /**
       * Helper function that determines if the request object contains the keys given in properties. Properties may either be an array of strings or a singular string
       */
     private function requestHasProperties($properties) {
-        if(is_array($properties)) {
+        if(!is_array($properties)) {
             $properties = array($properties);
         }
-        else {
-            foreach($properties as $property) {
-                if(!array_key_exists($properties, $this->request)) {
-                    return false;
-                }
+        
+        foreach($properties as $property) {
+            // echo $property;
+            if(!array_key_exists($property, $this->request)) {
+                return false;
             }
         }
+        
         return true;
     }
 
+    /**
+      *  Return the id of the company that has the given the api key, will throw an exception upon failure
+      */ 
     private function authenticate($apiKey) {
         return $this->database->select_company($apiKey);
     }
@@ -334,21 +469,29 @@ class MyAPI extends API
             }
             else throw new Exception("Missing parameters");
         }
-        // elseif($this->method == 'GET') {
-        //     throw new Exception("Unimplemented");
-        // }
+        elseif($this->method == 'GET') {
+            if(array_key_exists('orderId', $this->request)) {
+                $result = $this->database->select_order($this->request['orderId']);
+                return $result;
+            }
+        }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
     }
-
-
 
     /**
      * The order_case endpoint is able to insert new order cases and linking them with BLE_Tags
      */    
     protected function order_case() {
-        
         if($this->method == 'POST') { 
-            if($this->requestHasProperties(array('orderCaseId','orderId','bleTagId','barCode'))) {
+            if($this->verb == 'update') {
+                if($this->requestHasProperties(array('orderCaseId','orderId','endTime'))) {
+                    $affected = $this->database->update_order_case_with_end_time($this->request['orderCaseId'],$this->request['orderId'],$this->request['endTime']);
+                    return array(  
+                        'affected' => (int)$affected
+                    );
+                }
+            }
+            elseif($this->requestHasProperties(array('orderCaseId','orderId','bleTagId','barCode'))) {
                $id = $this->database->insert_order_case($this->request['orderCaseId'],$this->request['orderId'],$this->request['bleTagMacAddress'],$this->request['barCode']);
                return array(  
                     'ID' => $id
@@ -356,9 +499,15 @@ class MyAPI extends API
             }
             else throw new Exception("Missing parameters");
         }
-        else {
-            throw new Exception("Method $this->method is unsupported");
+        else if($this->method == 'PATCH') {
+            if($this->requestHasProperties(array('orderCaseId','orderId','end'))) {
+                $this->database->update_order_case_with_end_time($this->request['orderCaseId'],$this->request['orderId'],$this->request['end']);
+                return array(  
+                    'ID' => $id
+                );
+            }
         }
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
     }
 
     /**
@@ -367,9 +516,90 @@ class MyAPI extends API
      protected function company() {
         if ($this->method == 'GET') {
             return "Your company ID = " . $this->companyId;
-        } else {
-            return "Only accepts GET requests";
+        } 
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
+     }
+
+     /**
+       *   Create or retrieve a new route, in case of creating also update the order cases that match the given ids (accepted as JSON array)
+       */
+     protected function route() {
+        if($this->method == 'POST') {
+
+            if($this->verb == 'start') {
+                if($this->requestHasProperties(array('routeId','startTime'))) {
+                    $affected = $this->database->update_route_with_start_time($this->request['routeId'],$this->request['startTime']);
+                    return array("affected" => (int)$affected);
+                    // return array("id" => $id);
+                }
+                else throw new Exception("Missing parameters");
+            }
+            if($this->verb == 'finish') {
+                if($this->requestHasProperties(array('routeId','endTime'))) {
+                    $affected = $this->database->update_route_with_end_time($this->request['routeId'],$this->request['endTime']);
+                    return array("affected" => (int)$affected);
+                    // return array("id" => $id);
+                }
+                else throw new Exception("Missing parameters");
+            }
+            //No verb, simply insert new 
+            else if($this->requestHasProperties(array('deviceId','installId','orderCases'))) {
+                $orderCases = json_decode($this->request['orderCases']);
+                $routeId = $this->database->insert_route($this->request['deviceId'],$this->request['installId']);
+
+                if($routeId) {
+                    //Update the order cases so they link to the newly created id
+                    foreach($orderCases as $orderCase) {
+                        $this->database->update_order_case($orderCase->orderId,$orderCase->orderCaseId,$routeId);
+                    }
+
+                    //Return the id of the route that was just created
+                    return array(  
+                        'ID' => $routeId
+                    );
+                }
+            }
+            else throw new Exception("Missing parameters");
         }
+        elseif($this->method == 'PATCH') { //Update the finish time of the route
+            if($this->requestHasProperties(array('routeId','end'))) {
+
+            }
+        }
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
+     }
+
+     /**
+       *    Create or retrieve tracking data (GPS, RSSI and possible sensor data).
+       *    In case of a POST method, GPS, RSSI and Sensor data should be submitted as separate arrays
+       */
+     protected function tracking_data() {
+        if($this->method == 'POST') {
+            if($this->requestHasProperties(array('routeId','gpsData','rssiData','sensorData'))) {
+                $gpsData = json_decode($this->request['gpsData']);
+                $rssiData = json_decode($this->request['rssiData']);
+                $sensorData = json_decode($this->request['sensorData']);
+                $routeId = $this->request['routeId'];
+
+                $gpsAdded = 0;
+                $rssiAdded = 0;
+                $sensorAdded = 0;
+
+                foreach($gpsData as $gpsRecord) {
+                    // print_r($gpsRecord);
+                    $gpsAdded = $this->database->insert_gps($routeId,$gpsRecord->time,$gpsRecord->lat,$gpsRecord->long);
+                }
+                foreach($rssiData as $rssiRecord) {
+                    $rssiAdded = $this->database->insert_rssi($routeId,$rssiRecord->mac,$rssiRecord->time,$rssiRecord->rssi);
+                }
+                // foreach($sensorData as $sensorRecord) {
+                //     $sensorAdded = $this->database->insert_sensoric($routeId,$sensorRecord$sensorRecord->time,$sensorRecord->reading);
+                // }
+
+                return json_encode(array("gpsAdded" => $gpsAdded,"rssiAdded" => $rssiAdded, "sensorAdded" => $sensorAdded));
+            }
+        }
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
      }
  }
 

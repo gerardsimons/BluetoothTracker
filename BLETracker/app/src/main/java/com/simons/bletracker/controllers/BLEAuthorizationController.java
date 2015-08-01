@@ -1,6 +1,6 @@
 package com.simons.bletracker.controllers;
 
-import com.simons.bletracker.models.BLETag;
+import com.simons.bletracker.models.sql.BLETag;
 
 /**
  * Created by Gerard on 22-7-2015.

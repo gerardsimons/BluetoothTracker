@@ -1,4 +1,4 @@
-package com.simons.bletracker.models;
+package com.simons.bletracker.models.sql;
 
 import java.util.Date;
 

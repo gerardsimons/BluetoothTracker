@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -15,11 +14,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.simons.bletracker.BLETrackerApplication;
-import com.simons.bletracker.Installation;
 import com.simons.bletracker.R;
-import com.simons.bletracker.controllers.DataController;
-import com.simons.bletracker.models.BLETag;
-import com.simons.bletracker.remote.Connection;
+import com.simons.bletracker.controllers.BLETracker;
+import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
@@ -31,11 +28,10 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private Connection connection;
     private TextView caseValueText;
     private TextView bleValueText;
 
-    private DataController dataController;
+    private BLETracker bleTracker;
     private BLETrackerApplication application;
     private ServerAPI serverAPI;
 
@@ -53,11 +49,11 @@ public class MainActivity extends ActionBarActivity {
 
         application = (BLETrackerApplication)getApplication();
         serverAPI = ServerAPI.GetInstance();
-        dataController = DataController.GetInstance();
+        bleTracker = BLETracker.GetInstance();
 
-        if(application.isFirstRun() || true) {
+        if(application.isFirstRun()) {
             //Register device as ble controller
-            serverAPI.registerBLEController(Build.SERIAL, Installation.id(getApplicationContext()), new ServerAPI.ServerRequestListener() {
+            serverAPI.registerBLEController(bleTracker.getDeviceId(), bleTracker.getInstallId(), new ServerAPI.ServerRequestListener() {
                 @Override
                 public void onRequestFailed() {
                     errorAlert(MainActivity.this,"RegisterError","Unable to register this device as a BLE controller");
@@ -106,6 +102,14 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        findViewById(R.id.testButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG,"Simulating a departure event.");
+
+
+            }
+        });
         //Authenticate at server
 //        remoteLogin();
     }
@@ -116,7 +120,7 @@ public class MainActivity extends ActionBarActivity {
             title = "Error";
         }
         if(message == null) {
-            message = "AN UNKNOWN ERROR OCCURRED";
+            message = "An unknown error occurred.";
         }
 
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
@@ -137,12 +141,7 @@ public class MainActivity extends ActionBarActivity {
             // handle scan result
 
             caseScan = barcodeScanResult.getContents();
-            Log.d(TAG,String.format("Scan code = %s",caseScan));
-
-            //Get the order ID
-            dataController.newOrderCaseScanned(caseScan);
-
-            //Get the
+            Log.d(TAG, String.format("Scan code = %s", caseScan));
 
             caseValueText.setText(caseScan);
         }
@@ -154,6 +153,9 @@ public class MainActivity extends ActionBarActivity {
             if(scannedTag != null) {
                 Log.d(TAG, "BLETag succesfully scanned : " + scannedTag);
                 bleValueText.setText(scannedTag.getAddress());
+
+                //Get the order ID
+                bleTracker.newOrderCaseScanned(caseScan,scannedTag.getAddress());
             }
 
             //Now we have both the case scanned and the label, these two are now considered linked together.
@@ -164,24 +166,6 @@ public class MainActivity extends ActionBarActivity {
 
             //Initialize a route service which detects departures, not sure if this should actually be a service
         }
-    }
-
-    private void remoteLogin() {
-        //TODO: Authenticate user and get labels he is allowed to see and use, this should return a temporary token which is then used in conjunction with the api key to retrieve any further information
-
-//        connection = new Connection(this);
-//
-//        connection.authIsLoggedIn(new Connection.ConnectionRequestListener() {
-//            @Override
-//            public void onRequestFinished() {
-//                Log.d(TAG,"User succesfully logged in.");
-//            }
-//
-//            @Override
-//            public void onRequestFailed(String errorMessage) {
-//                Log.d(TAG, "Login failed message = " + errorMessage);
-//            }
-//        });
     }
 
     @Override

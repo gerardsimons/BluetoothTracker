@@ -41,7 +41,7 @@
             android:exported="true" >
         </service>
         <service
-            android:name=".services.BluetoothLeDiscoveryService"
+            android:name=".services.BLEDiscoveryService"
             android:enabled="true" />
 
         <activity
