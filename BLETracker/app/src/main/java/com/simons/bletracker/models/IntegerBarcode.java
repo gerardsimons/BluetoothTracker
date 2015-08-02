@@ -6,9 +6,10 @@ package com.simons.bletracker.models;
 public class IntegerBarcode {
 
     private int[] components;
+    private String barcodeString;
 
     public IntegerBarcode(String barcode, int[] componentIndices) {
-
+        this.barcodeString = barcode;
         components = new int[componentIndices.length];
         int startI = 0;
         for(int i = 0 ; i < componentIndices.length ; ++i) {
@@ -25,5 +26,10 @@ public class IntegerBarcode {
 
     public int getComponent(int ID) {
         return components[ID];
+    }
+
+    @Override
+    public String toString() {
+        return barcodeString;
     }
 }

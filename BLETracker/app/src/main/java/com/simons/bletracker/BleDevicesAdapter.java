@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.views.CircularValueIndicator;
 
@@ -23,7 +24,7 @@ public class BleDevicesAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
-    public BLETag getExistingDevice(String address) {
+    public BLETag getExistingDevice(MacAddress address) {
         for (BLETag myBTDevice : leDevices) {
             if (myBTDevice.getAddress().equals(address))
                 return myBTDevice;
@@ -31,10 +32,12 @@ public class BleDevicesAdapter extends BaseAdapter {
         return null;
     }
 
-    public void addTag(String name, String address, int rssi) {
+    public void addTag(String name, MacAddress address, int rssi) {
         BLETag existingDevice = getExistingDevice(address);
         if (existingDevice == null) {
+
             leDevices.add(new BLETag(name,address,rssi));
+
         } else {
             existingDevice.setLatestRSSI(rssi);
         }
@@ -95,7 +98,7 @@ public class BleDevicesAdapter extends BaseAdapter {
         else
             viewHolder.deviceName.setText("Unknown Device");
 
-        viewHolder.deviceAddress.setText(device.getAddress());
+        viewHolder.deviceAddress.setText(device.getAddress().toString());
 
         //-20 is considered best
         //-100 considered worst

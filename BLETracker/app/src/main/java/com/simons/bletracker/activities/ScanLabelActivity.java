@@ -19,16 +19,20 @@ import android.view.MenuItem;
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
 import com.simons.bletracker.controllers.BLEAuthorizationController;
+import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.services.BLEDiscoveryService;
 import com.simons.bletracker.views.CircularValueIndicator;
+
+import java.io.UnsupportedEncodingException;
 
 public class ScanLabelActivity extends ActionBarActivity {
 
     private static final String TAG = "ScanlabelActivity";
     private static final int MAX_ROUNDS_REQUIRED = 3;
     private static final int MIN_RSSI = -40;
-    private static final String SCAN_RESULT_KEY = "scan_result";
+
+    public static final String SCAN_RESULT_KEY = "scan_result";
     public static final int REQUEST_SCAN_CODE = 8530;
 
     private int roundsRequired = 3;
@@ -49,7 +53,12 @@ public class ScanLabelActivity extends ActionBarActivity {
                 String address = intent.getStringExtra(BLEDiscoveryService.DEVICE_ADDRESS);
                 int rssi = intent.getIntExtra(BLEDiscoveryService.DEVICE_RSSI, -999);
 
-                BLETag tag = new BLETag(name, address, rssi);
+                BLETag tag = null;
+                try {
+                    tag = new BLETag(name, new MacAddress(address), rssi);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
                 Log.d(TAG, "New BLE tag : " + tag.toString());
 
@@ -63,7 +72,7 @@ public class ScanLabelActivity extends ActionBarActivity {
                         roundsRequired = MAX_ROUNDS_REQUIRED;
                     }
                     else if(roundsRequired <= 0) {
-                        //DONE®
+                        //DONE
 
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra(SCAN_RESULT_KEY, tag);
@@ -88,7 +97,6 @@ public class ScanLabelActivity extends ActionBarActivity {
             discoveryService = ((BLEDiscoveryService.LocalBinder) service).getService();
             if (!discoveryService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
-
                 finish();
             } else discoveryService.startScanning();
         }

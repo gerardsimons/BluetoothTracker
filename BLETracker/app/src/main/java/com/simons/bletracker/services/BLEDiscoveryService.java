@@ -135,7 +135,6 @@ public class BLEDiscoveryService extends Service {
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
-
             Log.d(TAG,"Device discovered " + device.getName());
 
             Intent intent = new Intent();

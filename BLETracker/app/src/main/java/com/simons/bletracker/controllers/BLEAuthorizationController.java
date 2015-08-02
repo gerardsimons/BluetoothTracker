@@ -12,14 +12,7 @@ public class BLEAuthorizationController {
     private static BLEAuthorizationController Instance;
     private static String[] authorizedBLETags = new String[] {
             "ED:77:96:59:D1:F1", //whereAt T
-            "E3:8E:9A:75:CE:D0", //whereAt La2
-            "F8:01:51:4D:1F:96",
-            "F0:17:35:EF:3C:0F",
-            "E6:F7:72:34:9F:79", //Where@ label
-            "F0:44:BA:E7:D0:39",
-            "C7:38:09:E4:A9:84",
-            "FE:A1:EB:F0:80:E7",
-            "C7:9E:37:9A:95:AA"};
+            "C5:E5:14:59:A0:A7"};
 
 
     private BLEAuthorizationController() {

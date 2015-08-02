@@ -2,26 +2,39 @@ package com.simons.bletracker.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
 import com.simons.bletracker.controllers.BLETracker;
+import com.simons.bletracker.controllers.StateController;
+import com.simons.bletracker.controllers.Transition;
+import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
+import com.simons.bletracker.services.GPSService;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
 
 import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -30,44 +43,107 @@ public class MainActivity extends ActionBarActivity {
 
     private TextView caseValueText;
     private TextView bleValueText;
+    private TextView stateValueText;
 
     private BLETracker bleTracker;
     private BLETrackerApplication application;
+    private StateController stateController;
     private ServerAPI serverAPI;
 
-    private String caseScan = "PLACEHOLDER";
+    private int mockLocationIndex = 0;
+    private final float[] mockLocations = new float[]{
+            51.925518F, 4.468968F,   //Rotterdam Centraal
+            51.930665F,4.469419F     //Thuis Rotterdam
+    };
 
+    private String caseScan = "PLACEHOLDER";
     private BLETag scannedTag;
+    private GPSService gpsService;
+
+    private void startGPSTracking() {
+        Log.d(TAG, "Starting GPS Tracking!");
+        registerReceiver(gpsReceiver, new IntentFilter(GPSService.ACTION_NAME));
+        Intent serviceIntent = new Intent(this, GPSService.class);
+        bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     * SERVICE CONNECTIONS *
+     */
+    private final ServiceConnection gpsServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+//            isGSPTracking = true;
+
+            Log.d(TAG, "Connected to GPS service.");
+            gpsService = ((GPSService.LocalBinder) service).getService();
+            //Immediately start requestion periodic location updates
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(TAG, "Disconnected from GPS service.");
+            gpsService = null;
+        }
+    };
+
+    //The broadcast receiver directed towards receiving location updates from the GPSService (if started)
+    BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.hasExtra(GPSService.ACTION_NAME)) {
+                Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
+                Log.d(TAG, "New location received = " + newLocation);
+                Toast.makeText(MainActivity.this,"New GPS Received : " + newLocation,Toast.LENGTH_LONG).show();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        caseValueText = (TextView)findViewById(R.id.caseValueText);
-        bleValueText = (TextView)findViewById(R.id.bleTagText);
+        caseValueText = (TextView) findViewById(R.id.caseValueText);
+        bleValueText = (TextView) findViewById(R.id.bleTagText);
+        stateValueText = (TextView) findViewById(R.id.currentStateTxt);
 
-        application = (BLETrackerApplication)getApplication();
+        application = (BLETrackerApplication) getApplication();
         serverAPI = ServerAPI.GetInstance();
         bleTracker = BLETracker.GetInstance();
 
-        if(application.isFirstRun()) {
+        //Set the state text to current state and also register as listener so it keeps getting updated
+        stateController = StateController.GetInstance();
+        stateValueText.setText(stateController.getState().toString());
+        stateController.registerListener(new StateController.OnStateChangedListener() {
+            @Override
+            public void OnStateTransitioned(final Transition transition) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        stateValueText.setText(transition.toState.toString());
+                    }
+                });
+            }
+        });
+
+        if (application.isFirstRun()) {
             //Register device as ble controller
-            serverAPI.registerBLEController(bleTracker.getDeviceId(), bleTracker.getInstallId(), new ServerAPI.ServerRequestListener() {
+            serverAPI.registerBLETracker(bleTracker.getDeviceId(), bleTracker.getInstallId(), new ServerAPI.ServerRequestListener() {
                 @Override
                 public void onRequestFailed() {
-                    errorAlert(MainActivity.this,"RegisterError","Unable to register this device as a BLE controller");
+                    errorAlert(MainActivity.this, "RegisterError", "Unable to register this device as a BLE controller");
                 }
 
                 @Override
                 public void onRequestCompleted(JSONObject response) {
-                    Log.d(TAG,"Succesfully registered this device as a BLE_Tracker!");
+                    Log.d(TAG, "Succesfully registered this device as a BLE_Tracker!");
                     application.setFirstRun(false);
                 }
             });
-        }
-        else {
-            Log.d(TAG,"Device already registered");
+        } else {
+            Log.d(TAG, "Device already registered");
         }
 
         //Set button listeners
@@ -102,24 +178,41 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        findViewById(R.id.testButton).setOnClickListener(new View.OnClickListener() {
+        //*** THESE ARE SPECIAL DEBUGGING / DEVELOPMENT BUTTONS **/
+        findViewById(R.id.testOrderCaseButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG,"Simulating a departure event.");
-
-
+                Log.d(TAG, "Simulating a ordercase scan event.");
+                try {
+                    bleTracker.newOrderCaseScanned("1678127860003003300020", new MacAddress("ED:77:96:59:D1:F1"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        //Authenticate at server
-//        remoteLogin();
+
+        findViewById(R.id.testGpsMovement).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "Simulating a GPS movement event.");
+
+                float latitude = mockLocations[mockLocationIndex];
+                float longitude = mockLocations[mockLocationIndex+1];
+                mockLocationIndex += 2;
+                if(mockLocationIndex >= mockLocations.length) {
+                    mockLocationIndex = 0;
+                }
+                GPSService._mockLocation(latitude,longitude);
+            }
+        });
     }
 
     private void errorAlert(Context context, String title, String message) {
 
-        if(title == null) {
+        if (title == null) {
             title = "Error";
         }
-        if(message == null) {
+        if (message == null) {
             message = "An unknown error occurred.";
         }
 
@@ -144,18 +237,15 @@ public class MainActivity extends ActionBarActivity {
             Log.d(TAG, String.format("Scan code = %s", caseScan));
 
             caseValueText.setText(caseScan);
-        }
-        else if(requestCode == ScanLabelActivity.REQUEST_SCAN_CODE && resultCode == Activity.RESULT_OK) {
+        } else if (requestCode == ScanLabelActivity.REQUEST_SCAN_CODE && resultCode == Activity.RESULT_OK) {
+            scannedTag = (BLETag) intent.getParcelableExtra(ScanLabelActivity.SCAN_RESULT_KEY);
 
-            Intent i = getIntent();
-            scannedTag = i.getParcelableExtra("name_of_extra");
-
-            if(scannedTag != null) {
+            if (scannedTag != null) {
                 Log.d(TAG, "BLETag succesfully scanned : " + scannedTag);
-                bleValueText.setText(scannedTag.getAddress());
+                bleValueText.setText(scannedTag.getAddress().toString());
 
                 //Get the order ID
-                bleTracker.newOrderCaseScanned(caseScan,scannedTag.getAddress());
+                bleTracker.newOrderCaseScanned(caseScan, scannedTag.getAddress());
             }
 
             //Now we have both the case scanned and the label, these two are now considered linked together.
@@ -178,13 +268,22 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        unregisterReceiver(gpsReceiver);
+        unbindService(gpsServiceConnection);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
         caseValueText.setText(caseScan);
+        startGPSTracking();
 
-        if(scannedTag != null)
-            bleValueText.setText(scannedTag.getAddress());
+        if (scannedTag != null)
+            bleValueText.setText(scannedTag.getAddress().toString());
     }
 
     @Override

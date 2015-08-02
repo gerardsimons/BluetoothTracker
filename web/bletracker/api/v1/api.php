@@ -97,7 +97,7 @@ abstract class API
         if (method_exists($this, $this->endpoint)) {
             return $this->_response($this->{$this->endpoint}($this->args));
         }
-        return $this->_response("No Endpoint: $this->endpoint", 404);
+        return $this->_response('{"error":"No Endpoint: $this->endpoint"', 404);
     }
 
     private function _paramArrayFromRaw($rawString) {
@@ -474,6 +474,7 @@ class MyAPI extends API
                 $result = $this->database->select_order($this->request['orderId']);
                 return $result;
             }
+            else throw new Exception("Missing parameters");
         }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
     }
@@ -491,7 +492,7 @@ class MyAPI extends API
                     );
                 }
             }
-            elseif($this->requestHasProperties(array('orderCaseId','orderId','bleTagId','barCode'))) {
+            elseif($this->requestHasProperties(array('orderCaseId','orderId','bleTagMacAddress','barCode'))) {
                $id = $this->database->insert_order_case($this->request['orderCaseId'],$this->request['orderId'],$this->request['bleTagMacAddress'],$this->request['barCode']);
                return array(  
                     'ID' => $id
@@ -525,7 +526,6 @@ class MyAPI extends API
        */
      protected function route() {
         if($this->method == 'POST') {
-
             if($this->verb == 'start') {
                 if($this->requestHasProperties(array('routeId','startTime'))) {
                     $affected = $this->database->update_route_with_start_time($this->request['routeId'],$this->request['startTime']);
@@ -560,6 +560,9 @@ class MyAPI extends API
                 }
             }
             else throw new Exception("Missing parameters");
+        }
+        elseif($this->method == 'GET') {
+
         }
         elseif($this->method == 'PATCH') { //Update the finish time of the route
             if($this->requestHasProperties(array('routeId','end'))) {

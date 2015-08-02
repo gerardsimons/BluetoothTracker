@@ -2,9 +2,6 @@ package com.simons.bletracker.activities;
 
 import android.app.Activity;
 import android.app.ListActivity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -26,8 +23,11 @@ import android.widget.Toast;
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.BleDevicesAdapter;
 import com.simons.bletracker.R;
+import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.services.BLEDiscoveryService;
+
+import java.io.UnsupportedEncodingException;
 
 public class LabelsListActivity extends ListActivity {
 
@@ -52,7 +52,12 @@ public class LabelsListActivity extends ListActivity {
                 int rssi = intent.getIntExtra(BLEDiscoveryService.DEVICE_RSSI, -1);
                 boolean threshold = intent.getBooleanExtra(BLEDiscoveryService.DEVICE_THRESHOLD, false);
 
-                BLETag tag = new BLETag(name, address, rssi);
+                BLETag tag = null;
+                try {
+                    tag = new BLETag(name, new MacAddress(address), rssi);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
                 Log.d(TAG,"New BLE tag : " + tag.toString());
 
@@ -99,7 +104,6 @@ public class LabelsListActivity extends ListActivity {
         Log.d(TAG, "LabelsListActivity created.");
 
         application = (BLETrackerApplication) getApplication();
-
         setContentView(R.layout.activity_labels_list);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
@@ -108,28 +112,6 @@ public class LabelsListActivity extends ListActivity {
             Toast.makeText(this, "BLE Not Supported", Toast.LENGTH_SHORT).show();
             finish();
         }
-    }
-
-    public void createNotification() {
-
-        Log.d(TAG, "Creating notification.");
-        // Prepare intent which is triggered if the
-        // notification is selected
-        Intent intent = new Intent(this, LabelsListActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        // Build notification
-        // Actions are just fake
-        Notification noti = new Notification.Builder(this)
-                .setContentTitle("New mail from " + "test@gmail.com")
-                .setContentText("Subject").setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(pIntent)
-                .addAction(R.drawable.ic_launcher, "And more", pIntent).build();
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        // hide the notification after its selected
-        noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        notificationManager.notify(0, noti);
     }
 
     @Override
@@ -146,7 +128,6 @@ public class LabelsListActivity extends ListActivity {
         }
 
         registerReceiver(receiver, new IntentFilter(BLEDiscoveryService.ACTION_NAME));
-
         Intent serviceIntent = new Intent(this, BLEDiscoveryService.class);
         bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
 

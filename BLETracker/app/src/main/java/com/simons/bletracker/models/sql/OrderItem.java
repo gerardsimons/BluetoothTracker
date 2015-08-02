@@ -6,22 +6,22 @@ package com.simons.bletracker.models.sql;
 public class OrderItem {
 
     private int ID;
-    private Location sourceLocation;
-    private Location targetLocation;
+    private SQLLocation sourceSQLLocation;
+    private SQLLocation targetSQLLocation;
     private User creator;
 
-    public OrderItem(Location sourceLocation, Location targetLocation, User creator) {
-        this.sourceLocation = sourceLocation;
-        this.targetLocation = targetLocation;
+    public OrderItem(SQLLocation sourceSQLLocation, SQLLocation targetSQLLocation, User creator) {
+        this.sourceSQLLocation = sourceSQLLocation;
+        this.targetSQLLocation = targetSQLLocation;
         this.creator = creator;
     }
 
-    public Location getSourceLocation() {
-        return sourceLocation;
+    public SQLLocation getSourceSQLLocation() {
+        return sourceSQLLocation;
     }
 
-    public Location getTargetLocation() {
-        return targetLocation;
+    public SQLLocation getTargetSQLLocation() {
+        return targetSQLLocation;
     }
 
     public User getCreator() {

@@ -1,0 +1,2 @@
+--  ScanLabelActivity is known to not scan on occasion
+--

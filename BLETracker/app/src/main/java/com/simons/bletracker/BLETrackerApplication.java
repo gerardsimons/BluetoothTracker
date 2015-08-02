@@ -1,6 +1,7 @@
 package com.simons.bletracker;
 
 import android.app.Application;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
@@ -33,6 +34,8 @@ public class BLETrackerApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        //IMPORTANT: set context first
+        BLETracker.SetContext(getApplicationContext());
         BLETracker tracker = BLETracker.GetInstance();
         tracker.setDeviceId(Build.SERIAL);
         tracker.setInstallId(Installation.id(getApplicationContext()));
@@ -41,6 +44,9 @@ public class BLETrackerApplication extends Application {
         bleAuthorizationController = BLEAuthorizationController.getInstance();
         stateController = StateController.GetInstance();
         serverAPI = ServerAPI.GetInstance();
+
+        Intent intent = new Intent(this,GPSService.class);
+        startService(intent);
     }
 
     public boolean isFirstRun() {

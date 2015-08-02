@@ -1,5 +1,7 @@
 package com.simons.bletracker.models.sql;
 
+import com.simons.bletracker.models.MacAddress;
+
 /**
  * Created by gerard on 31/07/15.
  */
@@ -16,7 +18,7 @@ public class RSSIMeasurement {
         this.tag = tag;
     }
 
-    public String getMacAddress() {
+    public MacAddress getMacAddress() {
         return tag.getAddress();
     }
 }

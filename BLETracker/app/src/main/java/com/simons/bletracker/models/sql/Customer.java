@@ -6,10 +6,20 @@ package com.simons.bletracker.models.sql;
 public class Customer {
 
     private int ID;
-
-    //Other fields from SQL
+    private String name;
+    private SQLLocation location;
 
     public Customer(int ID) {
         this.ID = ID;
+    }
+
+    public Customer(int ID, String name, SQLLocation location) {
+        this.ID = ID;
+        this.name = name;
+        this.location = location;
+    }
+
+    public SQLLocation getLocation() {
+        return location;
     }
 }
