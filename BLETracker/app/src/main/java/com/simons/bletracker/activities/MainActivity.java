@@ -2,23 +2,16 @@ package com.simons.bletracker.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.location.Location;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
@@ -28,7 +21,6 @@ import com.simons.bletracker.controllers.Transition;
 import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
-import com.simons.bletracker.services.GPSService;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
 
@@ -50,55 +42,8 @@ public class MainActivity extends ActionBarActivity {
     private StateController stateController;
     private ServerAPI serverAPI;
 
-    private int mockLocationIndex = 0;
-    private final float[] mockLocations = new float[]{
-            51.925518F, 4.468968F,   //Rotterdam Centraal
-            51.930665F,4.469419F     //Thuis Rotterdam
-    };
-
     private String caseScan = "PLACEHOLDER";
     private BLETag scannedTag;
-    private GPSService gpsService;
-
-    private void startGPSTracking() {
-        Log.d(TAG, "Starting GPS Tracking!");
-        registerReceiver(gpsReceiver, new IntentFilter(GPSService.ACTION_NAME));
-        Intent serviceIntent = new Intent(this, GPSService.class);
-        bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    /**
-     * SERVICE CONNECTIONS *
-     */
-    private final ServiceConnection gpsServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-//            isGSPTracking = true;
-
-            Log.d(TAG, "Connected to GPS service.");
-            gpsService = ((GPSService.LocalBinder) service).getService();
-            //Immediately start requestion periodic location updates
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(TAG, "Disconnected from GPS service.");
-            gpsService = null;
-        }
-    };
-
-    //The broadcast receiver directed towards receiving location updates from the GPSService (if started)
-    BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(GPSService.ACTION_NAME)) {
-                Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
-                Log.d(TAG, "New location received = " + newLocation);
-                Toast.makeText(MainActivity.this,"New GPS Received : " + newLocation,Toast.LENGTH_LONG).show();
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,6 +123,15 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        //Maps button transits to map activity
+        findViewById(R.id.mapButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this,MapActivity.class);
+                startActivity(intent);
+            }
+        });
+
         //*** THESE ARE SPECIAL DEBUGGING / DEVELOPMENT BUTTONS **/
         findViewById(R.id.testOrderCaseButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,20 +145,21 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        findViewById(R.id.testGpsMovement).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "Simulating a GPS movement event.");
-
-                float latitude = mockLocations[mockLocationIndex];
-                float longitude = mockLocations[mockLocationIndex+1];
-                mockLocationIndex += 2;
-                if(mockLocationIndex >= mockLocations.length) {
-                    mockLocationIndex = 0;
-                }
-                GPSService._mockLocation(latitude,longitude);
-            }
-        });
+        //TODO: Move this button to map activity
+//        findViewById(R.id.testGpsMovement).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Log.d(TAG, "Simulating a GPS movement event.");
+//
+//                float latitude = mockLocations[mockLocationIndex];
+//                float longitude = mockLocations[mockLocationIndex+1];
+//                mockLocationIndex += 2;
+//                if(mockLocationIndex >= mockLocations.length) {
+//                    mockLocationIndex = 0;
+//                }
+//                GPSService._mockLocation(latitude,longitude);
+//            }
+//        });
     }
 
     private void errorAlert(Context context, String title, String message) {
@@ -270,17 +225,15 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onPause() {
         super.onPause();
-
-        unregisterReceiver(gpsReceiver);
-        unbindService(gpsServiceConnection);
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        BLETracker.SetContext(this);
+
         caseValueText.setText(caseScan);
-        startGPSTracking();
 
         if (scannedTag != null)
             bleValueText.setText(scannedTag.getAddress().toString());

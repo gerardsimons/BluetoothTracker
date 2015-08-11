@@ -21,13 +21,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class MyActivity extends ActionBarActivity implements
+public class MainActivity extends ActionBarActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener {
 
     // TAG for Log.d
-    private static final String TAG = MyActivity.class.getName();
+    private static final String TAG = MainActivity.class.getName();
 
     // Keys for save bundle during lifecycle
     private static final String KEYLOCCOUNTER = "locCnt";

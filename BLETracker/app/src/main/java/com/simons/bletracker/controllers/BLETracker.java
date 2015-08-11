@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.simons.bletracker.Configuration;
 import com.simons.bletracker.controllers.StateController.OnStateChangedListener;
@@ -20,12 +21,14 @@ import com.simons.bletracker.models.sql.GPSMeasurement;
 import com.simons.bletracker.models.sql.Order;
 import com.simons.bletracker.models.sql.OrderCase;
 import com.simons.bletracker.models.sql.RSSIMeasurement;
+import com.simons.bletracker.models.sql.Route;
 import com.simons.bletracker.models.sql.SQLLocation;
 import com.simons.bletracker.models.sql.SensorMeasurement;
 import com.simons.bletracker.remote.ServerAPI;
 import com.simons.bletracker.services.BLEDiscoveryService;
 import com.simons.bletracker.services.GPSService;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
@@ -38,14 +41,11 @@ import java.util.Iterator;
  * This is the main controller driving this application. It takes care of data management relating to tags, gps and others.
  * It also determines what services to run depending on this data and the state of the application.
  */
-public class BLETracker implements OnStateChangedListener {
+public class BLETracker implements OnStateChangedListener, GPSService.GPSListener {
 
     private static final String TAG = "BLETracker";
     private static BLETracker Instance;
     private static Context AppContext;     //A context is required to start and bind to the GPS and BLE services
-
-    private static int CACHE_SIZE = 10;
-    private static int DISTANCE_TRIGGER = 300; //The distance in meters which is considered to trigger departure and arrivals
 
     private BLEAuthorizationController authorizationController;
     private StateController stateController;
@@ -55,6 +55,7 @@ public class BLETracker implements OnStateChangedListener {
     private String installId;
 
     private Location departureLocation;
+    private Route activeRoute;
 
     private ArrayList<OrderCase> orderCases;
     /**
@@ -86,6 +87,8 @@ public class BLETracker implements OnStateChangedListener {
             gpsService = ((GPSService.LocalBinder) service).getService();
             //Immediately start requestion periodic location updates
             gpsService.startLocationUpdates();
+
+            gpsService.registerListener(BLETracker.this);
         }
 
         @Override
@@ -145,9 +148,15 @@ public class BLETracker implements OnStateChangedListener {
     BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(GPSService.ACTION_NAME)) {
+
+            Toast.makeText(AppContext, "Received something...", Toast.LENGTH_LONG).show();
+
+            if (intent.hasExtra(GPSService.NEW_LOCATION_KEY)) {
+
                 Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
                 Log.d(TAG, "New location received = " + newLocation);
+                Toast.makeText(AppContext, "New GPS Received : " + newLocation, Toast.LENGTH_LONG).show();
+
                 processGPSReading(newLocation);
             }
         }
@@ -215,7 +224,6 @@ public class BLETracker implements OnStateChangedListener {
             final Order newOrder = new Order(orderId, new Customer(customerId));
             existingOrder = newOrder;
 
-            final Order finalExistingOrder = existingOrder;
             serverAPI.addNewOrder(newOrder.getID(), customerId, new ServerAPI.ServerRequestListener() {
                 @Override
                 public void onRequestFailed() {
@@ -226,30 +234,62 @@ public class BLETracker implements OnStateChangedListener {
                 public void onRequestCompleted(JSONObject response) {
                     Log.d(TAG, "Added new order to server succesfully");
                     Log.d(TAG, "Response = \n" + response);
-
-                    //Always create the new order case as well
-                    Log.d(TAG, "Creating new ordercase #" + orderId + "-" + orderCaseId);
-                    final OrderCase orderCase = new OrderCase(orderCaseId, finalExistingOrder);
-                    serverAPI.addNewOrderCase(finalExistingOrder.getID(), orderCase.getID(), bleTagMac.getMinifiedAddress(), barcode.toString(), new ServerAPI.ServerRequestListener() {
-                        @Override
-                        public void onRequestFailed() {
-                            Log.e(TAG, "Unable to add new order case");
-                        }
-
-                        @Override
-                        public void onRequestCompleted(JSONObject response) {
-                            Log.d(TAG, "Added new ordercase to server.");
-                            Log.d(TAG, "Response = \n" + response);
-                            //Keep track of the new order case
-                            orderCases.add(orderCase);
-
-                            //Everything went well, we can safely progress to the next state
-                            stateController.doAction(Action.SCAN_CASE);
-                        }
-                    });
                 }
             });
         }
+
+        //Always create the new order case as well
+        Log.d(TAG, "Creating new ordercase #" + orderId + "-" + orderCaseId);
+        final OrderCase orderCase = new OrderCase(orderCaseId, existingOrder);
+        serverAPI.addNewOrderCase(existingOrder.getID(), orderCase.getID(), bleTagMac.getMinifiedAddress(), barcode.toString(), new ServerAPI.ServerRequestListener() {
+            @Override
+            public void onRequestFailed() {
+                Log.e(TAG, "Unable to add new order case");
+            }
+
+            @Override
+            public void onRequestCompleted(JSONObject response) {
+                Log.d(TAG, "Added new ordercase to server.");
+                Log.d(TAG, "Response = \n" + response);
+                //Keep track of the new order case
+
+                try {
+                    JSONObject orderJSON = response.getJSONObject("order");
+                    JSONObject customerJSON = orderJSON.getJSONObject("customer");
+                    JSONObject locationJSON = customerJSON.getJSONObject("location");
+                    SQLLocation customerLocation = new SQLLocation(
+                            locationJSON.getInt("id"),
+                            locationJSON.getString("name"),
+                            (float)locationJSON.getDouble("latitude"),
+                            (float)locationJSON.getDouble("longitude"),
+                            "street",
+                            0,
+                            "city",
+                            "zip_code"
+                    );
+
+                    int orderId = orderJSON.getInt("id");
+                    Order existingOrder = getOrderWithID(orderId);
+                    Customer customer = new Customer(customerJSON.getInt("id"), customerJSON.getString("name"), customerLocation);
+
+                    if(existingOrder != null) {
+                        existingOrder.setCustomer(customer);
+                    }
+                    else {
+                        existingOrder = new Order(orderJSON.getInt("id"),customer);
+                        orders.add(existingOrder);
+                    }
+//                    orderCase.setOrder(existingOrder);
+
+                    orderCases.add(new OrderCase(orderCaseId,existingOrder));
+
+                    //Everything went well, we can safely progress to the next state
+                    stateController.doAction(Action.SCAN_CASE);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -266,13 +306,20 @@ public class BLETracker implements OnStateChangedListener {
                     //Check if it has departed
                     if (departureLocation != null) {
                         float distance = departureLocation.distanceTo(newLocation);
-                        if (distance > DISTANCE_TRIGGER) {
+                        if (distance >= Configuration.DEPART_DISTANCE) {
                             //It has departed
+                            Log.d(TAG,"We have departed!");
+                            Toast.makeText(AppContext,"Unit has departed",Toast.LENGTH_LONG).show();
                             stateController.doAction(Action.DEPART);
                         }
+                        else {
+                            float distanceLeft = Configuration.DEPART_DISTANCE - distance;
+                            Log.d(TAG,"Distance until departed = " + distanceLeft);
+                            Toast.makeText(AppContext,"Distance until departed = " +distanceLeft,Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        Log.d(TAG, "New departure location set: " + departureLocation.toString());
                         departureLocation = newLocation;
+                        Log.d(TAG, "New departure location set: " + departureLocation.toString());
                     }
                     break;
                 case EN_ROUTE: //Cache data
@@ -288,23 +335,50 @@ public class BLETracker implements OnStateChangedListener {
                             float distance = results[0];
 
                             Log.d(TAG, "Distance between the current location and order #" + orderCase.getOrder().getID() + " is " + distance);
-                            if (distance < DISTANCE_TRIGGER) { //TODO: Do all location proximity checking in a new controller
+                            if (distance < Configuration.ARRIVE_DISTANCE) { //TODO: Do all location proximity checking in a new controller
                                 Log.d(TAG, "SO... You may consider it arrived!");
 
                                 //Remove from list
                                 i.remove();
                             } else { //Not yet arrived
-                                Log.d(TAG, "Order # " + orderCase.getOrder().getID() + " still has " + (distance - DISTANCE_TRIGGER) + " meters to go.");
+                                String message = "Order #" + orderCase.getOrder().getID() + " has " + (distance - Configuration.ARRIVE_DISTANCE) + " m to go.";
+                                Log.d(TAG,message);
+                                Toast.makeText(AppContext,message,Toast.LENGTH_LONG).show();
                             }
                         }
+                        else {
+                            Log.w(TAG,"No customer location found for order case, I don't know where it should go!");
+                        }
                     }
+
+                    //When no more order cases to be delivered, we can consider this finished
+                    if(orderCases.size() == 0) {
+                        String message = "All packages have been delivered.";
+                        Toast.makeText(AppContext,message,Toast.LENGTH_LONG);
+                        Log.d(TAG, message);
+
+                        stateController.doAction(Action.FINISHED);
+                        break;
+                    }
+
+                    Log.d(TAG,"New gps measurement added");
+                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),System.currentTimeMillis() / 1000L));
+                    checkFlush();
+
                     break;
-                case ARRIVED: //Only check if it has returned
+                case ALL_DELIVERED: //Only check if it has returned
                     float distance = departureLocation.distanceTo(newLocation);
-                    if (distance < DISTANCE_TRIGGER) {
+                    if (distance < Configuration.ARRIVE_DISTANCE) {
                         //It has returned
-                        Log.d(TAG, "'Oost,West,Thuis Best' --- The BLETracker has returned home.");
+                        String message = "'Oost,West,Thuis Best' --- The BLETracker has returned home.";
+                        Log.d(TAG, message);
+                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG);
                         stateController.doAction(Action.RETURN);
+                    }
+                    else {
+                        String message = distance + " m to go before home.";
+                        Log.d(TAG, message);
+                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG);
                     }
                     break;
             }
@@ -340,6 +414,8 @@ public class BLETracker implements OnStateChangedListener {
             AppContext.registerReceiver(gpsReceiver, new IntentFilter(GPSService.ACTION_NAME));
             Intent serviceIntent = new Intent(AppContext, GPSService.class);
             AppContext.bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
+
+
         } else Log.w(TAG, "Already GPS tracking!");
     }
 
@@ -349,7 +425,7 @@ public class BLETracker implements OnStateChangedListener {
      */
     private void checkFlush() {
         int allData = rssiMeasurements.size() + gpsMeasurements.size() + sensorMeasurements.size();
-        if (allData > CACHE_SIZE) {
+        if (allData >= Configuration.TRACKER_CACHE_SIZE) {
             flushTrackingData();
         }
     }
@@ -375,22 +451,30 @@ public class BLETracker implements OnStateChangedListener {
      */
     public void flushTrackingData() {
         if (!rssiMeasurements.isEmpty() || !gpsMeasurements.isEmpty()) {
-            Log.d(TAG, "Flushing all tracking data...");
-            serverAPI.sendTrackingData(deviceId, installId, (RSSIMeasurement[]) rssiMeasurements.toArray(), (GPSMeasurement[]) gpsMeasurements.toArray(), new ServerAPI.ServerRequestListener() {
-                @Override
-                public void onRequestFailed() {
-                    Log.e(TAG, "Unable to send tracking data to server");
-                }
+            if (activeRoute != null) {
+                Log.d(TAG, "Flushing all tracking data...");
+                Toast.makeText(AppContext,"Flushing tracking data",Toast.LENGTH_LONG).show();
+                serverAPI.sendTrackingData(deviceId, installId, activeRoute.getId(), rssiMeasurements, gpsMeasurements, new ServerAPI.ServerRequestListener() {
+                    @Override
+                    public void onRequestFailed() {
+                        Log.e(TAG, "Unable to send tracking data to server");
+                    }
 
-                @Override
-                public void onRequestCompleted(JSONObject response) {
-                    Log.d(TAG, "Succesfully sent " + rssiMeasurements.size() + " rssi measurements and " + gpsMeasurements.size() + "GPS points to the server");
+                    @Override
+                    public void onRequestCompleted(JSONObject response) {
+                        Log.d(TAG,"Response = " + response.toString());
 
-                    //Safe to clear the cache
-                    rssiMeasurements.clear();
-                    gpsMeasurements.clear();
-                }
-            });
+                        Log.d(TAG, "Succesfully sent " + rssiMeasurements.size() + " rssi measurements and " + gpsMeasurements.size() + "GPS points to the server");
+
+                        //Safe to clear the cache
+                        rssiMeasurements.clear();
+                        gpsMeasurements.clear();
+                    }
+                });
+            }
+            else {
+                Log.e(TAG,"No current route set!");
+            }
         }
     }
 
@@ -410,7 +494,35 @@ public class BLETracker implements OnStateChangedListener {
             Log.d(TAG,"We are ready to depart, activating GPS service.,");
             startGPSTracking();
         }
+        if(transition.action == Action.DEPART) { //Create and start route
 
+            //Unwrap the ordercase ids and order ids that are to be tracked
+            int[] orderIds = new int[orderCases.size()];
+            int[] orderCaseIds = new int[orderCases.size()];
+
+            for(int i = 0 ; i < orderCases.size() ; ++i) {
+                OrderCase orderCase = orderCases.get(i);
+                orderIds[i] = orderCase.getID();
+                orderCaseIds[i] = orderCase.getOrder().getID();
+            }
+
+            serverAPI.createRoute(deviceId, installId, orderIds, orderCaseIds, new ServerAPI.ServerRequestListener() {
+                @Override
+                public void onRequestFailed() {
+                    Log.e(TAG,"Too bad: this don't work son");
+                }
+
+                @Override
+                public void onRequestCompleted(JSONObject response) {
+                    try {
+                        int routeId = response.getInt(ServerAPI.GetKeys.ID);
+                        activeRoute = new Route(routeId);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -431,5 +543,13 @@ public class BLETracker implements OnStateChangedListener {
 
     public String getInstallId() {
         return installId;
+    }
+
+    @Override
+    public void OnNewLocationReceived(Location newLocation) {
+
+        Log.d(TAG,"New location callback");
+
+        processGPSReading(newLocation);
     }
 }

@@ -2,6 +2,92 @@
 
 require_once('../../MySQLi/MysqliDb.php');
 
+/** SQL CLASSES **/
+class Customer {
+    public $id;
+    public $location;
+    public $name;
+
+    public function __construct($id,$location,$name) {
+        $this->id = $id;
+        $this->location = $location;
+        $this->name = $name;
+    }
+}
+
+class Order {
+    public $id;
+    public $customer;
+    public $created;
+
+    public function __construct($id,$customer,$created) {
+        $this->id = $id;
+        $this->customer = $customer;
+        $this->created = $created;
+    }
+}
+
+class Order_Case {
+    public $id;
+    public $order;
+    public $bleTag;
+    public $route;
+    public $barCode;
+    public $status;
+    public $start;
+    public $end;
+
+    public function __construct($id,$order,$bleTag,$route,$status,$start,$end) {
+        $this->id = $id;
+        $this->order = $order;
+        $this->bleTag = $bleTag;
+        $this->route = $route;
+        $this->status = $status;
+        $this->start = $start;
+        $this->end = $end;
+    }
+}
+
+class Location {
+    public $id;
+    public $name;
+    public $latitude;
+    public $longitude;
+    public $street;
+    public $street_number;
+    public $city;
+    public $zip_code;
+
+    public function __construct($id,$name,$latitude,$longitude,$street,$street_number,$city,$zip_code) {
+        $this->id = $id;
+        $this->name = $name;
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+        $this->street = $street;
+        $this->street_number = $street_number;
+        $this->city = $city;
+        $this->zip_code = $zip_code;
+    }
+}
+
+class BLE_Tag {
+    public $id;
+    public $company;
+    public $mac;
+
+    public function __construct($id) {
+        $this->id = $id;
+    }
+}
+
+class Route {
+    public $id;
+
+    public function __construct($id) {
+        $this->id = $id;
+    }
+}
+
 abstract class API
 {
     /**
@@ -187,6 +273,17 @@ class Database {
         return $result[0];
     }
 
+    //Select the complete data for a given order_case 
+    public function select_order_case($orderId,$orderCaseId) {
+
+        $sql = "SELECT *, locations.Name AS Location_Name, order_cases.ID AS Order_Case_ID FROM order_cases,orders,customers,locations WHERE orders.ID = ? AND order_cases.ID = ? AND orders.Customer_ID = customers.ID AND locations.ID = customers.Location_ID";
+
+        $result = $this->db->rawQuery($sql,array($orderId,$orderCaseId));
+        // echo $this->db->getLastQuery();
+        // print_r($result);
+        return $result[0];
+    }
+
     /**
      *   Inserts a new BLE_Tracker with the given device and install IDs. The IDs are composite uniques preventing duplicates
      */
@@ -223,11 +320,15 @@ class Database {
     public function insert_order_case($caseId,$orderId,$bleMacAddress,$barCode) {
 
         $sql = 'INSERT INTO order_cases (ID,Order_ID,BLE_Tag_ID,Bar_Code) SELECT ?,?,ble_tags.ID,? FROM ble_tags WHERE Mac_Address = ?';
-        $id = $this->db->rawQuery($sql,array($caseId,$orderId,$barCode, $bleMacAddress));
-        if(!$id) {
+        $this->db->rawQuery($sql,array($caseId,$orderId,$barCode, $bleMacAddress));
+
+        //The return does not work for order cases probably because of the composite key
+        $order = $this->select_order_case($orderId,$caseId);
+        // print_r($order);
+        if(!$order) {
             $this->sql_error();
         }
-        else return $id;
+        else return $order;
     }
 
     /**
@@ -402,6 +503,7 @@ class MyAPI extends API
         if (!array_key_exists('apiKey', $this->request)) {
             throw new Exception('No API Key provided');
         }
+        
         $companyId = $this->authenticate($this->request['apiKey']);
         if($companyId != -1) {
             $this->companyId = $companyId;
@@ -493,10 +595,42 @@ class MyAPI extends API
                 }
             }
             elseif($this->requestHasProperties(array('orderCaseId','orderId','bleTagMacAddress','barCode'))) {
-               $id = $this->database->insert_order_case($this->request['orderCaseId'],$this->request['orderId'],$this->request['bleTagMacAddress'],$this->request['barCode']);
-               return array(  
-                    'ID' => $id
+               $sqlOrder = $this->database->insert_order_case($this->request['orderCaseId'],$this->request['orderId'],$this->request['bleTagMacAddress'],$this->request['barCode']);
+
+                //TODO: This seems extremely archaic, and should be improved
+                $orderCase = new Order_Case($sqlOrder['Order_Case_ID'],
+                    new Order($sqlOrder['Order_ID'],
+                        new Customer(
+                            $sqlOrder['Customer_ID'],
+                            new Location(
+                                $sqlOrder['Location_ID'],
+                                $sqlOrder['Location_Name'],
+                                $sqlOrder['Latitude'],
+                                $sqlOrder['Longitude'],
+                                $sqlOrder['Street'],
+                                $sqlOrder['Street_Number'],
+                                $sqlOrder['City'],
+                                $sqlOrder['Zip_Code']
+                            ),
+                            $sqlOrder['Name']
+                        ),
+                        $sqlOrder['Created']
+                    ),
+                    new BLE_Tag($sqlOrder['BLE_Tag_ID']),
+                    new Route($sqlOrder['Route_ID']),
+                    $sqlOrder['Status'],
+                    $sqlOrder['Start'],
+                    $sqlOrder['End']
                 );
+
+               //Correctly format it
+               // $order->customer = 
+
+                //Wrap it in a object
+               // $return = new stdObject();
+               // $return->order
+
+               return $orderCase;
             }
             else throw new Exception("Missing parameters");
         }

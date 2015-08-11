@@ -9,6 +9,7 @@ package com.simons.bletracker.models.sql;
 public class SQLLocation {
 
     private int id;
+    private String name;
     private float latitude;
     private float longitude;
     private String street;
@@ -20,8 +21,9 @@ public class SQLLocation {
         this.id = id;
     }
 
-    public SQLLocation(int id, float latitude, float longitude, String street, int streetNumber, String city, String zipCode) {
+    public SQLLocation(int id, String name, float latitude, float longitude, String street, int streetNumber, String city, String zipCode) {
         this.id = id;
+        this.name = name;
         this.street = street;
         this.streetNumber = streetNumber;
         this.city = city;

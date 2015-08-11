@@ -4,10 +4,10 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -24,6 +24,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -35,7 +36,9 @@
             android:name=".activities.LabelsListActivity"
             android:label="@string/title_activity_labels_list" >
         </activity>
-
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyA2xGQaePRVdxioiVEBEqGEeGxi9plz1gE" />
         <service
             android:name=".services.GPSService"
             android:enabled="true"
@@ -48,6 +51,10 @@
         <activity
             android:name=".activities.ScanLabelActivity"
             android:label="@string/title_activity_scan_label" >
+        </activity>
+        <activity
+            android:name=".activities.MapActivity"
+            android:label="@string/title_activity_map" >
         </activity>
     </application>
 

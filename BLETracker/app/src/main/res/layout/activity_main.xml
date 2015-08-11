@@ -103,7 +103,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
             <Button
                 android:id="@+id/scanCaseButton"
                 style="@style/marginStyle"
@@ -116,12 +115,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Scan Label" />
+            </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <Button
                 android:id="@+id/labelsButton"
                 style="@style/marginStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Labels" />
+            <Button android:id="@+id/mapButton"
+                style="@style/marginStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Map"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/testButtons"
@@ -140,6 +149,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Move GPS" />
+            <Button
+                android:id="@+id/testDepartButton"
+                style="@style/marginStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Depart" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

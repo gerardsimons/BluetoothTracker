@@ -17,8 +17,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+
+    public interface GPSListener {
+        public void OnNewLocationReceived(Location newLocation);
+    }
 
     /** Use this in conjunction with PendingIntent to run while the app is killed or in background **/
     public class ProximityIntentReceiver extends BroadcastReceiver {
@@ -47,6 +54,9 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public static final String ACTION_NAME = "com.simons.bletracker.gps_read";
     public static final String NEW_LOCATION_KEY = "NEW_LOCATION";
 
+    /** Although new GPS locations are broadcast it may also be useful to just register as a listener callback **/
+    private List<GPSListener> gpsListeners;
+
     public class LocalBinder extends Binder {
         public GPSService getService() {
             return GPSService.this;
@@ -61,7 +71,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(TAG,"Connection suspended");
+        Log.d(TAG, "Connection suspended");
     }
 
     @Override
@@ -72,8 +82,15 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
         //Broadcast new location
         Intent intent = new Intent();
+        intent.setAction(ACTION_NAME);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.putExtra(NEW_LOCATION_KEY,newLocation);
         sendBroadcast(intent);
+
+        //Also notify any additional listeners
+        notifyListeners(newLocation);
+
+        Log.d(TAG, "Broadcast sent " + intent.toString());
     }
 
     @Override
@@ -85,6 +102,15 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "Unbind event");
         return super.onUnbind(intent);
+    }
+
+    /**
+     * Notify the GPSListeners about any changes
+     */
+    private void notifyListeners(Location newLocation) {
+        for(GPSListener gpsListener : gpsListeners) {
+            gpsListener.OnNewLocationReceived(newLocation);
+        }
     }
 
     /**
@@ -140,6 +166,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         mLocationRequest.setSmallestDisplacement(DISPLACEMENT); // 10 meters
     }
 
+    public void registerListener(GPSListener newListener) {
+        gpsListeners.add(newListener);
+    }
+
     /**
      * Creating google api client object
      * */
@@ -154,6 +184,8 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public void onCreate() {
         super.onCreate();
+
+        gpsListeners = new ArrayList<>();
 
         Log.d(TAG,"GPSService created");
         // First we need to check availability of play services

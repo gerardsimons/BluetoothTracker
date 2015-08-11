@@ -252,7 +252,7 @@ public class ServerAPI {
     public void createRoute(String deviceId, String installId,int[] orderIds, int[] orderCaseIds, ServerRequestListener listener) {
         assert orderCaseIds.length == orderIds.length;
 
-        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ORDER);
+        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ROUTE);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API,Configuration.API_KEY));
@@ -280,11 +280,12 @@ public class ServerAPI {
         doRequest(httpPost, listener);
     }
 
-    public void sendTrackingData(String deviceId, String installId, RSSIMeasurement[] rssiMeasurements, GPSMeasurement[] gpsMeasurements, ServerRequestListener listener) {
+    public void sendTrackingData(String deviceId, String installId, int routeId, List<RSSIMeasurement> rssiMeasurements, List<GPSMeasurement> gpsMeasurements, ServerRequestListener listener) {
         HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.TRACKING_DATA);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.ROUTE_ID,routeId+""));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.DEVICE_ID, deviceId));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.INSTALL_ID, installId));
 
@@ -318,9 +319,14 @@ public class ServerAPI {
             nameValuePairs.add(new BasicNameValuePair(PostKeys.GPS_DATA,gpsJsonArray.toString()));
             nameValuePairs.add(new BasicNameValuePair(PostKeys.SENSOR_DATA,sensoricArray.toString()));
 
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+
 
         //Execute, the return value is given through the listener callback
         doRequest(httpPost, listener);

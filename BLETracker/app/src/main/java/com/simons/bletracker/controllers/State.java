@@ -7,6 +7,6 @@ public enum State {
     IDLE,
     READY_FOR_DEPARTURE,
     EN_ROUTE,
-    ARRIVED,
+    ALL_DELIVERED,
     RETURNED;
 }

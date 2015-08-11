@@ -65,10 +65,10 @@ public class StateController {
                 break;
             case EN_ROUTE: //It is allowed to arrive or add a checkpoint
                 if(action == Action.FINISHED) {
-                    state = State.ARRIVED;
+                    state = State.ALL_DELIVERED;
                 }
                 break;
-            case ARRIVED:
+            case ALL_DELIVERED:
                 break;
             case RETURNED:
                 break;
