@@ -37,8 +37,12 @@ public class MacAddress {
      */
     public String getBeautifiedAddress() {
         String beautfied = "";
-        for(int i = 0 ; i < address.length() - 2 ; i += 2) {
-            beautfied += address.substring(i,i+2) + ":";
+        for(int i = 0 ; i < address.length() ; i += 2) {
+            beautfied += address.substring(i,i+2);
+
+            if((i + 2) < address.length()) {
+                beautfied += ":";
+            }
         }
         return beautfied;
     }
@@ -58,6 +62,6 @@ public class MacAddress {
 
     @Override
     public String toString() {
-        return getBeautifiedAddress();
+        return address;
     }
 }

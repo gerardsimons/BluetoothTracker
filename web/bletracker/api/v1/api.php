@@ -129,7 +129,7 @@ abstract class API
     public function __construct($request) {
         header("Access-Control-Allow-Orgin: *");
         header("Access-Control-Allow-Methods: *");
-        header("Content-Type: application/json");
+        header("Content-Type: application/json; charset=utf-8");
 
         $this->args = explode('/', rtrim($request, '/'));
         $this->endpoint = array_shift($this->args);
@@ -422,9 +422,10 @@ class Database {
         $result = $this->db->rawQuery($sql,array($routeId,$datetime,$rssi,$bleTagMacAddress));
 
         // echo $this->db->getLastQuery();
+        // echo $this->db->getLastError();
         // print_r($result);
 
-        return $result;
+        return 1;
     }
 
     /**
@@ -723,17 +724,17 @@ class MyAPI extends API
                 $sensorAdded = 0;
 
                 foreach($gpsData as $gpsRecord) {
-                    // print_r($gpsRecord);
-                    $gpsAdded = $this->database->insert_gps($routeId,$gpsRecord->time,$gpsRecord->lat,$gpsRecord->long);
+                    print_r($gpsRecord);
+                    $gpsAdded += $this->database->insert_gps($routeId,$gpsRecord->time,$gpsRecord->lat,$gpsRecord->long);
                 }
                 foreach($rssiData as $rssiRecord) {
-                    $rssiAdded = $this->database->insert_rssi($routeId,$rssiRecord->mac,$rssiRecord->time,$rssiRecord->rssi);
+                    $rssiAdded += $this->database->insert_rssi($routeId,$rssiRecord->macAddress,$rssiRecord->time,$rssiRecord->rssi);
                 }
-                // foreach($sensorData as $sensorRecord) {
-                //     $sensorAdded = $this->database->insert_sensoric($routeId,$sensorRecord$sensorRecord->time,$sensorRecord->reading);
-                // }
-
-                return json_encode(array("gpsAdded" => $gpsAdded,"rssiAdded" => $rssiAdded, "sensorAdded" => $sensorAdded));
+                foreach($sensorData as $sensorRecord) {
+                    $sensorAdded += $this->database->insert_sensoric($routeId,$sensorRecord$sensorRecord->time,$sensorRecord->reading);
+                }
+                
+                return array('gpsAdded' => $gpsAdded,'rssiAdded' => $rssiAdded, 'sensorAdded' => $sensorAdded);
             }
         }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);

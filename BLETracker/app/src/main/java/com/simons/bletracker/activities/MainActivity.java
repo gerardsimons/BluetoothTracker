@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
+import com.simons.bletracker.controllers.Action;
 import com.simons.bletracker.controllers.BLETracker;
 import com.simons.bletracker.controllers.StateController;
 import com.simons.bletracker.controllers.Transition;
@@ -145,21 +146,21 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        //TODO: Move this button to map activity
-//        findViewById(R.id.testGpsMovement).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Log.d(TAG, "Simulating a GPS movement event.");
-//
-//                float latitude = mockLocations[mockLocationIndex];
-//                float longitude = mockLocations[mockLocationIndex+1];
-//                mockLocationIndex += 2;
-//                if(mockLocationIndex >= mockLocations.length) {
-//                    mockLocationIndex = 0;
-//                }
-//                GPSService._mockLocation(latitude,longitude);
-//            }
-//        });
+        findViewById(R.id.flushDataButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "Manual flushing of data.");
+                bleTracker.flushTrackingData();
+            }
+        });
+
+        findViewById(R.id.testDepartButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "Manual depart.");
+                stateController.doAction(Action.DEPART);
+            }
+        });
     }
 
     private void errorAlert(Context context, String title, String message) {
@@ -202,14 +203,6 @@ public class MainActivity extends ActionBarActivity {
                 //Get the order ID
                 bleTracker.newOrderCaseScanned(caseScan, scannedTag.getAddress());
             }
-
-            //Now we have both the case scanned and the label, these two are now considered linked together.
-
-            //Update this at the server
-
-            //Possibly continue scanning more labels and cases or check for departure of truck
-
-            //Initialize a route service which detects departures, not sure if this should actually be a service
         }
     }
 

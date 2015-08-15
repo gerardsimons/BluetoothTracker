@@ -144,11 +144,11 @@
                 android:layout_height="wrap_content"
                 android:text="OrderCase" />
             <Button
-                android:id="@+id/testGpsMovement"
+                android:id="@+id/flushDataButton"
                 style="@style/marginStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Move GPS" />
+                android:text="Flush" />
             <Button
                 android:id="@+id/testDepartButton"
                 style="@style/marginStyle"

@@ -76,7 +76,7 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
     private BLEDiscoveryService discoveryService;
 
     /**
-     * SERVICE CONNECTIONS *
+     * SERVICE CONNECTIONS
      */
     private final ServiceConnection gpsServiceConnection = new ServiceConnection() {
         @Override
@@ -166,6 +166,7 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         stateController = StateController.GetInstance();
         stateController.registerListener(this);
         serverAPI = ServerAPI.GetInstance();
+        authorizationController = BLEAuthorizationController.getInstance();
 
         orders = new ArrayList<>();
         orderCases = new ArrayList<>();
@@ -414,8 +415,6 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
             AppContext.registerReceiver(gpsReceiver, new IntentFilter(GPSService.ACTION_NAME));
             Intent serviceIntent = new Intent(AppContext, GPSService.class);
             AppContext.bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
-
-
         } else Log.w(TAG, "Already GPS tracking!");
     }
 
@@ -425,6 +424,9 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
      */
     private void checkFlush() {
         int allData = rssiMeasurements.size() + gpsMeasurements.size() + sensorMeasurements.size();
+
+        Log.d(TAG,"Cache size = " + allData);
+
         if (allData >= Configuration.TRACKER_CACHE_SIZE) {
             flushTrackingData();
         }
@@ -453,8 +455,8 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         if (!rssiMeasurements.isEmpty() || !gpsMeasurements.isEmpty()) {
             if (activeRoute != null) {
                 Log.d(TAG, "Flushing all tracking data...");
-                Toast.makeText(AppContext,"Flushing tracking data",Toast.LENGTH_LONG).show();
-                serverAPI.sendTrackingData(deviceId, installId, activeRoute.getId(), rssiMeasurements, gpsMeasurements, new ServerAPI.ServerRequestListener() {
+                Toast.makeText(AppContext,"Flushing tracking data",Toast.LENGTH_SHORT).show();
+                serverAPI.sendTrackingData(activeRoute.getId(), rssiMeasurements, gpsMeasurements, new ServerAPI.ServerRequestListener() {
                     @Override
                     public void onRequestFailed() {
                         Log.e(TAG, "Unable to send tracking data to server");
@@ -522,6 +524,8 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
                     }
                 }
             });
+
+            startBLETracking();
         }
     }
 

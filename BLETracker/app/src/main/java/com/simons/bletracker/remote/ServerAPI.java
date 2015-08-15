@@ -62,7 +62,7 @@ public class ServerAPI {
         /**
          * Nested parameter JSON keys used in POSTs *
          */
-        private static final String MAC_ADDRESS = "mac";
+        private static final String MAC_ADDRESS = "macAddress";
         private static final String RSSI = "rssi";
         private static final String TIMESTAMP = "time";
         private static final String LATITUDE = "lat";
@@ -140,6 +140,7 @@ public class ServerAPI {
 
     private void doRequest(HttpUriRequest request, ServerRequestListener listener) {
         if(listener != null) {
+
             ServerRequestTask task = new ServerRequestTask(listener);
             task.execute(request);
         }
@@ -280,14 +281,14 @@ public class ServerAPI {
         doRequest(httpPost, listener);
     }
 
-    public void sendTrackingData(String deviceId, String installId, int routeId, List<RSSIMeasurement> rssiMeasurements, List<GPSMeasurement> gpsMeasurements, ServerRequestListener listener) {
+    public void sendTrackingData(int routeId, List<RSSIMeasurement> rssiMeasurements, List<GPSMeasurement> gpsMeasurements, ServerRequestListener listener) {
         HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.TRACKING_DATA);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.ROUTE_ID,routeId+""));
-        nameValuePairs.add(new BasicNameValuePair(PostKeys.DEVICE_ID, deviceId));
-        nameValuePairs.add(new BasicNameValuePair(PostKeys.INSTALL_ID, installId));
+//        nameValuePairs.add(new BasicNameValuePair(PostKeys.DEVICE_ID, deviceId));
+//        nameValuePairs.add(new BasicNameValuePair(PostKeys.INSTALL_ID, installId));
 
         try {
             JSONArray rssiJsonArray = new JSONArray();
@@ -317,16 +318,19 @@ public class ServerAPI {
 
             nameValuePairs.add(new BasicNameValuePair(PostKeys.RSSI_DATA,rssiJsonArray.toString()));
             nameValuePairs.add(new BasicNameValuePair(PostKeys.GPS_DATA,gpsJsonArray.toString()));
-            nameValuePairs.add(new BasicNameValuePair(PostKeys.SENSOR_DATA,sensoricArray.toString()));
+            nameValuePairs.add(new BasicNameValuePair(PostKeys.SENSOR_DATA, sensoricArray.toString()));
 
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(nameValuePairs);
+
+            Log.d(TAG,"Server request pairs = " + nameValuePairs.toString());
+
+            httpPost.setEntity(formEntity);
 
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
 
         //Execute, the return value is given through the listener callback
         doRequest(httpPost, listener);

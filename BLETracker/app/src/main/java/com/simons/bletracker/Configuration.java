@@ -13,4 +13,5 @@ public class Configuration {
     public static int TRACKER_CACHE_SIZE = 1; //Size of tracker data before flushing it to the server
     public static int DEPART_DISTANCE = 0; //The distance in meters which is considered to trigger a departure
     public static int ARRIVE_DISTANCE = 50; //Idem but for arrivals (both the tracker on return and case orders)
+    public static int BLE_TAG_LOST_DISTANCE = 100; //Distance in meters when a ble tag is considered 'lost'
 }
