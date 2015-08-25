@@ -4,7 +4,7 @@ require_once("MySQLi/MysqliDb.php");
 $server = "localhost:3306";
 $user = "whereAt";
 $pass = "whereAt2014";
-$dbName = "ble_tracker";
+$dbName = "test";
 
 $db = new MysqliDb ($server,$user,$pass,$dbName);
 

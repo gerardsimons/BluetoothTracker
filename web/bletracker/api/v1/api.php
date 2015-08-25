@@ -731,7 +731,7 @@ class MyAPI extends API
                     $rssiAdded += $this->database->insert_rssi($routeId,$rssiRecord->macAddress,$rssiRecord->time,$rssiRecord->rssi);
                 }
                 foreach($sensorData as $sensorRecord) {
-                    $sensorAdded += $this->database->insert_sensoric($routeId,$sensorRecord$sensorRecord->time,$sensorRecord->reading);
+                    $sensorAdded += $this->database->insert_sensoric($routeId,$sensorRecord->time,$sensorRecord->reading);
                 }
                 
                 return array('gpsAdded' => $gpsAdded,'rssiAdded' => $rssiAdded, 'sensorAdded' => $sensorAdded);
