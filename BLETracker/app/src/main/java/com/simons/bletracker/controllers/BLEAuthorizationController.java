@@ -1,5 +1,6 @@
 package com.simons.bletracker.controllers;
 
+import com.simons.bletracker.Configuration;
 import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 
@@ -16,19 +17,19 @@ public class BLEAuthorizationController {
 
     private static MacAddress[] authorizedMacAddresses;
 
-
-
     private BLEAuthorizationController() {
         fillAuthorizedMacAddresses();
     }
 
     private void fillAuthorizedMacAddresses() {
 
-        authorizedMacAddresses = new MacAddress[2];
+        authorizedMacAddresses = new MacAddress[Configuration.BLE_TAG_MAC_ADDRESSES.length];
 
+        //Convert mac addresses to proper mac adress objects
         try {
-            authorizedMacAddresses[0] = new MacAddress("ED:77:96:59:D1:F1"); //whereAt T
-            authorizedMacAddresses[1] = new MacAddress("C5:E5:14:59:A0:A7");
+            for(int i = 0 ; i < Configuration.BLE_TAG_MAC_ADDRESSES.length ; ++i) {
+                authorizedMacAddresses[i] = new MacAddress(Configuration.BLE_TAG_MAC_ADDRESSES[i]);
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

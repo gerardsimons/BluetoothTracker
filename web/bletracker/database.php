@@ -21,8 +21,16 @@ class Database {
         throw new Exception("Failed to execute SQL Query " . $this->db->getLastQuery() . " ERROR : " . $this->db->getLastError());
     }
 
+    public function update_settings($user,$password,$alert) {
+        $sql = 'UPDATE settings,users SET Alert = ? WHERE settings.User_ID = users.ID AND Username = ? AND Password = SHA1(?)';
+        $result = $this->db->rawQuery($sql,array($alert,$user,$password));
+        // echo $this->db->getLastQuery();
+
+        return $result;
+    }
+
     public function select_user_for_credentials($username,$password) {
-        $sql = 'SELECT Company_ID,Username,Email,Created,Country,Business_Unit,First_Name,Last_Name,Phone_Number,Gender,Position,settings.* FROM users,settings WHERE settings.User_ID = users.ID AND Username = ? AND Password = SHA1(?)';
+        $sql = 'SELECT Company_ID,Logo_URL,Username,Email,Country,Business_Unit,First_Name,Last_Name,Phone_Number,Gender,Position,settings.* FROM users,companies,settings WHERE settings.User_ID = users.ID AND Username = ? AND Password = SHA1(?)';
 
         $result = $this->db->rawQuery($sql,array($username,$password));
 
@@ -184,19 +192,9 @@ class Database {
                
         // $id = $this->db->rawQuery($sql,array($deviceId,$installId));
         $id = $this->db->insert("routes",$data);
+        // echo $id;
         if($id) {
-
-            //Somehow the value is not being returned, get it manually
-            $data = array("Device_ID" => $deviceId,"Install_ID" => $installId);
-            $id = $this->db->rawQuery('SELECT routes.ID from routes,ble_trackers where Device_ID = ? AND Install_ID = ? AND ble_trackers.ID = routes.BLE_Tracker_ID',$data);
-            // print_r($id);
-
-            if($id !== null) {
-                return $id[0]['ID'];
-            }
-            else {
-                $this->sql_error();
-            }
+            return $id;
         }
         else $this->sql_error();
     }
@@ -215,7 +213,6 @@ class Database {
         if ($this->db->update ('order_cases', $data)) {
             // echo $this->db->count . ' records were updated';
             // echo $this->db->getLastQuery();
-
             return $this->db->count;
         }
     }
@@ -312,6 +309,8 @@ class Database {
         );
         $this->db->where('ID', $routeId);
         $result = $this->db->update('routes', $data);
+
+        // echo $this->db->getLastQuery();
 
         return $result;
     }

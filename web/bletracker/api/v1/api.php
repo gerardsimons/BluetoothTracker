@@ -424,6 +424,9 @@ class MyAPI extends API
                 else throw new Exception("Missing parameters");
             }
             if($this->verb == 'finish') {
+
+                // print_r($this->request);
+
                 if($this->requestHasProperties(array('routeId','endTime'))) {
                     $affected = $this->database->update_route_with_end_time($this->request['routeId'],$this->request['endTime']);
                     return array("affected" => (int)$affected);
@@ -434,11 +437,12 @@ class MyAPI extends API
             //No verb, simply insert new 
             else if($this->requestHasProperties(array('deviceId','installId','orderCases'))) {
                 $orderCases = json_decode($this->request['orderCases']);
+                // print_r($this->request['orderCases']);
                 $routeId = $this->database->insert_route($this->request['deviceId'],$this->request['installId']);
-
                 if($routeId) {
                     //Update the order cases so they link to the newly created id
                     foreach($orderCases as $orderCase) {
+                        // print_r($orderCase);
                         $this->database->update_order_case($orderCase->orderId,$orderCase->orderCaseId,$routeId);
                     }
 
@@ -448,7 +452,7 @@ class MyAPI extends API
                     );
                 }
             }
-            else throw new Exception("Missing parameters");
+            else throw new Exception("Unknown verb $this->verb");
         }
         elseif($this->method == 'GET') {
             if($this->requestHasProperties(array('routeId'))) {
@@ -538,9 +542,22 @@ class MyAPI extends API
             }
         }
         elseif($this->method == 'GET') {
-            throw new Exception("Missing parameters");
+            throw new Exception("Unsupported method " . $this->method);
         }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
+     }
+
+     protected function settings() {
+        if($this->method == 'POST') {
+            if($this->requestHasProperties(array('username','password','alert'))) {
+                $result = $this->database->update_settings($this->request['username'],$this->request['password'],(int)filter_var($this->request['alert'], FILTER_VALIDATE_BOOLEAN));
+                return array("succes" => true);
+            }
+            else throw new Exception("Missing parameters");
+        }
+        else {
+            throw new Exception("Unsupported method " . $this->method);
+        }
      }
  }
 
@@ -548,9 +565,6 @@ class MyAPI extends API
 if (!array_key_exists('HTTP_ORIGIN', $_SERVER)) {
     $_SERVER['HTTP_ORIGIN'] = $_SERVER['SERVER_NAME'];
 }
-
-// print_r($_POST);
-// print_r($_GET);
 
 try {
     $API = new MyAPI($_REQUEST['request'], $_SERVER['HTTP_ORIGIN']);

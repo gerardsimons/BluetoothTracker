@@ -54,7 +54,7 @@ public class BLETag implements Parcelable {
             address = new MacAddress(in.readString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            address = null;
+//            address = null;
         }
         latestRSSI = in.readInt();
     }

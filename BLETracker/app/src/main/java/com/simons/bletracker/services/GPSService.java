@@ -16,6 +16,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.simons.bletracker.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     private Location latestLocation;
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 8694;
-    private static final int UPDATE_INTERVAL = 1000;
-    private static final int FASTEST_INTERVAL = 500;
-    private static final int DISPLACEMENT = 1;
+
 
     public static final String ACTION_NAME = "com.simons.bletracker.gps_read";
     public static final String NEW_LOCATION_KEY = "NEW_LOCATION";
@@ -66,6 +65,9 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG,"Succesfully connected");
+
+        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
+
         startLocationUpdates();
     }
 
@@ -160,10 +162,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
      * */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setInterval(Configuration.GPS_UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(Configuration.GPS_FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setSmallestDisplacement(DISPLACEMENT); // 10 meters
+        mLocationRequest.setSmallestDisplacement(Configuration.GPS_DISPLACEMENT);
     }
 
     public void registerListener(GPSListener newListener) {
@@ -221,17 +223,17 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     }
 
     /*
-     *      DEBUG METHOD TO MOCK LOCATION; USEFUL TO TEST LOCATION UPDATES DISPLACEMENT
+     *      DEBUG METHOD TO MOCK LOCATION; USEFUL TO TEST LOCATION UPDATES GPS_DISPLACEMENT
      */
     public static void _mockLocation(float latitude, float longitude) {
         Log.d(TAG, "Set mock location : (" + latitude + "," + longitude + ")");
 
-        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
+//        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
         Location targetLocation = new Location("");//provider name is unecessary
         targetLocation.setLatitude(latitude);//your coords of course
         targetLocation.setLongitude(longitude);
         LocationServices.FusedLocationApi.setMockLocation(GoogleApi, targetLocation);
-        LocationServices.FusedLocationApi.setMockMode(GoogleApi, false);
+//        LocationServices.FusedLocationApi.setMockMode(GoogleApi, false);
     }
 
     @Override

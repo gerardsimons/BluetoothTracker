@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 public class BLEDiscoveryService extends Service {
@@ -115,18 +116,14 @@ public class BLEDiscoveryService extends Service {
 
         @Override
         public void run() {
-            try {
-                while (true) {
-                    if (running) {
-                        Log.d(TAG,"Starting scan...");
-                        mBluetoothAdapter.startLeScan(mLeScanCallback);
-                        sleep(SCAN_PERIOD);
-                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    }
-                    else sleep(SCAN_PERIOD);
+            while (true) {
+                if (running) {
+                    Log.d(TAG,"Starting scan...");
+                    mBluetoothAdapter.startLeScan(mLeScanCallback);
+                    SystemClock.sleep(SCAN_PERIOD);
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                SystemClock.sleep(SCAN_PERIOD);
             }
         }
     };

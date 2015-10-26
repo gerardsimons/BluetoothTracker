@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -176,6 +177,19 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         sensorMeasurements = new ArrayList<>();
     }
 
+    private void reset() {
+        activeRoute = null;
+        gpsMeasurements.clear();
+        rssiMeasurements.clear();
+        sensorMeasurements.clear();
+
+        isBLETracking = false;
+        isGSPTracking = false;
+
+        AppContext.unbindService(gpsServiceConnection);
+        AppContext.unbindService(rssiServiceConnection);
+    }
+
     private Order getOrderWithID(int id) {
         for (Order order : orders) {
             if (order.getID() == id) {
@@ -227,8 +241,8 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
 
             serverAPI.addNewOrder(newOrder.getID(), customerId, new ServerAPI.ServerRequestListener() {
                 @Override
-                public void onRequestFailed() {
-                    Log.e(TAG, "Unable to add new order to server.");
+                public void onRequestFailed(String message) {
+                    Log.e(TAG, "Unable to add new order to server. MESSAGE = " + message);
                 }
 
                 @Override
@@ -244,8 +258,8 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         final OrderCase orderCase = new OrderCase(orderCaseId, existingOrder);
         serverAPI.addNewOrderCase(existingOrder.getID(), orderCase.getID(), bleTagMac.getMinifiedAddress(), barcode.toString(), new ServerAPI.ServerRequestListener() {
             @Override
-            public void onRequestFailed() {
-                Log.e(TAG, "Unable to add new order case");
+            public void onRequestFailed(String message) {
+                Log.e(TAG, "Unable to add new order case : " + message);
             }
 
             @Override
@@ -432,7 +446,10 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         }
     }
 
+    boolean test = true;
     public void processRSSI(BLETag tag, int rssi) {
+        if(test)
+            return;
         if (authorizationController.isAuthorized(tag)) {
             if (isBLETracking) {
                 RSSIMeasurement rssiMeasurement = new RSSIMeasurement(rssi, System.currentTimeMillis() / 1000L, tag);
@@ -458,14 +475,13 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
                 Toast.makeText(AppContext,"Flushing tracking data",Toast.LENGTH_SHORT).show();
                 serverAPI.sendTrackingData(activeRoute.getId(), rssiMeasurements, gpsMeasurements, new ServerAPI.ServerRequestListener() {
                     @Override
-                    public void onRequestFailed() {
-                        Log.e(TAG, "Unable to send tracking data to server");
+                    public void onRequestFailed(String message) {
+                        Log.e(TAG, "Unable to send tracking data to server MESSAGE : " + message);
                     }
 
                     @Override
                     public void onRequestCompleted(JSONObject response) {
                         Log.d(TAG,"Response = " + response.toString());
-
                         Log.d(TAG, "Succesfully sent " + rssiMeasurements.size() + " rssi measurements and " + gpsMeasurements.size() + "GPS points to the server");
 
                         //Safe to clear the cache
@@ -504,19 +520,20 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
 
             for(int i = 0 ; i < orderCases.size() ; ++i) {
                 OrderCase orderCase = orderCases.get(i);
-                orderIds[i] = orderCase.getID();
-                orderCaseIds[i] = orderCase.getOrder().getID();
+                orderCaseIds[i] = orderCase.getID();
+                orderIds[i] = orderCase.getOrder().getID();
             }
 
             serverAPI.createRoute(deviceId, installId, orderIds, orderCaseIds, new ServerAPI.ServerRequestListener() {
                 @Override
-                public void onRequestFailed() {
-                    Log.e(TAG,"Too bad: this don't work son");
+                public void onRequestFailed(String message) {
+                    Log.e(TAG,"Creating route failed. MESSAGE: " + message);
                 }
 
                 @Override
                 public void onRequestCompleted(JSONObject response) {
                     try {
+                        Log.d(TAG,"Create route response = " + response);
                         int routeId = response.getInt(ServerAPI.GetKeys.ID);
                         activeRoute = new Route(routeId);
                     } catch (JSONException e) {
@@ -526,6 +543,24 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
             });
 
             startBLETracking();
+        }
+        else if(transition.action == Action.RETURN) {
+            checkFlush();
+
+            //FIXME: On rare occasions active route is not yet received (create route has not yet finished) before this happens, resulting in a NPE
+            //Finish the route
+            serverAPI.finishRoute(activeRoute.getId(), new Date(), new ServerAPI.ServerRequestListener() {
+                @Override
+                public void onRequestFailed(String message) {
+                    Log.e(TAG,"Unable to finish route " + activeRoute.getId() + " MESSAGE : " + message);
+                }
+
+                @Override
+                public void onRequestCompleted(JSONObject response) {
+                    Log.d(TAG,"Server response = " + response.toString());
+                    stateController.doAction(Action.RESET);
+                }
+            });
         }
     }
 

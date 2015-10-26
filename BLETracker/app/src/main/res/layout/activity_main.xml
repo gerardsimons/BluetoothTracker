@@ -132,11 +132,12 @@
                 android:layout_height="wrap_content"
                 android:text="Map"/>
         </LinearLayout>
-        <LinearLayout
+        <TableLayout
             android:id="@+id/testButtons"
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+            <TableRow>
             <Button
                 android:id="@+id/testOrderCaseButton"
                 style="@style/marginStyle"
@@ -155,6 +156,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Depart" />
-        </LinearLayout>
+            </TableRow>
+            <TableRow>
+                <Button
+                    android:id="@+id/testGPSButton"
+                    style="@style/marginStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Test GPS" />
+                <Button
+                    android:id="@+id/exitButton"
+                    style="@style/marginStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Exit" />
+            </TableRow>
+        </TableLayout>
     </LinearLayout>
 </RelativeLayout>

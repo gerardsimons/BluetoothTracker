@@ -15,5 +15,6 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_scan_label">ScanLabelActivity</string>
     <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_configuration">ConfigurationActivity</string>
 
 </resources>

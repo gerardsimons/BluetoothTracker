@@ -102,8 +102,11 @@ public class ServerAPI {
     }
 
     /** Additional verbs to be used in conjunction with end-points **/
-    private static final String START_VERB = "start";
-    private static final String END_VERB = "end";
+    private static class Verbs {
+        private static final String START = "start";
+        private static final String END = "end";
+        private static final String FINISH = "finish";
+    }
 
     /** The date format the server uses **/
     public static final DateFormat ServerDateTimeFormat = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
@@ -266,22 +269,28 @@ public class ServerAPI {
             for(int i = 0 ; i < orderIds.length ; ++i) {
                 JSONObject orderCaseJSON = new JSONObject();
                 orderCaseJSON.put(PostKeys.ORDER_ID,orderIds[i]);
-                orderCaseJSON.put(PostKeys.ORDER_CASE_ID,orderIds[i]);
+                orderCaseJSON.put(PostKeys.ORDER_CASE_ID,orderCaseIds[i]);
                 orderCases.put(orderCaseJSON);
             }
-            nameValuePairs.add(new BasicNameValuePair(PostKeys.ORDER_CASES,orderCases.toString()));
+            String orderCasesString = orderCases.toString();
+            nameValuePairs.add(new BasicNameValuePair(PostKeys.ORDER_CASES, orderCasesString));
+            Log.d(TAG,nameValuePairs.toString());
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
         } catch (UnsupportedEncodingException e) {
-            Log.e(TAG,"Unable to create FormEntity from parameters");
+            Log.e(TAG, "Unable to create FormEntity from parameters");
         } catch (JSONException e) {
-            Log.e(TAG,"Unable to create JSON OrderCase array",e);
+            Log.e(TAG, "Unable to create JSON OrderCase array", e);
         }
 
         //Execute, the return value is given through the listener callback
         doRequest(httpPost, listener);
     }
 
-    public void sendTrackingData(int routeId, List<RSSIMeasurement> rssiMeasurements, List<GPSMeasurement> gpsMeasurements, ServerRequestListener listener) {
+    public synchronized void sendTrackingData(int routeId, List<RSSIMeasurement> rssiMeasurements, List<GPSMeasurement> gpsMeasurements, ServerRequestListener listener) {
+
+        RSSIMeasurement[] rssiMeasurementsArray = rssiMeasurements.toArray(new RSSIMeasurement[rssiMeasurements.size()]);
+        GPSMeasurement[] gpsMeasurementsArray = gpsMeasurements.toArray(new GPSMeasurement[gpsMeasurements.size()]);
+
         HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.TRACKING_DATA);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
@@ -292,25 +301,33 @@ public class ServerAPI {
 
         try {
             JSONArray rssiJsonArray = new JSONArray();
-            for (RSSIMeasurement rssiMeasurement : rssiMeasurements) {
-                JSONObject rssiJson = new JSONObject();
+//            Iterator<RSSIMeasurement> iter = rssiMeasurements.iterator();
 
-                rssiJson.put(PostKeys.MAC_ADDRESS, rssiMeasurement.getMacAddress());
-                rssiJson.put(PostKeys.RSSI, rssiMeasurement.rssi);
-                rssiJson.put(PostKeys.TIMESTAMP, rssiMeasurement.timestamp);
+            for(RSSIMeasurement rssiMeasurement : rssiMeasurementsArray) {
+//            while (iter.hasNext()) {
+//                RSSIMeasurement rssiMeasurement = iter.next();
+                if(rssiMeasurement != null) {
+                    JSONObject rssiJson = new JSONObject();
 
-                rssiJsonArray.put(rssiJson);
+                    rssiJson.put(PostKeys.MAC_ADDRESS, rssiMeasurement.getMacAddress());
+                    rssiJson.put(PostKeys.RSSI, rssiMeasurement.rssi);
+                    rssiJson.put(PostKeys.TIMESTAMP, rssiMeasurement.timestamp);
+
+                    rssiJsonArray.put(rssiJson);
+                }
             }
 
             JSONArray gpsJsonArray = new JSONArray();
-            for (GPSMeasurement gpsMeasurement : gpsMeasurements) {
-                JSONObject gpsJson = new JSONObject();
+            for (GPSMeasurement gpsMeasurement : gpsMeasurementsArray) {
+                if(gpsMeasurement != null) {
+                    JSONObject gpsJson = new JSONObject();
 
-                gpsJson.put(PostKeys.LATITUDE, gpsMeasurement.latitude);
-                gpsJson.put(PostKeys.LONGITUDE, gpsMeasurement.longitude);
-                gpsJson.put(PostKeys.TIMESTAMP, gpsMeasurement.timestamp);
+                    gpsJson.put(PostKeys.LATITUDE, gpsMeasurement.latitude);
+                    gpsJson.put(PostKeys.LONGITUDE, gpsMeasurement.longitude);
+                    gpsJson.put(PostKeys.TIMESTAMP, gpsMeasurement.timestamp);
 
-                gpsJsonArray.put(gpsJson);
+                    gpsJsonArray.put(gpsJson);
+                }
             }
 
             //TODO: Fill sensoric array here
@@ -337,7 +354,7 @@ public class ServerAPI {
     }
 
     public void finishOrderCase(int orderCaseId, int orderId, Date finishTime, ServerRequestListener listener) {
-        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ORDER_CASE + "/" + END_VERB);
+        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ORDER_CASE + "/" + Verbs.END);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
@@ -349,7 +366,7 @@ public class ServerAPI {
     }
 
     public void startRoute(int routeId, Date startTime, ServerRequestListener listener) {
-        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ROUTE + "/" + START_VERB);
+        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ROUTE + "/" + Verbs.START);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
@@ -360,12 +377,33 @@ public class ServerAPI {
         doRequest(httpPost, listener);
     }
 
-    public void finishRoute() {
-        throw new RuntimeException("Stub");
+    //FIXME: This method still returns "Missing parameters"
+    public void finishRoute(int routeId, Date endTime, ServerRequestListener listener) {
+        String url = Configuration.SERVER_API_URL + EndPoints.ROUTE + "/" + Verbs.FINISH;
+        HttpPost httpPost = new HttpPost(url);
+        List<NameValuePair> nameValuePairs = new ArrayList<>(3);
+
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.ROUTE_ID,routeId+""));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.END_TIME, ServerDateTimeFormat.format(endTime)));
+
+        Log.d(TAG,url);
+        Log.d(TAG,nameValuePairs.toString());
+
+        try {
+            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(nameValuePairs);
+            httpPost.setEntity(formEntity);
+
+            doRequest(httpPost, listener);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+//        throw new RuntimeException("Stub");
     }
 
     public interface ServerRequestListener {
-        public void onRequestFailed();
+        public void onRequestFailed(String errorMessage);
         public void onRequestCompleted(JSONObject response);
     }
 
@@ -381,7 +419,7 @@ public class ServerAPI {
         protected JSONObject doInBackground(HttpUriRequest... requests) {
             if(requests.length > 1) {
                 Log.e(TAG,"Only 1 request at a time supported.");
-                listener.onRequestFailed();
+                listener.onRequestFailed("Only 1 request at a time supported.");
                 return null;
             }
             try {
@@ -395,14 +433,16 @@ public class ServerAPI {
                         return jsonResponse;
                     }
                     catch (JSONException e) {
-                        Log.e(TAG,String.format("Unable to convert server response '%s' to a JSONObject",stringResponse),e);
+                        String errorMessage = String.format("Unable to convert server response '%s' to a JSONObject", stringResponse);
+                        Log.e(TAG,errorMessage,e);
+                        listener.onRequestFailed(errorMessage);
                     }
                 } else {
-                    listener.onRequestFailed();
+                    listener.onRequestFailed("NULL response");
                     return null;
                 }
             } catch (Exception e) {
-                listener.onRequestFailed();
+                listener.onRequestFailed("UNKNOWN RESPONSE");
                 this.exception = e;
             }
             return null;

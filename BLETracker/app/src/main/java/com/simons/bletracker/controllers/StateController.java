@@ -69,8 +69,13 @@ public class StateController {
                 }
                 break;
             case ALL_DELIVERED:
+                if(action == Action.RETURN) {
+                    state = State.RETURNED;
+                }
                 break;
             case RETURNED:
+                if(action == Action.RESET)
+                    state = State.IDLE;
                 break;
         }
 

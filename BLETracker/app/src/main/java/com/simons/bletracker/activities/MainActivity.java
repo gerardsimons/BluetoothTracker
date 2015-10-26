@@ -6,22 +6,26 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.simons.bletracker.BLETrackerApplication;
 import com.simons.bletracker.R;
 import com.simons.bletracker.controllers.Action;
 import com.simons.bletracker.controllers.BLETracker;
+import com.simons.bletracker.controllers.State;
 import com.simons.bletracker.controllers.StateController;
 import com.simons.bletracker.controllers.Transition;
 import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
+import com.simons.bletracker.services.GPSService;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
 
@@ -29,8 +33,10 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
+//import android.support.v7.app.ActionBarActivity;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends Activity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -45,6 +51,8 @@ public class MainActivity extends ActionBarActivity {
 
     private String caseScan = "PLACEHOLDER";
     private BLETag scannedTag;
+
+    int ordersScanned = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +86,8 @@ public class MainActivity extends ActionBarActivity {
             //Register device as ble controller
             serverAPI.registerBLETracker(bleTracker.getDeviceId(), bleTracker.getInstallId(), new ServerAPI.ServerRequestListener() {
                 @Override
-                public void onRequestFailed() {
-                    errorAlert(MainActivity.this, "RegisterError", "Unable to register this device as a BLE controller");
+                public void onRequestFailed(String response) {
+                    errorAlert(MainActivity.this, "RegisterError", "Unable to register this device as a BLE controller MESSAGE = " + response);
                 }
 
                 @Override
@@ -133,16 +141,35 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        //#9 and #10
+        final String[] testTagMacs = {"FC:91:57:FA:03:65","F0:1A:97:79:F5:1E"};
+
+        //Eudokia plein
+        final String[] testCustomerCodes = {"1678111111003003300020","1678111111003103310021"};
+
+                //Rotterdam Centraal
+//        "1678127860003003300020"
+
         //*** THESE ARE SPECIAL DEBUGGING / DEVELOPMENT BUTTONS **/
-        findViewById(R.id.testOrderCaseButton).setOnClickListener(new View.OnClickListener() {
+        final Button orderCaseBttn = (Button) findViewById(R.id.testOrderCaseButton);
+        orderCaseBttn.setText("OrderCase #" + (ordersScanned + 1));
+        orderCaseBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "Simulating a ordercase scan event.");
-                try {
-                    bleTracker.newOrderCaseScanned("1678127860003003300020", new MacAddress("ED:77:96:59:D1:F1"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                if (ordersScanned < testCustomerCodes.length) {
+                    Log.d(TAG, "Simulating a ordercase scan event.");
+                    try {
+                        bleTracker.newOrderCaseScanned(testCustomerCodes[ordersScanned], new MacAddress("ED:77:96:59:D1:F1"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    ordersScanned++;
+
+                    if (ordersScanned < testCustomerCodes.length) {
+                        orderCaseBttn.setText("OrderCase #" + (ordersScanned + 1));
+                    }
+                } else
+                    Toast.makeText(MainActivity.this, "All test cases scanned", Toast.LENGTH_SHORT);
             }
         });
 
@@ -157,10 +184,34 @@ public class MainActivity extends ActionBarActivity {
         findViewById(R.id.testDepartButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "Manual depart.");
-                stateController.doAction(Action.DEPART);
+                if(stateController.getState() == State.READY_FOR_DEPARTURE) {
+                    Log.d(TAG, "Manual depart.");
+                    stateController.doAction(Action.DEPART);
+                }
+                else Toast.makeText(MainActivity.this,"Not yet ready to depart",Toast.LENGTH_SHORT);
             }
         });
+
+        //EUDOKIA
+        final float latitude = 51.932822000F;
+        final float longitude = 4.47081300F;
+
+        findViewById(R.id.testGPSButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Toast.makeText(MainActivity.this,"Not yet implemented",Toast.LENGTH_SHORT);
+
+                GPSService._mockLocation(latitude,longitude);
+            }
+        });
+
+        findViewById(R.id.exitButton).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                System.exit(0);
+            }
+        });
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private void errorAlert(Context context, String title, String message) {
@@ -211,7 +262,7 @@ public class MainActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
 
         //UNCOMMENT TO SHOW MENU
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -241,7 +292,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent i = new Intent(MainActivity.this,ConfigurationActivity.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);

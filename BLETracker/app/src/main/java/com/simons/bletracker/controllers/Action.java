@@ -7,5 +7,6 @@ public enum Action {
     SCAN_CASE,
     DEPART,
     FINISHED,
+    RESET,
     RETURN
 }
