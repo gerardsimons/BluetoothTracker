@@ -1,4 +1,5 @@
-package com.simons.bletracker.services;
+package com.example.gerard.locationservicestest;
+
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -16,17 +17,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.simons.bletracker.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks,
+public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
-
-    public interface GPSListener {
-        public void OnNewLocationReceived(Location newLocation);
-    }
 
     /** Use this in conjunction with PendingIntent to run while the app is killed or in background **/
     public class ProximityIntentReceiver extends BroadcastReceiver {
@@ -39,7 +32,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         }
     }
 
-    private static final String TAG = GPSService.class.getSimpleName();
+    private static final String TAG = LocationService.class.getSimpleName();
     private static GoogleApiClient GoogleApi;
 
     private final IBinder mBinder = new LocalBinder();
@@ -48,32 +41,28 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     private Location latestLocation;
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 8694;
-
+    private static final int UPDATE_INTERVAL = 1000;
+    private static final int FASTEST_INTERVAL = 500;
+    private static final int DISPLACEMENT = 1;
 
     public static final String ACTION_NAME = "com.simons.bletracker.gps_read";
     public static final String NEW_LOCATION_KEY = "NEW_LOCATION";
 
-    /** Although new GPS locations are broadcast it may also be useful to just register as a listener callback **/
-    private List<GPSListener> gpsListeners;
-
     public class LocalBinder extends Binder {
-        public GPSService getService() {
-            return GPSService.this;
+        public LocationService getService() {
+            return LocationService.this;
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG,"Succesfully connected");
-
-        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
-
         startLocationUpdates();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Connection suspended");
+        Log.d(TAG,"Connection suspended");
     }
 
     @Override
@@ -89,10 +78,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         intent.putExtra(NEW_LOCATION_KEY,newLocation);
         sendBroadcast(intent);
 
-        //Also notify any additional listeners
-        notifyListeners(newLocation);
-
-        Log.d(TAG, "Broadcast sent " + intent.toString());
+        Log.d(TAG,"Broadcast sent " + intent.toString());
     }
 
     @Override
@@ -104,15 +90,6 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "Unbind event");
         return super.onUnbind(intent);
-    }
-
-    /**
-     * Notify the GPSListeners about any changes
-     */
-    private void notifyListeners(Location newLocation) {
-        for(GPSListener gpsListener : gpsListeners) {
-            gpsListener.OnNewLocationReceived(newLocation);
-        }
     }
 
     /**
@@ -162,14 +139,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
      * */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(Configuration.GPS_UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(Configuration.GPS_FASTEST_INTERVAL);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setSmallestDisplacement(Configuration.GPS_DISPLACEMENT);
-    }
-
-    public void registerListener(GPSListener newListener) {
-        gpsListeners.add(newListener);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT); // 10 meters
     }
 
     /**
@@ -187,9 +160,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public void onCreate() {
         super.onCreate();
 
-        gpsListeners = new ArrayList<>();
-
-        Log.d(TAG,"GPSService created");
+        Log.d(TAG,"LocationService created");
         // First we need to check availability of play services
         if (checkPlayServices()) {
 
@@ -207,7 +178,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d(TAG, "GPSService was destroyed.");
+        Log.d(TAG, "LocationService was destroyed.");
         if (GoogleApi.isConnected()) {
             GoogleApi.disconnect();
             GoogleApi = null;
@@ -223,17 +194,17 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     }
 
     /*
-     *      DEBUG METHOD TO MOCK LOCATION; USEFUL TO TEST LOCATION UPDATES GPS_DISPLACEMENT
+     *      DEBUG METHOD TO MOCK LOCATION; USEFUL TO TEST LOCATION UPDATES DISPLACEMENT
      */
     public static void _mockLocation(float latitude, float longitude) {
         Log.d(TAG, "Set mock location : (" + latitude + "," + longitude + ")");
 
-//        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
+        LocationServices.FusedLocationApi.setMockMode(GoogleApi, true);
         Location targetLocation = new Location("");//provider name is unecessary
         targetLocation.setLatitude(latitude);//your coords of course
         targetLocation.setLongitude(longitude);
         LocationServices.FusedLocationApi.setMockLocation(GoogleApi, targetLocation);
-//        LocationServices.FusedLocationApi.setMockMode(GoogleApi, false);
+        LocationServices.FusedLocationApi.setMockMode(GoogleApi, false);
     }
 
     @Override

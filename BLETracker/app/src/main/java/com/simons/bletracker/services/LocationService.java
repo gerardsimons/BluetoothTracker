@@ -1,5 +1,4 @@
-package com.example.gerard.locationservicestest;
-
+package com.simons.bletracker.services;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -18,13 +17,23 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks,
+import java.util.ArrayList;
+import java.util.List;
+
+public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+
+    public interface GPSListener {
+        public void OnNewLocationReceived(Location newLocation);
+    }
+
+    /** Although new GPS locations are broadcast it may also be useful to just register as a listener callback **/
+    private List<GPSListener> gpsListeners;
 
     /** Use this in conjunction with PendingIntent to run while the app is killed or in background **/
     public class ProximityIntentReceiver extends BroadcastReceiver {
 
-        @SuppressWarnings("deprecation")
+//        @SuppressWarnings("deprecation")
         @Override
         public void onReceive(Context context, Intent intent) {
             //action to be performed
@@ -32,7 +41,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         }
     }
 
-    private static final String TAG = GPSService.class.getSimpleName();
+    private static final String TAG = LocationService.class.getSimpleName();
     private static GoogleApiClient GoogleApi;
 
     private final IBinder mBinder = new LocalBinder();
@@ -49,20 +58,20 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public static final String NEW_LOCATION_KEY = "NEW_LOCATION";
 
     public class LocalBinder extends Binder {
-        public GPSService getService() {
-            return GPSService.this;
+        public LocationService getService() {
+            return LocationService.this;
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.d(TAG,"Succesfully connected");
+        Log.d(TAG, "Succesfully connected");
         startLocationUpdates();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(TAG,"Connection suspended");
+        Log.d(TAG, "Connection suspended");
     }
 
     @Override
@@ -75,10 +84,22 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         Intent intent = new Intent();
         intent.setAction(ACTION_NAME);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.putExtra(NEW_LOCATION_KEY,newLocation);
+        intent.putExtra(NEW_LOCATION_KEY, newLocation);
         sendBroadcast(intent);
 
-        Log.d(TAG,"Broadcast sent " + intent.toString());
+        Log.d(TAG, "Broadcast sent " + intent.toString());
+
+        //Also notify any additional listeners
+        notifyListeners(newLocation);
+    }
+
+    /**
+     * Notify the GPSListeners about any changes
+     */
+    private void notifyListeners(Location newLocation) {
+        for(GPSListener gpsListener : gpsListeners) {
+            gpsListener.OnNewLocationReceived(newLocation);
+        }
     }
 
     @Override
@@ -159,8 +180,9 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public void onCreate() {
         super.onCreate();
+        gpsListeners = new ArrayList<>();   
 
-        Log.d(TAG,"GPSService created");
+        Log.d(TAG,"LocationService created");
         // First we need to check availability of play services
         if (checkPlayServices()) {
 
@@ -178,7 +200,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d(TAG, "GPSService was destroyed.");
+        Log.d(TAG, "LocationService was destroyed.");
         if (GoogleApi.isConnected()) {
             GoogleApi.disconnect();
             GoogleApi = null;
@@ -206,6 +228,11 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
         LocationServices.FusedLocationApi.setMockLocation(GoogleApi, targetLocation);
         LocationServices.FusedLocationApi.setMockMode(GoogleApi, false);
     }
+
+    public void registerListener(GPSListener newListener) {
+        gpsListeners.add(newListener);
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {

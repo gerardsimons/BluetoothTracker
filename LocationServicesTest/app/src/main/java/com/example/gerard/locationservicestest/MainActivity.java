@@ -40,11 +40,11 @@ public class MainActivity extends Activity {
         Log.d(TAG, "Starting GPS Tracking!");
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(GPSService.ACTION_NAME);
+        filter.addAction(LocationService.ACTION_NAME);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(gpsReceiver, filter);
 
-        Intent serviceIntent = new Intent(this, GPSService.class);
+        Intent serviceIntent = new Intent(this, LocationService.class);
         bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 //            isGSPTracking = true;
 
             Log.d(TAG, "Connected to GPS service.");
-//            gpsService = ((GPSService.LocalBinder) service).getService();
+//            gpsService = ((LocationService.LocalBinder) service).getService();
             //Immediately start requestion periodic location updates
 
         }
@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
         unbindService(gpsServiceConnection);
     }
 
-    //The broadcast receiver directed towards receiving location updates from the GPSService (if started)
+    //The broadcast receiver directed towards receiving location updates from the LocationService (if started)
     BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -85,8 +85,8 @@ public class MainActivity extends Activity {
 //            Toast.makeText(getApplicationContext(), "received",
 //                    Toast.LENGTH_SHORT).show();
 
-            if (intent.hasExtra(GPSService.NEW_LOCATION_KEY)) {
-                Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
+            if (intent.hasExtra(LocationService.NEW_LOCATION_KEY)) {
+                Location newLocation = intent.getParcelableExtra(LocationService.NEW_LOCATION_KEY);
                 Log.d(TAG, "New location received = " + newLocation);
                 Toast.makeText(MainActivity.this,"New GPS Received : " + newLocation,Toast.LENGTH_LONG).show();
 

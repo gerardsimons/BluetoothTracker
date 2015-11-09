@@ -25,16 +25,12 @@ import com.simons.bletracker.controllers.Transition;
 import com.simons.bletracker.models.MacAddress;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
-import com.simons.bletracker.services.GPSService;
 import com.simons.bletracker.zxing.IntentIntegrator;
 import com.simons.bletracker.zxing.IntentResult;
 
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-
-//import android.support.v7.app.ActionBarActivity;
-
 
 public class MainActivity extends Activity {
 
@@ -199,9 +195,9 @@ public class MainActivity extends Activity {
         findViewById(R.id.testGPSButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Toast.makeText(MainActivity.this,"Not yet implemented",Toast.LENGTH_SHORT);
+                Toast.makeText(MainActivity.this,"Not yet implemented",Toast.LENGTH_SHORT);
 
-                GPSService._mockLocation(latitude,longitude);
+//                LocationService._mockLocation(latitude, longitude);
             }
         });
 

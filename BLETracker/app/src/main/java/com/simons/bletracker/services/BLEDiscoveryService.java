@@ -86,6 +86,13 @@ public class BLEDiscoveryService extends Service {
             Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
+
+        //Check if turned on
+        if(!mBluetoothAdapter.isEnabled()) {
+            Log.d(TAG,"Turning on Bluetooth auto-magically");
+            mBluetoothAdapter.enable();
+        }
+
         Log.d(TAG,"BluetoothDiscoveryService succesfully initialised.");
         return true;
     }
@@ -107,11 +114,13 @@ public class BLEDiscoveryService extends Service {
         }
 
         public void resumeScanning() {
-            synchronized (this) {
-                Log.d(TAG, "Starting discovery.");
-                running = true;
-                start();
-            }
+//            if(!running) {
+                synchronized (this) {
+                    Log.d(TAG, "Starting discovery.");
+                    running = true;
+                    start();
+                }
+//            }
         }
 
         @Override

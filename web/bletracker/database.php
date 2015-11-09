@@ -223,8 +223,8 @@ class Database {
     public function insert_gps($routeId,$time,$latitude,$longitude) {
         // echo $time;
 
-        $dt = new DateTime("@$time");
-        $time = $dt->format('Y-m-d H:i:s');
+        // $dt = new DateTime("@$time");
+        // $time = $dt->format('Y-m-d H:i:s');
 
         $data = array(
             "Route_ID" => $routeId,
@@ -248,10 +248,10 @@ class Database {
         // );
         $sql = "INSERT INTO rssi_data (Route_ID,BLE_Tag_ID,Time_Read,RSSI) SELECT ?,ID,?,? FROM ble_tags WHERE Mac_Address = ?";
 
-        $format = 'Y-m-d H:i:s';
-        $datetime = date($format,$timestamp);
+        // $format = 'Y-m-d H:i:s';
+        // $datetime = date($format,$timestamp);
 
-        $result = $this->db->rawQuery($sql,array($routeId,$datetime,$rssi,$bleTagMacAddress));
+        $result = $this->db->rawQuery($sql,array($routeId,$timestamp,$rssi,$bleTagMacAddress));
 
         // echo $this->db->getLastQuery();
         // echo $this->db->getLastError();
@@ -275,11 +275,11 @@ class Database {
      *   Updates the end time to the value of end of the order case identified by the composite key matching the order and order case id
      */
     public function update_order_case_with_end_time($orderCaseId,$orderId,$end) {
-        $format = 'Y-m-d H:i:s';
-        $datetime = date($format,$end);
+        // $format = 'Y-m-d H:i:s';
+        // $datetime = date($format,$end);
 
         $data = array(
-            "End" => $datetime
+            "End" => $end
         );
 
         $this->db->where('Order_ID', $orderId);

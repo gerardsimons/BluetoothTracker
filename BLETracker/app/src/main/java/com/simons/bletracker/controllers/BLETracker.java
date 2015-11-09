@@ -26,7 +26,7 @@ import com.simons.bletracker.models.sql.SQLLocation;
 import com.simons.bletracker.models.sql.SensorMeasurement;
 import com.simons.bletracker.remote.ServerAPI;
 import com.simons.bletracker.services.BLEDiscoveryService;
-import com.simons.bletracker.services.GPSService;
+import com.simons.bletracker.services.LocationService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +42,7 @@ import java.util.Iterator;
  * This is the main controller driving this application. It takes care of data management relating to tags, gps and others.
  * It also determines what services to run depending on this data and the state of the application.
  */
-public class BLETracker implements OnStateChangedListener, GPSService.GPSListener {
+public class BLETracker implements OnStateChangedListener, LocationService.GPSListener {
 
     private static final String TAG = "BLETracker";
     private static BLETracker Instance;
@@ -73,7 +73,7 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
     private boolean isBLETracking = false;
     private boolean isGSPTracking = false;
 
-    private GPSService gpsService;
+    private LocationService gpsService;
     private BLEDiscoveryService discoveryService;
 
     /**
@@ -85,7 +85,7 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
             isGSPTracking = true;
 
             Log.d(TAG, "Connected to GPS service.");
-            gpsService = ((GPSService.LocalBinder) service).getService();
+            gpsService = ((LocationService.LocalBinder) service).getService();
             //Immediately start requestion periodic location updates
             gpsService.startLocationUpdates();
 
@@ -145,16 +145,16 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
         }
     };
 
-    //The broadcast receiver directed towards receiving location updates from the GPSService (if started)
+    //The broadcast receiver directed towards receiving location updates from the LocationService (if started)
     BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             Toast.makeText(AppContext, "Received something...", Toast.LENGTH_LONG).show();
 
-            if (intent.hasExtra(GPSService.NEW_LOCATION_KEY)) {
+            if (intent.hasExtra(LocationService.NEW_LOCATION_KEY)) {
 
-                Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
+                Location newLocation = intent.getParcelableExtra(LocationService.NEW_LOCATION_KEY);
                 Log.d(TAG, "New location received = " + newLocation);
                 Toast.makeText(AppContext, "New GPS Received : " + newLocation, Toast.LENGTH_LONG).show();
 
@@ -218,7 +218,7 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
 
         //Get the start location to be used to measure departure
 //         TODO: Only do this one time?
-//        departureLocation = GPSService.GetLocation();
+//        departureLocation = LocationService.GetLocation();
 //        Log.d(TAG,"Setting as departure location : " + departureLocation);
 
         //Convert to barcode
@@ -352,13 +352,14 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
                             Log.d(TAG, "Distance between the current location and order #" + orderCase.getOrder().getID() + " is " + distance);
                             if (distance < Configuration.ARRIVE_DISTANCE) { //TODO: Do all location proximity checking in a new controller
                                 Log.d(TAG, "SO... You may consider it arrived!");
-
+                                String message = "Order #" + orderCase.getOrder().getID() + " has arrived!";
+                                Toast.makeText(AppContext,message,Toast.LENGTH_LONG).show();
                                 //Remove from list
                                 i.remove();
                             } else { //Not yet arrived
                                 String message = "Order #" + orderCase.getOrder().getID() + " has " + (distance - Configuration.ARRIVE_DISTANCE) + " m to go.";
-                                Log.d(TAG,message);
-                                Toast.makeText(AppContext,message,Toast.LENGTH_LONG).show();
+                                Log.d(TAG, message);
+//                                Toast.makeText(AppContext,message,Toast.LENGTH_SHORT).show();
                             }
                         }
                         else {
@@ -376,8 +377,9 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
                         break;
                     }
 
-                    Log.d(TAG,"New gps measurement added");
-                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),System.currentTimeMillis() / 1000L));
+                    Log.d(TAG, "New gps measurement added");
+//                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),System.currentTimeMillis() / 1000L));
+                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
                     checkFlush();
 
                     break;
@@ -387,13 +389,13 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
                         //It has returned
                         String message = "'Oost,West,Thuis Best' --- The BLETracker has returned home.";
                         Log.d(TAG, message);
-                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG);
+                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG).show();
                         stateController.doAction(Action.RETURN);
                     }
                     else {
                         String message = distance + " m to go before home.";
                         Log.d(TAG, message);
-                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG);
+//                        Toast.makeText(AppContext, message, Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -426,8 +428,8 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
     private void startGPSTracking() {
         if (!isGSPTracking) {
             Log.d(TAG, "Starting GPS Tracking!");
-            AppContext.registerReceiver(gpsReceiver, new IntentFilter(GPSService.ACTION_NAME));
-            Intent serviceIntent = new Intent(AppContext, GPSService.class);
+            AppContext.registerReceiver(gpsReceiver, new IntentFilter(LocationService.ACTION_NAME));
+            Intent serviceIntent = new Intent(AppContext, LocationService.class);
             AppContext.bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
         } else Log.w(TAG, "Already GPS tracking!");
     }
@@ -448,11 +450,11 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
 
     boolean test = true;
     public void processRSSI(BLETag tag, int rssi) {
-        if(test)
-            return;
+//        if(test)
+//            return;
         if (authorizationController.isAuthorized(tag)) {
             if (isBLETracking) {
-                RSSIMeasurement rssiMeasurement = new RSSIMeasurement(rssi, System.currentTimeMillis() / 1000L, tag);
+                RSSIMeasurement rssiMeasurement = new RSSIMeasurement(rssi, new Date(), tag);
                 rssiMeasurements.add(rssiMeasurement);
 
                 //Check if we need to push the data to the server
@@ -545,7 +547,9 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
             startBLETracking();
         }
         else if(transition.action == Action.RETURN) {
-            checkFlush();
+
+            //Force flush because we finished
+            flushTrackingData();
 
             //FIXME: On rare occasions active route is not yet received (create route has not yet finished) before this happens, resulting in a NPE
             //Finish the route
@@ -586,7 +590,6 @@ public class BLETracker implements OnStateChangedListener, GPSService.GPSListene
 
     @Override
     public void OnNewLocationReceived(Location newLocation) {
-
         Log.d(TAG,"New location callback");
 
         processGPSReading(newLocation);

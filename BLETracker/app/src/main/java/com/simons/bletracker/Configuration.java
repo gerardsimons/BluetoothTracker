@@ -25,11 +25,12 @@ public class Configuration {
     public static String API_KEY = "]wv2Np:c@e8V9@>r37g){18u.32lY";
 
     /** GPS STUFF **/
-    public static int GPS_UPDATE_INTERVAL = 1000;
-    public static int GPS_FASTEST_INTERVAL = 500;
-    public static int GPS_DISPLACEMENT = 0;
+    public static int GPS_UPDATE_INTERVAL = 100;
+    public static int GPS_FASTEST_INTERVAL = 50;
+    public static int GPS_DISPLACEMENT = 1;
 
-    public static int TRACKER_CACHE_SIZE = 1000; //Size of tracker data before flushing it to the server
+//    public static int TRACKER_CACHE_SIZE = 25; //Size of tracker data before flushing it to the server
+    public static int TRACKER_CACHE_SIZE = 1; //Size of tracker data before flushing it to the server
     public static int DEPART_DISTANCE = 30; //The distance in meters which is considered to trigger a departure
     public static int ARRIVE_DISTANCE = 80; //Idem but for arrivals (both the tracker on return and case orders)
     public static int RSSI_DISCOVERY_INTERVAL = 250; //Sleep time in ms to wait until discovery is restarted after succesfully finding a licensed tag

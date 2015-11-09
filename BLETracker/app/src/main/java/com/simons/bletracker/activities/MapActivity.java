@@ -1,5 +1,6 @@
 package com.simons.bletracker.activities;
 
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,17 +20,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.simons.bletracker.R;
-import com.simons.bletracker.services.GPSService;
+import com.simons.bletracker.services.LocationService;
 
 public class MapActivity extends Activity {
-
-    private int mockLocationIndex = 0;
-    private final float[] mockLocations = new float[]{
-            51.925518F, 4.468968F,   //Rotterdam Centraal
-            51.930665F,4.469419F     //Thuis Rotterdam
-    };
-    private static final String TAG = MapActivity.class.getSimpleName();
-    private GoogleMap map;
 
     /** Use this in conjunction with PendingIntent to run while the app is killed or in background **/
     public class ProximityIntentReceiver extends BroadcastReceiver {
@@ -42,18 +35,18 @@ public class MapActivity extends Activity {
         }
     }
 
-    /**
-     * Helper function to connect to GPS service and register as receiver
-     */
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private GoogleMap map;
+
     private void startGPSTracking() {
         Log.d(TAG, "Starting GPS Tracking!");
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(GPSService.ACTION_NAME);
+        filter.addAction(LocationService.ACTION_NAME);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(gpsReceiver, filter);
 
-        Intent serviceIntent = new Intent(this, GPSService.class);
+        Intent serviceIntent = new Intent(this, LocationService.class);
         bindService(serviceIntent, gpsServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -66,7 +59,8 @@ public class MapActivity extends Activity {
 //            isGSPTracking = true;
 
             Log.d(TAG, "Connected to GPS service.");
-//            gpsService = ((GPSService.LocalBinder) service).getService();
+            Toast.makeText(MapActivity.this,"Connected to LocationService",Toast.LENGTH_LONG).show();
+//            gpsService = ((LocationService.LocalBinder) service).getService();
             //Immediately start requestion periodic location updates
 
         }
@@ -86,12 +80,17 @@ public class MapActivity extends Activity {
         unbindService(gpsServiceConnection);
     }
 
-    //The broadcast receiver directed towards receiving location updates from the GPSService (if started)
+    //The broadcast receiver directed towards receiving location updates from the LocationService (if started)
     BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(GPSService.NEW_LOCATION_KEY)) {
-                Location newLocation = intent.getParcelableExtra(GPSService.NEW_LOCATION_KEY);
+
+            Toast.makeText(getApplicationContext(), "received",
+                    Toast.LENGTH_SHORT).show();
+
+            if (intent.hasExtra(LocationService.NEW_LOCATION_KEY)) {
+                Location newLocation = intent.getParcelableExtra(LocationService.NEW_LOCATION_KEY);
+
                 Log.d(TAG, "New location received = " + newLocation);
                 Toast.makeText(MapActivity.this,"New GPS Received : " + newLocation,Toast.LENGTH_LONG).show();
 

@@ -311,7 +311,7 @@ public class ServerAPI {
 
                     rssiJson.put(PostKeys.MAC_ADDRESS, rssiMeasurement.getMacAddress());
                     rssiJson.put(PostKeys.RSSI, rssiMeasurement.rssi);
-                    rssiJson.put(PostKeys.TIMESTAMP, rssiMeasurement.timestamp);
+                    rssiJson.put(PostKeys.TIMESTAMP, ServerDateTimeFormat.format(rssiMeasurement.timestamp));
 
                     rssiJsonArray.put(rssiJson);
                 }
@@ -324,7 +324,7 @@ public class ServerAPI {
 
                     gpsJson.put(PostKeys.LATITUDE, gpsMeasurement.latitude);
                     gpsJson.put(PostKeys.LONGITUDE, gpsMeasurement.longitude);
-                    gpsJson.put(PostKeys.TIMESTAMP, gpsMeasurement.timestamp);
+                    gpsJson.put(PostKeys.TIMESTAMP, ServerDateTimeFormat.format(gpsMeasurement.timestamp));
 
                     gpsJsonArray.put(gpsJson);
                 }
@@ -365,6 +365,7 @@ public class ServerAPI {
         doRequest(httpPost, listener);
     }
 
+    //TODO: I think this has become obsolete as routes are auto-started upon creation, please check
     public void startRoute(int routeId, Date startTime, ServerRequestListener listener) {
         HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ROUTE + "/" + Verbs.START);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);

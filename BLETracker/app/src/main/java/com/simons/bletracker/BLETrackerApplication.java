@@ -1,17 +1,23 @@
 package com.simons.bletracker;
 
+import android.app.AlertDialog;
 import android.app.Application;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.simons.bletracker.controllers.BLEAuthorizationController;
 import com.simons.bletracker.controllers.BLETracker;
 import com.simons.bletracker.controllers.StateController;
 import com.simons.bletracker.models.sql.BLETag;
 import com.simons.bletracker.remote.ServerAPI;
-import com.simons.bletracker.services.GPSService;
+import com.simons.bletracker.services.LocationService;
 
 /**
  * Created by Gerard on 22-7-2015.
@@ -29,13 +35,17 @@ public class BLETrackerApplication extends Application {
     private StateController stateController;
     private ServerAPI serverAPI;
 
-    private GPSService gpsService;
+    private LocationService gpsService;
 
     private SharedPreferences preferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //Check if location services and bluetooth are on
+
+
 
         preferences = this.getSharedPreferences("com.simons.bletracker",0);
 
@@ -52,8 +62,46 @@ public class BLETrackerApplication extends Application {
         stateController = StateController.GetInstance();
         serverAPI = ServerAPI.GetInstance();
 
-        Intent intent = new Intent(this,GPSService.class);
+        Intent intent = new Intent(this,LocationService.class);
         startService(intent);
+    }
+
+    private void checkForLocationRequirements() {
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("Please turn on location services");
+            dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    // TODO Auto-generated method stub
+                    Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                    //get gps
+                }
+            });
+            dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    // TODO Auto-generated method stub
+                    Toast.makeText(BLETrackerApplication.this,"This app is unable to run without these settings.",Toast.LENGTH_SHORT).show();
+                    System.exit(0);
+                }
+            });
+            dialog.show();
+        }
     }
 
     public boolean isFirstRun() {

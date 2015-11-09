@@ -36,7 +36,7 @@
             android:value="AIzaSyA2xGQaePRVdxioiVEBEqGEeGxi9plz1gE" />
 
         <service
-            android:name=".GPSService"
+            android:name=".LocationService"
             android:enabled="true"
             android:exported="true" >
         </service>
