@@ -63,12 +63,12 @@ class Database {
         return $this->db->rawQuery($sql,array($companyId));
     }
 
-    //Select routes for a given ble tracker
-    public function select_routes($companyId) {
+    //Select routes for a given company
+    public function select_routes_for_company($companyId) {
         $sql = "SELECT routes.* FROM routes,ble_trackers WHERE routes.BLE_Tracker_ID = ble_trackers.ID AND Company_ID = ?";
         $result = $this->db->rawQuery($sql,array($companyId));
-
-        if(isset($result) && count($result) > 0) {
+        
+        if(isset($result)) {
             // echo $this->db->getLastQuery();
             return $result;
         }
@@ -310,9 +310,30 @@ class Database {
         $this->db->where('ID', $routeId);
         $result = $this->db->update('routes', $data);
 
-        // echo $this->db->getLastQuery();
-
         return $result;
+    }
+
+    /** 
+      * Select orders for given company 
+      */
+    public function select_orders_for_company($companyId) {
+        // $sql = SELECT 
+        //TODO: FIX-ME: This SQL seems nasty with the group by, perhaps the SQL structure is off ?
+        $sql = "SELECT orders.* FROM orders,order_cases,routes,ble_trackers WHERE Company_ID = ? AND orders.ID = order_cases.Order_ID AND routes.ID = order_cases.Route_ID AND routes.BLE_Tracker_ID = ble_trackers.ID GROUP BY Order_ID";
+        return $this->db->rawQuery($sql,array($companyId));
+    }
+
+    /**
+      * Select all the order cases that belong to the given route 
+      */
+    public function select_order_cases_for_route($routeId) {
+        $sql = "SELECT * FROM order_cases WHERE Route_ID = ?";
+        return $this->db->rawQuery($sql,array($routeId));
+    }
+
+    public function select_customers_for_company($companyId) {
+        $sql = "SELECT * FROM customers WHERE Company_ID = ?";
+        return $this->db->rawQuery($sql,array($companyId));
     }
 
     /*

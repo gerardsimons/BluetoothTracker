@@ -313,7 +313,6 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
      * @param newLocation
      */
     public void processGPSReading(Location newLocation) {
-
         if (isGSPTracking) {
             State currentState = stateController.getState();
             switch (currentState) {
@@ -379,8 +378,8 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
 
                     Log.d(TAG, "New gps measurement added");
 //                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),System.currentTimeMillis() / 1000L));
-                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
-                    checkFlush();
+//                    gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
+//                    checkFlush();
 
                     break;
                 case ALL_DELIVERED: //Only check if it has returned
@@ -397,8 +396,11 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
                         Log.d(TAG, message);
 //                        Toast.makeText(AppContext, message, Toast.LENGTH_SHORT).show();
                     }
+
                     break;
             }
+            gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
+            checkFlush();
         }
         else {
             Log.d(TAG,"Not currently doing GPS tracking...");

@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="../js/jquery.min.js"></script>
+<script src="../js/d3.min.js"></script>
+<script>
+
+var apiURL = "http://whereatcloud.com/bletracker/api/v1/";
+// var apiURL = "http://localhost/bletracker/api/v1/";
+var apiKey = "]wv2Np:c@e8V9@>r37g){18u.32lY";
+
+var map;
+var markers = [];
+
+var bleTags = [];
+
+function initMap() {
+
+	console.log("init map");
+
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 51.930702209473, lng: 4.469624042511},
+    zoom: 8
+  });
+}
+
+function main() {
+	console.log("Hello World!");
+	// document.domain = "	whereatcloud.com";
+
+	fetchCompanyOverview();
+
+	// fetchRoute(213);
+	// fetchRoute(80);
+}
+
+function createRoutesTable(routes) {
+// Create table of routes
+  	var table = d3.select("#routes").append("table");
+  	table.append("h1").text("Routes")
+
+  	var headerRow = table.append("tr")
+  	headerRow.append("th").html("ID")
+  	headerRow.append("th").html("BLE Tracker ID")
+  	headerRow.append("th").html("BLE Tags")
+  	headerRow.append("th").html("Start")
+  	headerRow.append("th").html("End")
+  	
+  	var rows = table.selectAll("tr").data(routes).enter().append("tr");
+
+  	rows.append("td").append("a").attr("href","javascript:void(0)").attr("onclick",function(d) {
+  		return "fetchRoute(" + d.ID + ")";
+  	}).html(function(d,i) {
+  		return d.ID;
+  	});
+
+  	rows.append("td").html(function(d) {
+  		return d.BLE_Tracker_ID;
+  	});
+
+  	rows.append("td").html(function(d) {
+  		var string = ""
+		var orderCases = d["Order_Cases"];
+		var tagIds = [];
+
+  		for(var i = 0 ; i < orderCases.length ; ++i) {
+  			var orderCase = orderCases[i];
+  			tagIds.push(orderCase["BLE_Tag_ID"]);
+  		}
+  		tagIds.sort();
+  		return tagIds.join(",");
+  	});
+
+  	rows.append("td").html(function(d) {
+  		return d.Start;
+  	});
+
+  	rows.append("td").html(function(d) {
+  		if(d.End == undefined) {
+  			// return "<i>NULL</i>"
+		}
+  		else return d.End;
+  	});
+}
+
+function createBLETrackersTable(trackers) {
+	var table = d3.select("#ble_trackers").append("table");
+	  	table.append("h1").text("BLE Trackers")
+	  	var headerRow = table.append("tr")
+	  	headerRow.append("th").html("ID")
+	  	headerRow.append("th").html("Device ID")
+	  	headerRow.append("th").html("Install ID")
+
+	  	var rows = table.selectAll("tr").data(trackers).enter().append("tr");
+	  	rows.append("td")
+	  		// .append("a")
+	  		// .attr("href","javascript:void(0)")
+	  		// .attr("onclick",function(d) {
+	  		// 	return "fetchRoute(" + d.ID + ")";
+	  		// })
+			.html(function(d,i) {
+	  			return d.ID;
+	  		});
+
+	  	rows.append("td").html(function(d) {
+	  		return d.Device_ID;
+	  	});
+
+	  	rows.append("td").html(function(d) {
+	  		return d.Install_ID;
+	  	});
+}
+
+function createBLETagsTable(tags) {
+  	var table = d3.select("#ble_tags").append("table");
+  	table.append("h1").text("BLE Tags")
+  	var headerRow = table.append("tr")
+  	headerRow.append("th").html("ID")
+  	headerRow.append("th").html("Name")
+  	headerRow.append("th").html("MAC Address")
+
+  	
+  	var rows = table.selectAll("tr").data(tags).enter().append("tr");
+  	rows.append("td")
+  		// .append("a")
+  		// .attr("href","javascript:void(0)")
+  		// .attr("onclick",function(d) {
+  		// 	return "fetchRoute(" + d.ID + ")";
+  		// })
+		.html(function(d,i) {
+  			return d.ID;
+  		});
+
+  	rows.append("td").html(function(d) {
+  		return d.Name;
+  	});
+
+  	rows.append("td").html(function(d) {
+
+  		var arr = d.Mac_Address.match(/.{1,2}/g)
+  		return arr.join(":")
+  	});
+}
+
+function createCustomersTable(customers) {
+	console.log(customers);
+	var table = d3.select("#customers").append("table");
+  	table.append("h1").text("Customers")
+
+  	var headerRow = table.append("tr")
+  	headerRow.append("th").html("ID")
+  	headerRow.append("th").html("Name")
+
+  	var rows = table.selectAll("tr").data(customers).enter().append("tr");
+  	rows.append("td")
+		.html(function(d,i) {
+  			return d.ID;
+  		});
+
+  	rows.append("td").html(function(d) {
+  		return d.Name;
+  	});
+}
+
+function fetchCompanyOverview() {
+	$.ajax({
+	  url: apiURL + "company",
+	  data: {'apiKey' : apiKey},
+		// jsonpCallback: 'callbackFunc', // the function to call
+  		// jsonp: 'callback', // name of the var specifying the callback in the request
+	  success: function(result) { 
+	  	console.log("Succesfully fetched company ");
+	  	//Do something with the company data
+	  	console.log(result);
+
+	  	tags = result["BLE_Tags"];
+	  	
+	  	//Create routes table
+	  	var routes = result.Routes;
+	  	createRoutesTable(routes);
+
+	  	//Create BLE Trackers table
+	  	var trackers = result.BLE_Trackers;
+	  	createBLETrackersTable(trackers);
+
+	  	var tags = result.BLE_Tags;
+	  	createBLETagsTable(tags);
+
+	  	var customers = result.Customers;
+	  	createCustomersTable(customers);
+	  },
+	  error : function(error) {
+	  	console.log(error);
+	  },
+	  dataType: 'json'
+	});
+}
+
+function callbackFunc(json) {
+	console.log(json);
+}
+
+function setMapToMarkers(newMap) {
+	for(var i in markers) {
+		var marker = markers[i]
+		marker.setMap(newMap);
+	}
+}
+
+function clearMarkers() {
+	setMapToMarkers(null);
+	markers = [];
+}
+
+function addMarkers(points) {
+	console.log("Adding " + points.length + " markers.");
+
+	for(var i in points) {
+  		var gps = gpsPoints[i]
+  		// console.log(gps);
+  		var latLng = {lat: gps.Latitude, lng: gps.Longitude};
+  		 var marker;
+
+		 if(i == 0) { //FIX-ME: Does not show a D marker!
+		 	// alert("Eyo");
+		 	marker = new google.maps.Marker({
+			    position: latLng,
+			    map: map,
+			    // title: 'Hello World!'
+			    icon : "http://maps.google.com/mapfiles/marker" + 'D' + ".png"
+		 	});
+		 }
+		 else {
+		 	marker = new google.maps.Marker({
+			    position: latLng,
+			    map: map,
+			    // title: 'Hello World!'
+			    // marker.icon = "http://maps.google.com/mapfiles/marker" + 'D' + ".png";
+		 	});
+		 }
+
+		 markers.push(marker);
+  	}
+}
+
+function fetchRoute(routeId) {
+
+	// $.ajax( apiURL, {'apiKey' : apiKey} ,function( data ) {
+
+	  // $( ".result" ).html( data );
+	  // console.log(data);
+	  // alert( "Load was performed." );
+	// });
+	console.log("Fetching route...");
+
+	$.ajax({
+	  url: apiURL + "route",
+	  data: {'apiKey' : apiKey,'routeId':routeId},
+		// jsonpCallback: 'callbackFunc', // the function to call
+  		// jsonp: 'callback', // name of the var specifying the callback in the request
+	  success: function(result) { 
+	  	console.log("Succesfully fetched route " + routeId)
+	  	test = result;
+	  	console.log(result); 
+
+	  	gpsPoints = result.gpsData;
+	  	
+	  	console.log(gpsPoints);
+	  	clearMarkers();
+
+	  	if(gpsPoints !== undefined && gpsPoints.length > 0) {
+	  		addMarkers(gpsPoints);
+	  		map.setCenter(markers[0].getPosition());  
+	  	}
+	  },
+	  error : function(error) {
+	  	// test = result;
+	  	console.log(error);
+	  },
+	  dataType: 'json'
+	});
+}
+
+</script>	
+</head>
+<body onload="main()">
+	<!-- <h1>WhereAt Industries</h1> -->
+	<div id="map"></div>
+	<div id="routes"></div>
+	<div id="ble_trackers"></div>
+	<div id="ble_tags"></div>
+	<div id="customers"></div>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAkHKQf2R6d42K248gHq8ql5-2ZPb8nog&callback=initMap" async defer></script>
+</body>
+</html>

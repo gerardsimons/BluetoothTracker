@@ -141,18 +141,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     public void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(GoogleApi, mLocationRequest, this);
         Log.d(TAG, "Periodic location updates started!");
-
-
-        //BELOW IS FOR UPDATING WHILE APP IS KILLED (?)
-//        String proximitys = "ACTION";
-//        IntentFilter filter = new IntentFilter(proximitys);
-//        registerReceiver(mybroadcast, filter);
-//        Intent intent = new Intent(proximitys);
-//        PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0,
-//                intent, PendingIntent.FLAG_CANCEL_CURRENT);
-//        LocationServices.FusedLocationApi.requestLocationUpdates(GoogleApi, mLocationRequest, proximityIntent);
-
-
     }
 
     /**
@@ -180,7 +168,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         super.onCreate();
-        gpsListeners = new ArrayList<>();   
+        gpsListeners = new ArrayList<>();
 
         Log.d(TAG,"LocationService created");
         // First we need to check availability of play services

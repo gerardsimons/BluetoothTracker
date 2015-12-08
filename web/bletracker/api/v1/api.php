@@ -394,16 +394,31 @@ class MyAPI extends API
 
             $returnWrapper = $this->company;
 
-            //Get all the routes
-            $routes = $this->database->select_routes($this->company['ID']);
+            //Get all the orders
+            $orders = $this->database->select_orders_for_company($this->company['ID']);
+            // print_r($orders);
+            $returnWrapper["Orders"] = $orders;
 
-            $returnWrapper['routes'] = $routes;
+            //Get customers
+            $returnWrapper["Customers"] = $this->database->select_customers_for_company($this->company['ID']);
+
+            //Get all the routes
+            $routes = $this->database->select_routes_for_company($this->company['ID']);
+
+            
+            //Get the orders for each route use (&) to pass by reference 
+            foreach($routes as &$route) {
+                $orderCases = $this->database->select_order_cases_for_route($route['ID']);  
+                $route["Order_Cases"] = $orderCases;
+            }
+
+            $returnWrapper['Routes'] = $routes;
 
             //Get all the ble trackers
-            $returnWrapper['bleTrackers'] = $this->database->select_ble_trackers($this->company['ID']);
+            $returnWrapper['BLE_Trackers'] = $this->database->select_ble_trackers($this->company['ID']);
 
             //Get all the ble tags
-            $returnWrapper['bleTags'] = $this->database->select_ble_tags($this->company['ID']);
+            $returnWrapper['BLE_Tags'] = $this->database->select_ble_tags($this->company['ID']);
 
             return $returnWrapper;
         } 
@@ -411,7 +426,7 @@ class MyAPI extends API
      }
 
      /**
-       *   Create or retrieve a new route, in case of creating also update the order cases that match the given ids (accepted as JSON array)
+       *   Create or retrieve a new route, in calculhmac(clent, data)se of creating also update the order cases that match the given ids (accepted as JSON array)
        */
      protected function route() {
         if($this->method == 'POST') {
