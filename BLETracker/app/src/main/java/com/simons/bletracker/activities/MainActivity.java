@@ -31,6 +31,7 @@ import com.simons.bletracker.zxing.IntentResult;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 
 public class MainActivity extends Activity {
 
@@ -192,11 +193,21 @@ public class MainActivity extends Activity {
         final float latitude = 51.932822000F;
         final float longitude = 4.47081300F;
 
-        findViewById(R.id.testGPSButton).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.testButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this,"Not yet implemented",Toast.LENGTH_SHORT);
+//                Toast.makeText(MainActivity.this,"Not yet implemented",Toast.LENGTH_SHORT);
+                serverAPI.finishOrderCase(20, 10011000, new Date(), new ServerAPI.ServerRequestListener() {
+                    @Override
+                    public void onRequestFailed(String errorMessage) {
+                        Log.e(TAG,"FAIL : " + errorMessage);
+                    }
 
+                    @Override
+                    public void onRequestCompleted(JSONObject response) {
+                        Log.d(TAG,"Succes = " + response);
+                    }
+                });
 //                LocationService._mockLocation(latitude, longitude);
             }
         });

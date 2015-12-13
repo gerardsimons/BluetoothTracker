@@ -243,7 +243,7 @@ class MyAPI extends API
         if (!array_key_exists('apiKey', $this->request)) {
             throw new Exception('No API Key provided');
         }
-        
+        // echo $this->request['apiKey'];
         $this->company = $this->authenticate($this->request['apiKey']);
         // print_r($this->company);
         if($this->company === NULL) {
@@ -326,13 +326,14 @@ class MyAPI extends API
      */    
     protected function order_case() {
         if($this->method == 'POST') { 
-            if($this->verb == 'update') {
+            if($this->verb == 'finish') {
                 if($this->requestHasProperties(array('orderCaseId','orderId','endTime'))) {
                     $affected = $this->database->update_order_case_with_end_time($this->request['orderCaseId'],$this->request['orderId'],$this->request['endTime']);
                     return array(  
                         'affected' => (int)$affected
                     );
                 }
+                else throw new Exception("Missing parameters");
             }
             elseif($this->requestHasProperties(array('orderCaseId','orderId','bleTagMacAddress','barCode'))) {
                $sqlOrder = $this->database->insert_order_case($this->request['orderCaseId'],$this->request['orderId'],$this->request['bleTagMacAddress'],$this->request['barCode']);
@@ -375,6 +376,7 @@ class MyAPI extends API
             else throw new Exception("Missing parameters");
         }
         else if($this->method == 'PATCH') {
+            print_r($this->args);
             if($this->requestHasProperties(array('orderCaseId','orderId','end'))) {
                 $this->database->update_order_case_with_end_time($this->request['orderCaseId'],$this->request['orderId'],$this->request['end']);
                 return array(  
@@ -386,7 +388,56 @@ class MyAPI extends API
     }
 
     /**
-     * Example of an Endpoint
+     *  Return orders including order_cases
+     *  
+     */
+    protected function orders() {
+        if ($this->method == 'GET') { 
+
+        }
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
+    }
+
+    /** 
+     *  Return routes for this company
+     */
+    protected function routes() {
+        if ($this->method == 'GET') { 
+
+            if(!is_null($this->args) && sizeof($this->args) > 0) {
+
+                $routes = array();
+
+                // print_r($this->args);
+                // return;
+                
+                // return array('Routes' => $routes);
+                foreach($this->args as $routeId) {
+                    // print $routeId;
+                    $route = $this->database->select_route($routeId);
+                    // print_r($route);
+                    $orders = $this->database->select_orders_for_route($routeId);
+
+                    foreach($orders as &$order) {
+                        $cases = $this->database->select_order_cases_for_order($order["ID"]);
+                        $order["Cases"] = $cases;
+                    }
+
+                    $route["Orders"] = $orders;
+                    array_push($routes, $route);
+                }
+                return $routes;
+                
+            }
+
+            $routes = $this->database->select_routes_for_company($this->company['ID']);
+            return array('Routes' => $routes);
+        }
+        else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
+    }
+
+    /**
+     * Get company details. Deprecated, scope is too broad
      */
      protected function company() {
         if ($this->method == 'GET') {            
@@ -394,10 +445,8 @@ class MyAPI extends API
 
             $returnWrapper = $this->company;
 
-            //Get all the orders
-            $orders = $this->database->select_orders_for_company($this->company['ID']);
-            // print_r($orders);
-            $returnWrapper["Orders"] = $orders;
+            //Get orders
+            $returnWrapper["Orders"] = $this->database->select_orders_for_company($this->company['ID']);
 
             //Get customers
             $returnWrapper["Customers"] = $this->database->select_customers_for_company($this->company['ID']);
@@ -430,9 +479,9 @@ class MyAPI extends API
        */
      protected function route() {
         if($this->method == 'POST') {
-            if($this->verb == 'start') {
-                if($this->requestHasProperties(array('routeId','startTime'))) {
-                    $affected = $this->database->update_route_with_start_time($this->request['routeId'],$this->request['startTime']);
+            if($this->verb == 'depart') {
+                if($this->requestHasProperties(array('routeId','departTime','lat','long'))) {
+                    $affected = $this->database->update_route_with_departure($this->request['routeId'],$this->request['departTime'],$this->request['lat'],$this->request['long']);
                     return array("affected" => (int)$affected);
                     // return array("id" => $id);
                 }

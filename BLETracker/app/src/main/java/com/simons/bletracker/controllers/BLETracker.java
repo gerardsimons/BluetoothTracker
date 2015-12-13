@@ -314,6 +314,7 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
      */
     public void processGPSReading(Location newLocation) {
         if (isGSPTracking) {
+            boolean addToMeasurements = true;
             State currentState = stateController.getState();
             switch (currentState) {
                 case READY_FOR_DEPARTURE:
@@ -322,9 +323,21 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
                         float distance = departureLocation.distanceTo(newLocation);
                         if (distance >= Configuration.DEPART_DISTANCE) {
                             //It has departed
-                            Log.d(TAG,"We have departed!");
-                            Toast.makeText(AppContext,"Unit has departed",Toast.LENGTH_LONG).show();
-                            stateController.doAction(Action.DEPART);
+                            Log.d(TAG, "We have departed!");
+//                            Toast.makeText(AppContext,"Unit has departed",Toast.LENGTH_LONG).show();
+//                            Date startTime = new Date();
+////                            serverAPI.startRoute(activeRoute.getId(), startTime, newLocation, new ServerAPI.ServerRequestListener() {
+//                                @Override
+//                                public void onRequestFailed(String errorMessage) {
+//                                    Log.e(TAG,"Unable to start route");
+//                                }
+//
+//                                @Override
+//                                public void onRequestCompleted(JSONObject response) {
+//                                    stateController.doAction(Action.DEPART);
+//                                }
+//                            });
+//                            addToMeasurements = false;
                         }
                         else {
                             float distanceLeft = Configuration.DEPART_DISTANCE - distance;
@@ -340,7 +353,7 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
                     //If there are still some cases undelivered, check whether they have arrived to their destinations
                     Iterator<OrderCase> i = orderCases.iterator();
                     while (i.hasNext()) {
-                        OrderCase orderCase = i.next();
+                        final OrderCase orderCase = i.next();
                         //Determine if the current location is sufficiently close to the customer's location
                         SQLLocation customerLocation = orderCase.getOrder().getCustomer().getLocation();
                         if (customerLocation != null) {
@@ -351,8 +364,24 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
                             Log.d(TAG, "Distance between the current location and order #" + orderCase.getOrder().getID() + " is " + distance);
                             if (distance < Configuration.ARRIVE_DISTANCE) { //TODO: Do all location proximity checking in a new controller
                                 Log.d(TAG, "SO... You may consider it arrived!");
-                                String message = "Order #" + orderCase.getOrder().getID() + " has arrived!";
-                                Toast.makeText(AppContext,message,Toast.LENGTH_LONG).show();
+
+                                serverAPI.finishOrderCase(orderCase.getID(), orderCase.getOrder().getID(), new Date(), new ServerAPI.ServerRequestListener() {
+                                    @Override
+                                    public void onRequestFailed(String errorMessage) {
+                                        String message = "Could not update order case #" + orderCase.getOrder().getID() + ".";
+                                        Log.e(TAG, message);
+//                                        Toast.makeText(AppContext, message, Toast.LENGTH_LONG).show();
+                                    }
+
+                                    @Override
+                                    public void onRequestCompleted(JSONObject response) {
+                                        Log.d(TAG,"Finish Order Case Server response = " + response.toString());
+                                    }
+                                });
+
+                                String message = "OrderCase #" + orderCase.getOrder().getID() + " has been delivered!";
+//                              Toast.makeText(AppContext, message, Toast.LENGTH_LONG).show();
+
                                 //Remove from list
                                 i.remove();
                             } else { //Not yet arrived
@@ -399,8 +428,10 @@ public class BLETracker implements OnStateChangedListener, LocationService.GPSLi
 
                     break;
             }
-            gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
-            checkFlush();
+            if(addToMeasurements) {
+                gpsMeasurements.add(new GPSMeasurement((float)newLocation.getLatitude(),(float)newLocation.getLongitude(),new Date()));
+                checkFlush();
+            }
         }
         else {
             Log.d(TAG,"Not currently doing GPS tracking...");

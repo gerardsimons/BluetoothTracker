@@ -159,11 +159,11 @@
             </TableRow>
             <TableRow>
                 <Button
-                    android:id="@+id/testGPSButton"
+                    android:id="@+id/testButton"
                     style="@style/marginStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Test GPS" />
+                    android:text="Test" />
                 <Button
                     android:id="@+id/exitButton"
                     style="@style/marginStyle"

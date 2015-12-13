@@ -1,5 +1,6 @@
 package com.simons.bletracker.remote;
 
+import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,6 +10,7 @@ import com.simons.bletracker.models.sql.RSSIMeasurement;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -109,7 +111,7 @@ public class ServerAPI {
     }
 
     /** The date format the server uses **/
-    public static final DateFormat ServerDateTimeFormat = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+    public static final DateFormat ServerDateTimeFormat = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
 
     private HttpClient httpClient;
     private static final String TAG = ServerAPI.class.getSimpleName();
@@ -354,25 +356,37 @@ public class ServerAPI {
     }
 
     public void finishOrderCase(int orderCaseId, int orderId, Date finishTime, ServerRequestListener listener) {
-        HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ORDER_CASE + "/" + Verbs.END);
+        String apiURL = Configuration.SERVER_API_URL + EndPoints.ORDER_CASE + "/" + Verbs.FINISH;
+        Log.d(TAG,"API URL = " + apiURL);
+        HttpPost httpPost = new HttpPost(apiURL);
+
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.ORDER_ID, orderId + ""));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.ORDER_CASE_ID, orderCaseId + ""));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.END_TIME, ServerDateTimeFormat.format(finishTime)));
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         //Execute, the return value is given through the listener callback
         doRequest(httpPost, listener);
     }
 
     //TODO: I think this has become obsolete as routes are auto-started upon creation, please check
-    public void startRoute(int routeId, Date startTime, ServerRequestListener listener) {
+    public void startRoute(int routeId, Date startTime, Location departureLocation, ServerRequestListener listener) {
         HttpPost httpPost = new HttpPost(Configuration.SERVER_API_URL + EndPoints.ROUTE + "/" + Verbs.START);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
         nameValuePairs.add(new BasicNameValuePair(PostKeys.API, Configuration.API_KEY));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.ROUTE_ID,routeId+""));
         nameValuePairs.add(new BasicNameValuePair(PostKeys.START_TIME, ServerDateTimeFormat.format(startTime)));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.LATITUDE, departureLocation.getLatitude()+""));
+        nameValuePairs.add(new BasicNameValuePair(PostKeys.LONGITUDE, departureLocation.getLatitude()+""));
 
         //Execute, the return value is given through the listener callback
         doRequest(httpPost, listener);
@@ -442,10 +456,15 @@ public class ServerAPI {
                     listener.onRequestFailed("NULL response");
                     return null;
                 }
-            } catch (Exception e) {
-                listener.onRequestFailed("UNKNOWN RESPONSE");
-                this.exception = e;
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+//            catch (Exception e) {
+//
+//                this.exception = e;
+//            }
             return null;
         }
 

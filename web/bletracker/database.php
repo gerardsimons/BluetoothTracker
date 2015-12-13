@@ -87,6 +87,10 @@ class Database {
         return $result;
     }
 
+    public function select_full_route($routeId) {
+
+    }
+
     public function select_gps_data($routeId) {
         $sql = "SELECT gps_data.* FROM gps_data,routes WHERE Route_ID = routes.ID AND routes.ID = ?";
         $result = $this->db->rawQuery($sql,array($routeId));
@@ -114,6 +118,13 @@ class Database {
         // echo $this->db->getLastQuery();
         // print_r($result);
         return $result[0];
+    }
+
+    public function select_order_cases_for_order($orderId) {
+        $sql = "SELECT * FROM order_cases WHERE Order_ID = ?";
+        $result = $this->db->rawQuery($sql,array($orderId));
+        echo $this->db->getLastQuery();
+        return $result;
     }
 
     //Select the complete data for a given order_case 
@@ -284,17 +295,23 @@ class Database {
 
         $this->db->where('Order_ID', $orderId);
         $this->db->where('ID',$orderCaseId);
-        return $this->db->update('order_cases', $data);
+        $result = $this->db->update('order_cases', $data);
+
+        // echo $this->db-getLastQuery();
+        return $result;
     }
 
     /**
-     *  Update a route with route id to reflect the new start time
+     *  Update a route with route id to reflect the new start time, and possibly a company's branch location
      */
-    public function update_route_with_start_time($routeId, $startTime) {
+    public function update_route_with_departure($routeId, $departTime, $lat, $long) {
         $data = array(
-            "Start" => $startTime
+            "Departed" => $departTime,
+            "Departure_Lat" => $lat,
+            "Departure_Long" => $long
         );
         $this->db->where('ID', $routeId);
+        // $this->db->
         $result = $this->db->update('routes', $data);
 
         return $result;
@@ -321,6 +338,11 @@ class Database {
         //TODO: FIX-ME: This SQL seems nasty with the group by, perhaps the SQL structure is off ?
         $sql = "SELECT orders.* FROM orders,order_cases,routes,ble_trackers WHERE Company_ID = ? AND orders.ID = order_cases.Order_ID AND routes.ID = order_cases.Route_ID AND routes.BLE_Tracker_ID = ble_trackers.ID GROUP BY Order_ID";
         return $this->db->rawQuery($sql,array($companyId));
+    }
+
+    public function select_orders_for_route($routeId) {
+        $sql = "SELECT orders.* FROM orders,order_cases WHERE orders.ID = order_cases.Order_ID AND Route_ID = ? GROUP BY Orders.ID";
+        return $this->db->rawQuery($sql,array($routeId));
     }
 
     /**
