@@ -123,7 +123,7 @@ class Database {
     public function select_order_cases_for_order($orderId) {
         $sql = "SELECT * FROM order_cases WHERE Order_ID = ?";
         $result = $this->db->rawQuery($sql,array($orderId));
-        echo $this->db->getLastQuery();
+        // echo $this->db->getLastQuery();
         return $result;
     }
 
@@ -356,6 +356,11 @@ class Database {
     public function select_customers_for_company($companyId) {
         $sql = "SELECT * FROM customers WHERE Company_ID = ?";
         return $this->db->rawQuery($sql,array($companyId));
+    }
+
+    public function select_first_gps_data_for_route($routeId) {
+        $sql = "SELECT Latitude,Longitude FROM gps_data WHERE route_id = ? order by Time_Read limit 1";
+        return $this->db->rawQuery($sql,array($routeId));
     }
 
     /*

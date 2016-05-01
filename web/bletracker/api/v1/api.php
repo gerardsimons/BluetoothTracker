@@ -285,12 +285,35 @@ class MyAPI extends API
             // print_r($this->request);
             if(array_key_exists('deviceId', $this->request) && array_key_exists('installId', $this->request)) {
                $id = $this->database->insert_ble_tracker($this->request['deviceId'],$this->request['installId']);
-
                return array(  
                     'ID' => $id
                 );
             }
             else throw new Exception("Missing parameters");
+        }
+        else {
+            throw new Exception("Method $this->method is unsupported");
+        }
+    }
+
+    /*
+     *  Return the ble_trackers for a company
+     */
+    protected function ble_trackers() {
+        if($this->method == 'GET') {
+            return $this->database->select_ble_trackers($this->company['ID']);
+        }
+        else {
+            throw new Exception("Method $this->method is unsupported");
+        }
+    }
+
+    /*
+     * Return the ble_tags for a company 
+     */
+    protected function ble_tags() {
+        if($this->method == 'GET') {
+            return $this->database->select_ble_tags($this->company['ID']);
         }
         else {
             throw new Exception("Method $this->method is unsupported");
@@ -304,7 +327,6 @@ class MyAPI extends API
         if($this->method == 'POST') {
             if(array_key_exists('orderId', $this->request) && array_key_exists('customerId', $this->request)) {
                 $id = $this->database->insert_order($this->request['orderId'],$this->request['customerId']);
-
                 return array(  
                     'ID' => $id
                 );
@@ -389,11 +411,18 @@ class MyAPI extends API
 
     /**
      *  Return orders including order_cases
-     *  
      */
     protected function orders() {
         if ($this->method == 'GET') { 
+            // if($this->requestHasProperties(array('orderCaseId','orderId','end'))) {
+            $orders = $this->database->select_orders_for_company($this->company["ID"]);
 
+            foreach($orders as &$order) {
+                $cases = $this->database->select_order_cases_for_order($order["ID"]);
+                $order["Cases"] = $cases;
+            }
+            return $orders;
+            // }
         }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
     }
@@ -403,21 +432,23 @@ class MyAPI extends API
      */
     protected function routes() {
         if ($this->method == 'GET') { 
-
             if(!is_null($this->args) && sizeof($this->args) > 0) {
 
                 $routes = array();
-
-                // print_r($this->args);
-                // return;
-                
-                // return array('Routes' => $routes);
                 foreach($this->args as $routeId) {
                     // print $routeId;
                     $route = $this->database->select_route($routeId);
                     // print_r($route);
                     $orders = $this->database->select_orders_for_route($routeId);
 
+                    //Get departure information
+                    $departureGPS = $this->database->select_first_gps_data_for_route($routeId);
+                    // print_r($departureGPS);
+
+                    if(!is_null($departureGPS)) {
+                        $route["Departure"] = $departureGPS;
+
+                    }
                     foreach($orders as &$order) {
                         $cases = $this->database->select_order_cases_for_order($order["ID"]);
                         $order["Cases"] = $cases;
@@ -427,11 +458,11 @@ class MyAPI extends API
                     array_push($routes, $route);
                 }
                 return $routes;
-                
             }
-
-            $routes = $this->database->select_routes_for_company($this->company['ID']);
-            return array('Routes' => $routes);
+            else {
+                $routes = $this->database->select_routes_for_company($this->company['ID']);
+                return array('Routes' => $routes);
+            }
         }
         else throw new Exception("Method $this->method is unsupported for end-point " . __FUNCTION__);
     }
